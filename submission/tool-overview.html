@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="【図解】人脈営業ツール — 解決したい課題とペイン構成">
+  <meta property="og:description" content="workspace-ui-kit の4ペインを踏襲し、人脈経由の営業活動を支えるツール。解決したい課題と画面構成を1枚で示します。">
+  <meta property="og:type" content="article">
+  <title>【図解】人脈営業ツール — 解決したい課題とペイン構成</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+    <!-- ヒーロー -->
+    <div class="mb-12">
+      <div class="inline-flex items-center gap-1.5 bg-ads-surface text-ads-muted text-xs font-medium px-3 py-1 rounded-full mb-4">
+        <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+        営業ツール
+      </div>
+      <h1 class="text-3xl md:text-4xl font-black text-ads-text leading-tight mb-3">
+        人脈営業ツール
+      </h1>
+      <p class="text-lg text-ads-muted leading-relaxed">
+        — 解決したい課題と画面構成（ペイン構成）—
+      </p>
+      <p class="text-xs text-ads-dim mt-4">
+        AI-Driven School 月次課題 / 第3回 グループセッション準備
+      </p>
+    </div>
+
+    <!-- 一枚絵サマリー -->
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 mb-12">
+      <p class="text-sm text-ads-dim font-medium mb-3">ひとことで言えば</p>
+      <p class="text-xl md:text-2xl text-ads-text font-bold leading-relaxed mb-6">
+        人脈営業の「次の一手」を、時系列で見える化するツール。
+      </p>
+      <p class="text-sm text-ads-muted mb-6">
+        詳細は下のセクション A（解決したい課題）/ B（ペイン構成）/ C（連絡文作成タブ）で説明します。
+      </p>
+
+      <!-- 構造図 -->
+      <div class="grid grid-cols-3 gap-3 text-center text-sm">
+        <div class="bg-white border border-ads-border rounded-lg p-4">
+          <i data-lucide="users" class="w-8 h-8 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text">人脈リスト</p>
+          <p class="text-xs text-ads-muted mt-1">Notion DB</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4">
+          <i data-lucide="clock" class="w-8 h-8 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text">接触ログ</p>
+          <p class="text-xs text-ads-muted mt-1">時系列で記録</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4">
+          <i data-lucide="sparkles" class="w-8 h-8 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text">AI連絡文</p>
+          <p class="text-xs text-ads-muted mt-1">次の一手の下書き</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- A. 解決したい課題 -->
+    <!-- ============================================================ -->
+    <div class="mb-12">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-ads-accent text-white text-xs font-bold px-2.5 py-1 rounded-full">必須</span>
+        <h2 class="text-2xl font-bold text-ads-text">A. 解決したい課題</h2>
+      </div>
+      <p class="text-ads-muted mb-6">grill-meスキルで詰めた「ツールでどんな課題を解決したいか」</p>
+
+      <!-- 現状 → ありたい姿 -->
+      <div class="grid md:grid-cols-2 gap-4 mb-8">
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-ads-negative"></i>
+            <p class="text-ads-negative font-bold text-sm">現状の困りごと</p>
+          </div>
+          <ul class="space-y-3 text-sm text-ads-text">
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="x" class="w-4 h-4 text-ads-negative flex-shrink-0 mt-0.5"></i>
+              <span>Notion の営業候補リストは<strong>接触履歴が時系列で追えない</strong>（進捗詳細テキスト1個だけ）</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="x" class="w-4 h-4 text-ads-negative flex-shrink-0 mt-0.5"></i>
+              <span>朝イチで「今日アプローチすべき相手」を絞り込むのに、Notionのビューを切り替える手間</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="x" class="w-4 h-4 text-ads-negative flex-shrink-0 mt-0.5"></i>
+              <span>「久しぶりに連絡したい人」「商談後のフォロー」に毎回ゼロから文章を考える時間</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="x" class="w-4 h-4 text-ads-negative flex-shrink-0 mt-0.5"></i>
+              <span>1件記録するたびに数秒待たされて入力テンポが落ちる</span>
+            </li>
+          </ul>
+        </div>
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-ads-positive"></i>
+            <p class="text-ads-positive font-bold text-sm">ありたい姿</p>
+          </div>
+          <ul class="space-y-3 text-sm text-ads-text">
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="check" class="w-4 h-4 text-ads-positive flex-shrink-0 mt-0.5"></i>
+              <span>接触ログが<strong>時系列で見える</strong>（いつ・どの手段・何を話したか）</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="check" class="w-4 h-4 text-ads-positive flex-shrink-0 mt-0.5"></i>
+              <span>ステージタブで<strong>3秒で「今日の対象」</strong>が見つかる</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="check" class="w-4 h-4 text-ads-positive flex-shrink-0 mt-0.5"></i>
+              <span>AIに紹介ネットワークと接触履歴を渡して<strong>連絡文を下書き</strong>させ、コピーして送る</span>
+            </li>
+            <li class="flex gap-2 leading-relaxed">
+              <i data-lucide="check" class="w-4 h-4 text-ads-positive flex-shrink-0 mt-0.5"></i>
+              <span>1件記録 → 次のログ追加まで体感1秒未満（楽観更新）</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 営業フロー -->
+      <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+        <p class="text-xs text-ads-dim font-medium mb-4">カバーする営業フロー（業種縛りなし）</p>
+        <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs">
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 font-medium text-ads-text">人脈経由 or<br>新規開拓で<br>候補者登録</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-slate-400 rounded px-3 py-1.5 font-medium text-slate-700">未連絡</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-yellow-50 border border-yellow-400 rounded px-3 py-1.5 font-medium text-yellow-800">アプローチ中</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-orange-50 border border-orange-400 rounded px-3 py-1.5 font-medium text-orange-800">商談中</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-green-50 border border-green-400 rounded px-3 py-1.5 font-medium text-green-800">契約</div>
+        </div>
+        <p class="text-xs text-ads-dim mt-3 text-center">失注・保留はサブステージで別管理</p>
+      </div>
+
+      <!-- 対象顧客像 -->
+      <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-white border border-ads-border rounded-lg p-4 text-center">
+          <i data-lucide="user-check" class="w-6 h-6 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text text-sm">既存のつながり</p>
+          <p class="text-xs text-ads-muted mt-1">久しぶりの再連絡</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4 text-center">
+          <i data-lucide="user-plus" class="w-6 h-6 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text text-sm">紹介経由</p>
+          <p class="text-xs text-ads-muted mt-1">バック人脈経由</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4 text-center">
+          <i data-lucide="users-2" class="w-6 h-6 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text text-sm">コミュニティ・同期</p>
+          <p class="text-xs text-ads-muted mt-1">間柄DBで経路特定</p>
+        </div>
+        <div class="bg-white border border-ads-border rounded-lg p-4 text-center">
+          <i data-lucide="handshake" class="w-6 h-6 mx-auto text-ads-accent mb-2"></i>
+          <p class="font-bold text-ads-text text-sm">新規（これから）</p>
+          <p class="text-xs text-ads-muted mt-1">交流会・仕事で出会う人</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- B. ペイン構成 -->
+    <!-- ============================================================ -->
+    <div class="mb-12">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-ads-muted text-white text-xs font-bold px-2.5 py-1 rounded-full">任意1</span>
+        <h2 class="text-2xl font-bold text-ads-text">B. ペイン構成</h2>
+      </div>
+      <p class="text-ads-muted mb-6">workspace-ui-kit の4ペイン構造を踏襲、Pane4 をタブ化して連絡文作成も同居</p>
+
+      <!-- 4ペインのレイアウト図 -->
+      <div class="border-2 border-ads-border rounded-xl overflow-hidden mb-6 shadow-sm">
+        <div class="grid grid-cols-12 gap-0">
+          <!-- Pane1: ステージタブ -->
+          <div class="col-span-3 md:col-span-2 bg-amber-50 border-r border-ads-border p-3 min-h-[280px]">
+            <div class="text-[10px] font-bold text-amber-800 bg-amber-200 rounded px-1.5 py-0.5 text-center mb-2">Pane1</div>
+            <p class="font-bold text-ads-text text-xs mb-2">ステージタブ</p>
+            <ul class="space-y-1 text-[10px] text-ads-text">
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-slate-400">未連絡</li>
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-yellow-400">アプローチ中</li>
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-orange-400">商談中</li>
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-green-400">契約</li>
+              <li class="text-ads-dim pt-1">─ サブ ─</li>
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-red-400">失注</li>
+              <li class="bg-white rounded px-1.5 py-1 border-l-2 border-slate-300">保留</li>
+            </ul>
+          </div>
+          <!-- Pane2: 候補者リスト -->
+          <div class="col-span-3 bg-sky-50 border-r border-ads-border p-3">
+            <div class="text-[10px] font-bold text-sky-800 bg-sky-200 rounded px-1.5 py-0.5 text-center mb-2">Pane2</div>
+            <p class="font-bold text-ads-text text-xs mb-2">候補者リスト</p>
+            <ul class="space-y-1 text-[10px] text-ads-text">
+              <li class="bg-white rounded px-1.5 py-1 border border-sky-200">
+                <div class="font-bold">○○商事</div>
+                <div class="text-ads-dim">田中さん</div>
+              </li>
+              <li class="bg-white rounded px-1.5 py-1 border-2 border-sky-500">
+                <div class="font-bold">△△医療法人</div>
+                <div class="text-ads-dim">鈴木さん</div>
+              </li>
+              <li class="bg-white rounded px-1.5 py-1 border border-sky-200">
+                <div class="font-bold">□□NPO法人</div>
+                <div class="text-ads-dim">佐藤さん</div>
+              </li>
+            </ul>
+          </div>
+          <!-- Pane3: 候補者ダッシュボード -->
+          <div class="col-span-3 md:col-span-4 bg-emerald-50 border-r border-ads-border p-3">
+            <div class="text-[10px] font-bold text-emerald-800 bg-emerald-200 rounded px-1.5 py-0.5 text-center mb-2">Pane3</div>
+            <p class="font-bold text-ads-text text-xs mb-2">候補者ダッシュボード</p>
+            <div class="bg-white rounded p-2 border border-emerald-200 text-[10px] space-y-1">
+              <p class="font-bold text-ads-text">△△医療法人 / 鈴木 太郎さん</p>
+              <p><span class="text-ads-muted">経由:</span> 同期会</p>
+              <p><span class="text-ads-muted">バック人脈:</span> △△会幹事</p>
+              <p><span class="text-ads-muted">紹介元:</span> 山田さん</p>
+              <p class="border-t border-emerald-100 pt-1 mt-1">
+                <span class="bg-orange-100 px-1.5 rounded text-orange-800">商談中</span>
+                <span class="bg-red-100 px-1.5 rounded text-red-800 ml-1">高</span>
+              </p>
+              <p class="text-ads-muted">次回: 05-15 電話再フォロー</p>
+            </div>
+          </div>
+          <!-- Pane4: タブ化 -->
+          <div class="col-span-3 bg-rose-50 p-3">
+            <div class="text-[10px] font-bold text-rose-800 bg-rose-200 rounded px-1.5 py-0.5 text-center mb-2">Pane4</div>
+            <p class="font-bold text-ads-text text-xs mb-2">次の一手</p>
+            <div class="flex gap-0.5 mb-2 text-[9px]">
+              <div class="bg-rose-600 text-white px-1.5 py-0.5 rounded-t font-bold">接触ログ</div>
+              <div class="bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded-t">連絡文</div>
+            </div>
+            <div class="bg-white rounded p-2 border border-rose-200 text-[10px] space-y-1">
+              <p class="font-bold">履歴</p>
+              <p>05-10 電話<br><span class="text-ads-dim">役員会で検討と返答</span></p>
+              <p>05-08 メール<br><span class="text-ads-dim">提案資料送付</span></p>
+              <p>05-05 LINE<br><span class="text-ads-dim">初回挨拶</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ペイン操作動線 -->
+      <div class="text-xs text-ads-dim text-center mb-6 flex justify-around">
+        <span><i data-lucide="filter" class="w-3 h-3 inline"></i> 絞込み</span>
+        <span><i data-lucide="mouse-pointer-2" class="w-3 h-3 inline"></i> 選択</span>
+        <span><i data-lucide="eye" class="w-3 h-3 inline"></i> 詳細</span>
+        <span><i data-lucide="zap" class="w-3 h-3 inline"></i> 次の一手</span>
+      </div>
+
+      <!-- 責務サマリ -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-ads-surface text-ads-muted">
+              <th class="text-left px-3 py-2 border-b-2 border-ads-border font-bold">ペイン</th>
+              <th class="text-left px-3 py-2 border-b-2 border-ads-border font-bold">役割</th>
+              <th class="text-left px-3 py-2 border-b-2 border-ads-border font-bold">データソース</th>
+            </tr>
+          </thead>
+          <tbody class="text-ads-text">
+            <tr class="border-b border-ads-border">
+              <td class="px-3 py-2 font-bold bg-amber-50">Pane1</td>
+              <td class="px-3 py-2">ステージタブで絞り込み（メイン4+サブ2）</td>
+              <td class="px-3 py-2 text-xs text-ads-muted">営業候補リスト「進捗状況」</td>
+            </tr>
+            <tr class="border-b border-ads-border">
+              <td class="px-3 py-2 font-bold bg-sky-50">Pane2</td>
+              <td class="px-3 py-2">選択ステージの候補者一覧</td>
+              <td class="px-3 py-2 text-xs text-ads-muted">営業候補リストDB</td>
+            </tr>
+            <tr class="border-b border-ads-border">
+              <td class="px-3 py-2 font-bold bg-emerald-50">Pane3</td>
+              <td class="px-3 py-2">選択候補者の全情報（紹介ネットワーク含む）</td>
+              <td class="px-3 py-2 text-xs text-ads-muted">営業候補リストDB + 間柄DB</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2 font-bold bg-rose-50">Pane4</td>
+              <td class="px-3 py-2"><strong>タブ化</strong>: 接触ログ / 連絡文作成</td>
+              <td class="px-3 py-2 text-xs text-ads-muted">接触ログDB / Anthropic API</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- データソース接続図 -->
+      <div class="mt-8 bg-ads-surface border border-ads-border rounded-xl p-5">
+        <p class="font-bold text-ads-text text-sm mb-4 text-center">データソースとの接続</p>
+        <div class="flex flex-col items-center gap-3">
+          <div class="bg-white border-2 border-ads-accent rounded-lg px-5 py-2 text-center">
+            <p class="font-bold text-ads-text text-sm">人脈営業ツール</p>
+            <p class="text-xs text-ads-muted">Next.js / ローカル / 4ペインUI</p>
+          </div>
+          <i data-lucide="chevrons-down" class="w-5 h-5 text-ads-dim"></i>
+          <div class="grid grid-cols-2 gap-4 w-full max-w-xl">
+            <div class="bg-white border border-ads-border rounded-lg p-3 text-center">
+              <i data-lucide="database" class="w-5 h-5 mx-auto text-ads-accent mb-1"></i>
+              <p class="font-bold text-ads-text text-sm">Notion API</p>
+              <p class="text-xs text-ads-muted mt-1">営業候補リスト DB<br>接触ログ DB（新規）<br>間柄 DB（参照）</p>
+            </div>
+            <div class="bg-white border border-ads-border rounded-lg p-3 text-center">
+              <i data-lucide="sparkles" class="w-5 h-5 mx-auto text-ads-accent mb-1"></i>
+              <p class="font-bold text-ads-text text-sm">Anthropic API</p>
+              <p class="text-xs text-ads-muted mt-1">Claude Sonnet 4.6<br>連絡文ドラフト生成<br>(Pane4 タブBから)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- C. 連絡文作成タブの詳細 -->
+    <!-- ============================================================ -->
+    <div class="mb-12">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">特徴</span>
+        <h2 class="text-2xl font-bold text-ads-text">C. 連絡文作成タブ</h2>
+      </div>
+      <p class="text-ads-muted mb-6">既存つながりへの久しぶり連絡も、新規の人への初接触も。AIが「次の一手」を下書き（Pane4 タブB）</p>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="layers" class="w-4 h-4 text-ads-accent"></i>
+            <p class="font-bold text-ads-text text-sm">カバーするシーン（5種）</p>
+          </div>
+          <ul class="space-y-2 text-sm text-ads-text">
+            <li class="flex gap-2"><span class="text-pink-500 font-bold flex-shrink-0">1.</span><span>初回声かけ（既存知人への再連絡 + 新規の人への初接触）</span></li>
+            <li class="flex gap-2"><span class="text-pink-500 font-bold flex-shrink-0">2.</span><span>フォローアップ（接触ログを踏まえた次の一手）</span></li>
+            <li class="flex gap-2"><span class="text-pink-500 font-bold flex-shrink-0">3.</span><span>紹介依頼（共通知人を介して架け橋）</span></li>
+            <li class="flex gap-2"><span class="text-pink-500 font-bold flex-shrink-0">4.</span><span>お礼（紹介・面会・契約への感謝）</span></li>
+            <li class="flex gap-2"><span class="text-pink-500 font-bold flex-shrink-0">5.</span><span>再アプローチ（失注・保留からの再接触）</span></li>
+          </ul>
+        </div>
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="message-square" class="w-4 h-4 text-ads-accent"></i>
+            <p class="font-bold text-ads-text text-sm">対応媒体（3種）</p>
+          </div>
+          <ul class="space-y-3 text-sm text-ads-text">
+            <li class="flex items-start gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div><strong>メール</strong>: 件名+本文・敬語・段落構成</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="message-circle" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+              <div><strong>LINE</strong>: 短文・親密トーン</div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="phone" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>
+              <div><strong>電話用トーク台本</strong>: 話し言葉・要点リスト</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 過去のやり取り入力 -->
+      <div class="bg-white border border-ads-border rounded-xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="paperclip" class="w-4 h-4 text-pink-500"></i>
+          <p class="font-bold text-ads-text text-sm">過去のやり取りも AI に渡せる（任意）</p>
+        </div>
+        <p class="text-sm text-ads-muted mb-4">
+          メール文面のコピペ、LINEのスクショ画像、どちらでも渡せます。AI が温度感・話題・口調を読み取って下書きに反映します。
+        </p>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div class="bg-ads-surface border border-ads-border rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="clipboard" class="w-4 h-4 text-ads-accent"></i>
+              <p class="font-bold text-ads-text text-sm">文面コピペ</p>
+            </div>
+            <p class="text-xs text-ads-muted mb-2">メールやチャット本文をテキストで貼り付け</p>
+            <div class="bg-white border border-ads-border rounded p-2 text-xs text-ads-text font-mono leading-relaxed">
+              先方:「ご連絡ありがとうございます…」<br>
+              自分:「資料添付しました…」
+            </div>
+          </div>
+          <div class="bg-ads-surface border border-ads-border rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="image" class="w-4 h-4 text-ads-accent"></i>
+              <p class="font-bold text-ads-text text-sm">スクショ画像（vision）</p>
+            </div>
+            <p class="text-xs text-ads-muted mb-2">LINEなどのスクショを最大3枚まで添付</p>
+            <div class="bg-white border border-ads-border border-dashed rounded p-2 text-xs text-ads-dim text-center py-3">
+              <i data-lucide="upload" class="w-4 h-4 inline"></i>
+              ファイル選択 or ドラッグ＆ドロップ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 生成フロー -->
+      <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+        <p class="text-xs text-ads-dim font-medium mb-4 text-center">生成フロー</p>
+        <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs">
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">シーン選択</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">媒体選択</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">補足（任意）</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">過去のやり取り<br>（文面/画像・任意）</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-pink-500 text-white rounded px-3 py-1.5 font-bold">生成</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">結果表示</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-ads-dim"></i>
+          <div class="bg-white border border-ads-border rounded px-3 py-1.5 text-ads-text">コピー or 接触ログとして保存</div>
+        </div>
+        <p class="text-xs text-ads-dim mt-4 text-center">
+          微調整:
+          <span class="bg-white border border-ads-border rounded px-2 py-0.5 mx-1">もっと丁寧</span>
+          <span class="bg-white border border-ads-border rounded px-2 py-0.5 mx-1">もっとカジュアル</span>
+          <span class="bg-white border border-ads-border rounded px-2 py-0.5 mx-1">もっと短く</span>
+          <span class="bg-white border border-ads-border rounded px-2 py-0.5 mx-1">再生成</span>
+        </p>
+      </div>
+    </div>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
