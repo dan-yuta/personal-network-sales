@@ -1,0 +1,40 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# OneDrive 一時ファイル
+~$*
+*.tmp
+
+# Editor
+.vscode/
+.idea/
+*.iml
+
+# Secrets (念のため)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# 個人情報を含む可能性のあるファイル
+**/personal_*
+**/private_*
+
+# ビルド成果物 (もしこのリポジトリ内でビルドする場合)
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# 大きすぎる提出ZIP (個別判断で submission/ には残す)
+*.tar.gz
+
+# 講師の発言を含むファイル (リポジトリ管理対象外)
+第5回講義_文字起こし.md
