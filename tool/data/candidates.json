@@ -1,0 +1,97 @@
+[
+  {
+    "id": "c1",
+    "profile": {
+      "name": "田中 一郎",
+      "birthday": "",
+      "source": "○○同期会経由",
+      "email": "tanaka@example.com",
+      "phone": "090-1111-1111",
+      "address": "東京都港区",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "careerText": "○○商事 営業部長。社内システムの内製化に興味あり。",
+      "motivationFull": "ご無沙汰しております。次回展示会の際にお声かけ予定。"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c2",
+    "profile": {
+      "name": "鈴木 太郎",
+      "birthday": "",
+      "source": "△△交流会で名刺交換",
+      "email": "suzuki@example.com",
+      "phone": "090-2222-2222",
+      "address": "東京都新宿区",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "careerText": "△△医療法人会 事務局長。クリニック10院をグループ運営。\nバック人脈: △△会幹事。\n紹介元: 山田さん。",
+      "motivationFull": "役員会で導入検討と返答。次回は現場責任者の佐藤さん同席で訪問予定。"
+    },
+    "scorecards": [],
+    "stage": "second"
+  },
+  {
+    "id": "c3",
+    "profile": {
+      "name": "佐藤 健",
+      "birthday": "",
+      "source": "山田さんからの紹介",
+      "email": "sato@example.com",
+      "phone": "090-3333-3333",
+      "address": "東京都渋谷区",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "careerText": "□□NPO法人 代表理事。地域包括ケアの DX に関心あり。",
+      "motivationFull": "提案資料を送付済み。来週返答予定。"
+    },
+    "scorecards": [],
+    "stage": "first"
+  },
+  {
+    "id": "c4",
+    "profile": {
+      "name": "山田 直美",
+      "birthday": "",
+      "source": "前職同僚",
+      "email": "yamada@example.com",
+      "phone": "090-4444-4444",
+      "address": "東京都中央区",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "careerText": "××商店 経営者。リファラル元として大きい存在。\n複数の経営者を紹介してくださる予定。",
+      "motivationFull": "紹介依頼を継続中。月1回のランチMTGを継続予定。"
+    },
+    "scorecards": [],
+    "stage": "final"
+  },
+  {
+    "id": "c5",
+    "profile": {
+      "name": "高橋 美咲",
+      "birthday": "",
+      "source": "Webセミナーで知り合う",
+      "email": "takahashi@example.com",
+      "phone": "",
+      "address": "大阪府大阪市",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "careerText": "個人事業主（コンサルティング）。地方在住。\n間柄: ◇◇コミュニティ経由。",
+      "motivationFull": "オンライン会議で初回挨拶済み。次回は具体提案フェーズへ。"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  }
+]

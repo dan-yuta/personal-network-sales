@@ -1,0 +1,20 @@
+[
+  {
+    "id": "d-main-stages",
+    "name": "メインステージ",
+    "positions": [
+      { "id": "stage-screening", "name": "未連絡", "count": 2 },
+      { "id": "stage-first", "name": "アプローチ中", "count": 1 },
+      { "id": "stage-second", "name": "商談中", "count": 1 },
+      { "id": "stage-final", "name": "契約", "count": 1 }
+    ]
+  },
+  {
+    "id": "d-sub-stages",
+    "name": "サブステージ",
+    "positions": [
+      { "id": "stage-lost", "name": "失注", "count": 0 },
+      { "id": "stage-held", "name": "保留", "count": 0 }
+    ]
+  }
+]
