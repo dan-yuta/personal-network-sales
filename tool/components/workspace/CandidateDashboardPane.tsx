@@ -14,10 +14,6 @@
 
 import { useState } from "react";
 import {
-  ArrowUpRight,
-  Check,
-  Circle,
-  CircleDot,
   ChevronDown,
   Mail,
   Phone,
@@ -28,27 +24,16 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import {
-  type Profile,
-  type StageStatus,
-  type Scorecard,
-  type SelectedDetail,
-  STAGE_ORDER,
-} from "@/lib/schema";
-import { STAGE_LABELS, PANE3_SECTION, PANE4_SECTION_IDS } from "@/lib/labels";
-import {
-  getScorecardsAverageScore,
-  deriveStageStatus,
-} from "@/lib/computed/scorecards";
+import { type Profile, type Scorecard } from "@/lib/schema";
+import { PANE3_SECTION } from "@/lib/labels";
+import { getScorecardsAverageScore } from "@/lib/computed/scorecards";
 import { calculateAge } from "@/lib/computed/profile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
 } from "@/components/ui/card";
 import {
@@ -175,60 +160,6 @@ export function AxisScoreRow({
   );
 }
 
-// ===== ↗ ジャンプアイコン（ADR-0014 §4、常時表示） =====
-
-function JumpIcon({
-  selected,
-  className,
-}: {
-  selected: boolean;
-  className?: string;
-}) {
-  return (
-    <ArrowUpRight
-      aria-hidden="true"
-      className={cn(
-        "size-4 shrink-0",
-        selected ? "text-primary" : "text-muted-foreground",
-        className,
-      )}
-    />
-  );
-}
-
-// ===== ステージアイコン（状態軸、ADR-0014 §7） =====
-
-function StageIcon({ status }: { status: StageStatus }) {
-  if (status === "done") {
-    return (
-      <span
-        className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
-        aria-label="完了"
-      >
-        <Check className="size-3" />
-      </span>
-    );
-  }
-  if (status === "planned") {
-    return (
-      <span
-        className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground"
-        aria-label="予定"
-      >
-        <CircleDot className="size-4" />
-      </span>
-    );
-  }
-  return (
-    <span
-      className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground"
-      aria-label="未着手"
-    >
-      <Circle className="size-4" />
-    </span>
-  );
-}
-
 // ===== Card: 採用条件（ADR-0015 §19.4 追加決定 M） =====
 
 function RecruitingConditionsCard({
@@ -282,112 +213,6 @@ function RecruitingConditionsCard({
             />
           </InlineFieldRow>
         </dl>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ===== Card: 選考フロー（ADR-0015 §19.5 担当者コメント統合版） =====
-
-function ScreeningFlowListCard({
-  scorecards,
-  selectedDetail,
-  onOpenDetail,
-}: {
-  scorecards: Scorecard[];
-  selectedDetail: SelectedDetail;
-  onOpenDetail: (next: SelectedDetail, scrollAnchor?: string) => void;
-}) {
-  const allStages: Scorecard[] = STAGE_ORDER.map(
-    (stage) =>
-      scorecards.find((s) => s.stage === stage) ?? {
-        stage,
-        label: STAGE_LABELS[stage],
-        date: "",
-        format: "",
-        interviewer: "",
-        axisScores: {
-          achievements: null,
-          thinkingAbility: null,
-          communication: null,
-          cultureFit: null,
-        },
-        attachments: [],
-      },
-  );
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle emphasis="prominent">
-          {PANE3_SECTION.screeningFlow}
-        </CardTitle>
-        <CardDescription>
-          {PANE3_SECTION.screeningFlowDescription}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-1">
-          {allStages.map((s, idx) => {
-            const selected =
-              selectedDetail?.type === "stage" &&
-              selectedDetail.stage === s.stage;
-            const status = deriveStageStatus(s.date, s.decision);
-            const showComment = status === "done" && !!s.comment;
-
-            return (
-              <div key={s.stage}>
-                {idx > 0 && <Separator className="my-1" />}
-                <button
-                  type="button"
-                  onClick={() =>
-                    onOpenDetail(
-                      { type: "stage", stage: s.stage },
-                      PANE4_SECTION_IDS.m2.info,
-                    )
-                  }
-                  aria-label={`Pane 4 で ${s.label} を開く`}
-                  className={cn(
-                    "flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                    selected
-                      ? "bg-accent text-accent-foreground"
-                      : "hover:bg-muted/40",
-                  )}
-                >
-                  <StageIcon status={status} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-foreground">
-                        {s.label}
-                      </span>
-                      <div className="flex shrink-0 items-center gap-2">
-                        {s.date && (
-                          <span className="text-xs text-muted-foreground">
-                            {s.date}
-                          </span>
-                        )}
-                        {s.decision && (
-                          <Badge variant="outline" size="xs">
-                            {s.decision}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {s.interviewer || "未予定"}
-                    </p>
-                    {showComment && (
-                      <p className="mt-0.5 line-clamp-2 border-l-2 border-primary/20 pl-2 text-xs leading-relaxed text-foreground/80">
-                        &quot;{s.comment}&quot;
-                      </p>
-                    )}
-                  </div>
-                  <JumpIcon selected={selected} className="mt-0.5" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
       </CardContent>
     </Card>
   );
@@ -639,8 +464,6 @@ function CandidateHeader({
 export function CandidateDashboardPane({
   profile,
   scorecards,
-  selectedDetail,
-  onOpenDetail,
   setProfile,
   applicationInfoOpen,
   onApplicationInfoOpenChange,
@@ -648,8 +471,6 @@ export function CandidateDashboardPane({
 }: {
   profile: Profile;
   scorecards: Scorecard[];
-  selectedDetail: SelectedDetail;
-  onOpenDetail: (next: SelectedDetail, scrollAnchor?: string) => void;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   applicationInfoOpen: boolean;
   onApplicationInfoOpenChange: (open: boolean) => void;

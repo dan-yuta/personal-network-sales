@@ -44,18 +44,13 @@ import { useState, useCallback, useMemo } from "react";
 
 import {
   type Profile,
-  type AxisKey,
   type StageKey,
   type Department,
   type Candidate,
   type Group,
-  type SelectedDetail,
   STAGE_ORDER,
 } from "@/lib/schema";
-import {
-  createMinimalProfile,
-  createMinimalScorecard,
-} from "@/lib/data/factories";
+import { createMinimalProfile } from "@/lib/data/factories";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
 import { ARCHIVED_GROUP_LABEL, STAGE_LABELS } from "@/lib/labels";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -74,23 +69,6 @@ import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane"
 // Pane 4 モード 2 用の `EditableScorecardKey` は
 // `components/workspace/CandidateDetailPane.tsx` 内部の閉じた型。
 
-// `updateScorecardField` の field 引数で使う key の union 型。Pane 4 内部の
-// `EditableScorecardKey` と同形。CandidateDetailPane 内部に閉じた型として扱い
-// たいため export せず、親側で同じ形を再宣言して持つ。
-//
-// ADR-0014「shadcn 標準フォームによる Pane 4 編集 UI」で `comment` / `summary`
-// を `InlineTextareaField` で編集対象に追加したため、旧 4 フィールドから 6 フィールド
-// に拡張。CandidateDetailPane.tsx 側の同型宣言（line 70-76）と同期させる。
-// `onUpdateScorecardField` 実装本体は `[field]: value` のスプレッドで
-// 動作するため、ロジックの追加修正は不要。
-type EditableScorecardKey =
-  | "date"
-  | "format"
-  | "interviewer"
-  | "decision"
-  | "comment"
-  | "summary";
-
 type WorkspaceProps = {
   initialDepartments: Department[];
   initialCandidates: Candidate[];
@@ -106,12 +84,10 @@ export function Workspace({
     useState<Department[]>(initialDepartments);
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string>("c2");
-  const [selectedDetail, setSelectedDetail] = useState<SelectedDetail>(null);
-  const [scrollAnchor, setScrollAnchor] = useState<string | null>(null);
   // 営業ツール用: Pane1 で選択中のステージ。null = 全候補者を表示。
   // positions.json の position.id が "stage-{StageKey}" の形式なので、それを基に判定する。
   const [selectedStage, setSelectedStage] = useState<StageKey | null>(null);
-  // ユーザーが手動で Pane 4 を畳んだか。ステージ選択は保持しつつ畳む用途。
+  // ユーザーが手動で Pane 4 を畳んだか。
   const [pane4ManuallyClosed, setPane4ManuallyClosed] = useState(false);
   // Pane 3 ヘッダー帯（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
   const [applicationInfoOpen, setApplicationInfoOpen] = useState(false);
@@ -147,38 +123,9 @@ export function Workspace({
     [selectedCandidateId],
   );
 
-  const openDetail = useCallback(
-    (next: SelectedDetail, anchor?: string) => {
-      if (next?.type === "stage") {
-        setCandidates((prev) =>
-          prev.map((c) => {
-            if (c.id !== selectedCandidateId) return c;
-            if (c.scorecards.some((s) => s.stage === next.stage)) return c;
-            return {
-              ...c,
-              scorecards: [...c.scorecards, createMinimalScorecard(next.stage)],
-            };
-          }),
-        );
-      }
-      setSelectedDetail(next);
-      setScrollAnchor(anchor ?? null);
-      setPane4ManuallyClosed(false);
-    },
-    [selectedCandidateId],
-  );
-
   // Pane 2 の候補者行クリックでアクティブ候補者を切り替える。
-  // - selectedDetail が「ステージ詳細」だった場合、新候補者にそのステージの
-  //   scorecard が無ければ Pane 4 を **候補者詳細にフォールバック**する
-  //   （ADR-0011 §7 大決定 E、旧 null フォールバックを撤回）。c2 以外は
-  //   scorecards: [] のため、c2 → 別候補者の切替時はほぼ常に候詳へフォールバック。
-  // - selectedDetail が「候補者詳細」のときは維持してよい（profile はどの候補者にも
-  //   必ず存在する）。
-  // - previousDetail state は ADR-0011 §6 大決定 D で削除済みのため、リセット不要。
   const selectCandidate = useCallback((id: string) => {
     setSelectedCandidateId(id);
-    setSelectedDetail(null);
     setApplicationInfoOpen(false);
     setPane4ManuallyClosed(false);
   }, []);
@@ -194,15 +141,12 @@ export function Workspace({
     };
     setCandidates((prev) => [...prev, newCandidate]);
     setSelectedCandidateId(newId);
-    setSelectedDetail(null);
     setApplicationInfoOpen(true);
     setPane4ManuallyClosed(false);
   }, []);
 
   // 候補者をアーカイブ（論理削除）する。データは残し `archived: true` を立てる。
-  // 復元は `restoreCandidate` から、もしくは Pane 2「アーカイブ済み」グループの
-  // 「復元」ボタン経由。アクティブ候補者をアーカイブした場合は、非 archived の
-  // 先頭候補者にフォールバックし、ステージ詳細（Pane 4）はクリアする。
+  // アクティブ候補者をアーカイブした場合は、非 archived の先頭候補者にフォールバック。
   const archiveCandidate = useCallback((id: string) => {
     setCandidates((prev) => {
       const next = prev.map((c) =>
@@ -215,7 +159,6 @@ export function Workspace({
       });
       return next;
     });
-    setSelectedDetail(null);
     setPane4ManuallyClosed(false);
   }, []);
 
@@ -305,60 +248,7 @@ export function Workspace({
     );
   }, []);
 
-  // 評価観点 ★ の編集ハンドラ。フェーズ 3A から「アクティブ候補者」の
-  // scorecards を更新する形に変更（candidates 配列の中の該当候補者だけを差し替え）。
-  const updateAxisScore = useCallback(
-    (stage: StageKey, axis: AxisKey, value: number | null) => {
-      setCandidates((prev) =>
-        prev.map((c) =>
-          c.id === selectedCandidateId
-            ? {
-                ...c,
-                scorecards: c.scorecards.map((s) =>
-                  s.stage === stage
-                    ? { ...s, axisScores: { ...s.axisScores, [axis]: value } }
-                    : s,
-                ),
-              }
-            : c,
-        ),
-      );
-    },
-    [selectedCandidateId],
-  );
-
-  // Pane 4 モード 2「メタ情報」の inline edit から呼ばれる。
-  // `decision` だけ undefined を許すため、空文字は undefined として扱う
-  // （`MetaRow` 廃止前の "未判定" 表示の代替: `EditableFieldRow` 側で空 = "未設定"）。
-  // フェーズ 3A: アクティブ候補者の scorecards を更新する形に変更。
-  const updateScorecardField = useCallback(
-    (stage: StageKey, field: EditableScorecardKey, value: string) => {
-      setCandidates((prev) =>
-        prev.map((c) =>
-          c.id === selectedCandidateId
-            ? {
-                ...c,
-                scorecards: c.scorecards.map((s) => {
-                  if (s.stage !== stage) return s;
-                  if (field === "decision") {
-                    const trimmed = value.trim();
-                    return {
-                      ...s,
-                      decision: trimmed === "" ? undefined : trimmed,
-                    };
-                  }
-                  return { ...s, [field]: value };
-                }),
-              }
-            : c,
-        ),
-      );
-    },
-    [selectedCandidateId],
-  );
-
-  // Pane 4 内の `useEffect` 依存安定化のため、Workspace 側でメモ化して props で渡す。
-  const consumeScrollAnchor = useCallback(() => setScrollAnchor(null), []);
+  // Pane 4 の開閉トグル。
   const togglePane4 = useCallback(() => setPane4ManuallyClosed((v) => !v), []);
 
   // 営業候補リスト用: Pane1 のステージタブ選択状態を breadcrumb に反映。
@@ -458,8 +348,6 @@ export function Workspace({
           <CandidateDashboardPane
             profile={profile}
             scorecards={scorecards}
-            selectedDetail={selectedDetail}
-            onOpenDetail={openDetail}
             setProfile={setProfile}
             applicationInfoOpen={applicationInfoOpen}
             onApplicationInfoOpenChange={setApplicationInfoOpen}
