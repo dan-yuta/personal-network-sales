@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 
 import { type Department } from "@/lib/schema";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
@@ -16,7 +16,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -77,14 +76,13 @@ export function PositionPane({
               <SidebarGroupLabel className="px-2 text-xs font-semibold tracking-wide text-sidebar-foreground/70 uppercase">
                 {dept.name}
               </SidebarGroupLabel>
-              <SidebarGroupAction
-                title={`${dept.name} に項目を追加`}
-                onClick={() => setAddDialogDeptId(dept.id)}
-                className="w-6 rounded-[min(var(--radius-md),10px)] text-muted-foreground hover:bg-muted hover:text-foreground [&>svg]:size-3"
-              >
-                <Plus />
-                <span className="sr-only">{dept.name} に項目を追加</span>
-              </SidebarGroupAction>
+              {/*
+                営業ツールではステージ階層を固定 (メインステージ4 + サブステージ2)。
+                新規追加された position の id は `p-${Date.now()}` で生まれるが、
+                Workspace.handleSelectPosition が `stage-` prefix 以外を弾くため、
+                クリックしても何も起きない死操作になる。
+                Phase 3 でユーザー定義カテゴリを許容するなら、その時点で再有効化する。
+              */}
               <SidebarGroupContent>
                 <SidebarMenu>
                   {dept.positions.map((pos) => {

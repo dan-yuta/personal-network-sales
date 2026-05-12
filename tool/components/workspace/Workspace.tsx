@@ -63,7 +63,7 @@ import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane"
 // ========== UI 内部型 ==========
 //
 // 種データは `data/*.json` → Server Component（app/page.tsx）で Zod parse → props で受け取る。
-// ヘルパー関数（createMinimalProfile / createMinimalScorecard）は `lib/data/factories.ts`。
+// ヘルパー関数（createMinimalProfile）は `lib/data/factories.ts`。
 // Pane 2 の表示用派生型 (CandidateRow / Group) と `SelectedDetail` 型は
 // `lib/schema.ts` に集約（複数ペインで共有するため）。
 // Pane 4 モード 2 用の `EditableScorecardKey` は
