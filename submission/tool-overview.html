@@ -96,8 +96,39 @@
         人脈営業の「次の一手」を、時系列で見える化するツール。
       </p>
       <p class="text-sm text-ads-muted mb-6">
-        詳細は下のセクション A（解決したい課題）/ B（ペイン構成）/ C（連絡文作成タブ）で説明します。
+        詳細は下のセクション A（解決したい課題）/ B（ペイン構成）/ C（連絡文作成タブ）/ D（工夫したポイント）で説明します。
       </p>
+
+      <!-- 用語ミニ凡例（初見の人向け） -->
+      <div class="border-t border-ads-border pt-4 mb-6">
+        <p class="text-xs text-ads-dim font-medium mb-2">用語ミニ凡例（初見の方へ）</p>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">Pane (ペイン)</dt>
+            <dd class="text-ads-muted">画面の領域。本ツールは縦に4分割（Pane1〜4）</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">workspace-ui-kit</dt>
+            <dd class="text-ads-muted">学校配布のUIテンプレート。本ツールの土台</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">grill-me</dt>
+            <dd class="text-ads-muted">AI に分岐を1問ずつ詰めさせる自問自答スキル</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">Vision (AI機能)</dt>
+            <dd class="text-ads-muted">AIが画像（スクショ等）を読み取れる機能</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">Notion / Anthropic API</dt>
+            <dd class="text-ads-muted">外部サービスとアプリ間でデータをやりとりする仕組み</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-bold text-ads-text shrink-0">バック人脈 / 間柄 / 親レコード</dt>
+            <dd class="text-ads-muted">既存Notion DBのプロパティ。それぞれ「紹介の後ろ盾」「経由したコミュニティ」「紹介元の候補者」</dd>
+          </div>
+        </dl>
+      </div>
 
       <!-- 構造図 -->
       <div class="grid grid-cols-3 gap-3 text-center text-sm">
@@ -364,7 +395,7 @@
             <div class="bg-white border border-ads-border rounded-lg p-3 text-center">
               <i data-lucide="sparkles" class="w-5 h-5 mx-auto text-ads-accent mb-1"></i>
               <p class="font-bold text-ads-text text-sm">Anthropic API</p>
-              <p class="text-xs text-ads-muted mt-1">Claude Sonnet 4.6<br>連絡文ドラフト生成<br>(Pane4 タブBから)</p>
+              <p class="text-xs text-ads-muted mt-1">Claude Sonnet 4.6<br>連絡文ドラフト生成<br>(Pane4 の連絡文作成タブから)</p>
             </div>
           </div>
         </div>
@@ -379,7 +410,7 @@
         <span class="bg-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">特徴</span>
         <h2 class="text-2xl font-bold text-ads-text">C. 連絡文作成タブ</h2>
       </div>
-      <p class="text-ads-muted mb-6">既存つながりへの久しぶり連絡も、新規の人への初接触も。AIが「次の一手」を下書き（Pane4 タブB）</p>
+      <p class="text-ads-muted mb-6">既存つながりへの久しぶり連絡も、新規の人への初接触も。AIが「次の一手」を下書き（Pane4 の「連絡文作成」タブ）</p>
 
       <div class="grid md:grid-cols-2 gap-4 mb-6">
         <div class="bg-white border border-ads-border rounded-xl p-5">
@@ -488,7 +519,7 @@
         <span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">補足</span>
         <h2 class="text-2xl font-bold text-ads-text">D. 工夫したポイント</h2>
       </div>
-      <p class="text-ads-muted mb-6">設計・実装でこだわった全10点のうち、特に伝えたい6点を抜粋。残り4点と詳細は <code class="text-xs bg-ads-surface px-1 rounded">docs/07_工夫したポイント.md</code> を参照。</p>
+      <p class="text-ads-muted mb-6">設計・実装でこだわった全10点のうち、特に伝えたい6点を抜粋。残り4点と詳細は同梱の <code class="text-xs bg-ads-surface px-1 rounded">docs/07_工夫したポイント.md</code> を参照。</p>
 
       <div class="grid md:grid-cols-2 gap-4">
         <div class="bg-white border border-ads-border rounded-xl p-5">
@@ -517,7 +548,7 @@
             <p class="font-bold text-ads-text">③ Pane4 をタブ化</p>
           </div>
           <p class="text-sm text-ads-muted leading-relaxed">
-            元テンプレートが Pane4 = ステージ詳細編集 専用だったところを、タブ切替で「接触ログ / 連絡文作成」を同居できる構造に。横スクロールや別画面遷移なし。
+            元の workspace-ui-kit テンプレートでは Pane4 が「ステージ詳細編集」専用だったところを、タブ切替で「接触ログ / 連絡文作成」を同居できる構造に。横スクロールや別画面遷移なし。
           </p>
         </div>
 
@@ -537,7 +568,7 @@
             <p class="font-bold text-ads-text">⑤ テンプレ参照と実装の分離</p>
           </div>
           <p class="text-sm text-ads-muted leading-relaxed">
-            workspace-ui-kit 原本は <code class="text-xs bg-ads-surface px-1 rounded">100_tool/</code> に「書き換え禁止」で保管。実装は <code class="text-xs bg-ads-surface px-1 rounded">tool/</code> にコピーして編集。テンプレと自分の変更が git diff で明示できる。
+            workspace-ui-kit 原本は <code class="text-xs bg-ads-surface px-1 rounded">100_tool/</code> フォルダに「書き換え禁止」で保管し、編集は別フォルダ <code class="text-xs bg-ads-surface px-1 rounded">tool/</code> にコピーして実施。テンプレートのどこを変えたかが Git の差分機能で明示できる。
           </p>
         </div>
 
