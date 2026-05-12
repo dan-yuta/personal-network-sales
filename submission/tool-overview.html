@@ -564,11 +564,11 @@
 
         <div class="bg-white border border-ads-border rounded-xl p-5">
           <div class="flex items-center gap-2 mb-2">
-            <i data-lucide="folder-tree" class="w-5 h-5 text-emerald-500"></i>
-            <p class="font-bold text-ads-text">⑤ テンプレ参照と実装の分離</p>
+            <i data-lucide="folder-plus" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">⑤ 接触ログDBだけ追加</p>
           </div>
           <p class="text-sm text-ads-muted leading-relaxed">
-            workspace-ui-kit 原本は <code class="text-xs bg-ads-surface px-1 rounded">100_tool/</code> フォルダに「書き換え禁止」で保管し、編集は別フォルダ <code class="text-xs bg-ads-surface px-1 rounded">tool/</code> にコピーして実施。テンプレートのどこを変えたかが Git の差分機能で明示できる。
+            ツールの生命線である「接触ログ」だけを新規 Notion DB として追加。会社DB・担当者DBの分離は見送り。既存の Notion ワークフロー（検索・フィルタ・テンプレート）を壊さず、最小拡張で済ませる設計判断。
           </p>
         </div>
 
@@ -578,7 +578,7 @@
             <p class="font-bold text-ads-text">⑥ モック先行</p>
           </div>
           <p class="text-sm text-ads-muted leading-relaxed">
-            Notion / Anthropic API のセットアップ前から、接触ログ・連絡文タブを「サンプルデータで動く状態」に。グルセでもデモは API 接続なしで完結。後で本物 API に切り替え。
+            Notion / Anthropic API のセットアップ前から、接触ログ・連絡文タブを「サンプルデータで動く状態」に。発表時のデモも API 接続なしで完結。後で本物の API に切り替え。
           </p>
         </div>
       </div>
