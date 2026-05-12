@@ -480,6 +480,87 @@
       </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- D. 工夫したポイント -->
+    <!-- ============================================================ -->
+    <div class="mb-12">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">補足</span>
+        <h2 class="text-2xl font-bold text-ads-text">D. 工夫したポイント</h2>
+      </div>
+      <p class="text-ads-muted mb-6">設計・実装の過程でこだわった6点（全10点の詳細は notes/2026-05-12_craftsmanship.md 参照）</p>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="message-square-quote" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">① grill-me で1問ずつ詰めた</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            計画段階で発生する全ての分岐を AI に1問ずつ質問してもらい、合意できた決定だけを設計に書き残した。「なぜその判断にしたか」が docs に残り、後から判断ログを辿れる。
+          </p>
+        </div>
+
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="database" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">② 既存 Notion DB を尊重</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            既存の「営業候補リスト」をそのまま流用し、ゼロからスキーマを作らない判断。データ移行コストゼロ。既存の Notion ワークフロー（検索・フィルタ）も壊さない。
+          </p>
+        </div>
+
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="layout-panel-top" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">③ Pane4 をタブ化</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            元テンプレートが Pane4 = ステージ詳細編集 専用だったところを、タブ切替で「接触ログ / 連絡文作成」を同居できる構造に。横スクロールや別画面遷移なし。
+          </p>
+        </div>
+
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="image" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">④ 連絡文に Vision 対応</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            過去のやり取りを「文面コピペ」と「スクショ画像添付」の両方で AI に渡せる設計。メールはコピペ、LINEはスクショ、と場面で使い分け可能。
+          </p>
+        </div>
+
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="folder-tree" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">⑤ テンプレ参照と実装の分離</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            workspace-ui-kit 原本は <code class="text-xs bg-ads-surface px-1 rounded">100_tool/</code> に「書き換え禁止」で保管。実装は <code class="text-xs bg-ads-surface px-1 rounded">tool/</code> にコピーして編集。テンプレと自分の変更が git diff で明示できる。
+          </p>
+        </div>
+
+        <div class="bg-white border border-ads-border rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="play-circle" class="w-5 h-5 text-emerald-500"></i>
+            <p class="font-bold text-ads-text">⑥ モック先行</p>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            Notion / Anthropic API のセットアップ前から、接触ログ・連絡文タブを「サンプルデータで動く状態」に。グルセでもデモは API 接続なしで完結。後で本物 API に切り替え。
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 bg-ads-surface border border-ads-border rounded-lg p-4 text-center">
+        <p class="text-xs text-ads-dim">
+          残り4点（接触ログDBだけ追加 / Pane1ステージタブ転用 / 採用→営業 語彙置換 / 設計と実装の同期コミット）の詳細は
+          <code class="text-xs bg-white px-1 rounded">notes/2026-05-12_craftsmanship.md</code>
+          を参照
+        </p>
+      </div>
+    </div>
+
 <!-- CONTENT_END -->
   </main>
   <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
