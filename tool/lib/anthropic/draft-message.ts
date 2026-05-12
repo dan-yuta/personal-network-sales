@@ -41,7 +41,7 @@ export type DraftMessageInput = {
   scene: DraftScene;
   medium: DraftMedium;
   note?: string; // 補足フリーテキスト
-  pastInteractionText?: string; // 文面コピペ
+  pastInteractionText?: string; // 文面コピー
   pastImagesBase64?: string[]; // 画像 (最大3枚)
 };
 
