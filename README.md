@@ -89,7 +89,7 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 ## 関連リソース
 
 - **テンプレート（参照のみ・絶対に書き換えない）**: `C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\100_tool\workspace-ui-kit\`
-- **実装モジュール（編集対象）**: `C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\004_5回目宿題\tool\`
+- **実装モジュール（編集対象）**: `C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\004_5回目宿題\personal-network-sales\tool\`
 - **既存Notion DB**: 営業候補リスト（自社の業務関連ページ配下に配置）
 - **設計ベース**: workspace-ui-kit（4ペイン構造の踏襲ルート、`designing-workspace-ui` スキル）
 
