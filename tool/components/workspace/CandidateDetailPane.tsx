@@ -316,7 +316,7 @@ const SCENE_OPTIONS = [
 const MEDIUM_OPTIONS = ["メール", "LINE", "電話用トーク台本"] as const;
 
 // シーンごとに「件名」「導入文」「本題テンプレ」「締め」を切り替える。
-// 営業フェーズ全体（初回〜契約）をカバーする 10 シーン用のモック。
+// 営業フェーズ全体（初回〜契約）+ 派生紹介の連鎖までカバーする 11 シーン用のモック。
 type SceneTemplate = {
   subjectSuffix: string;
   emailLead: string;

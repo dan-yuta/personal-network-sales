@@ -3,6 +3,14 @@
 AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作り変える）の設計記録です。
 自分の人脈経由（既存知人・紹介・コミュニティ + これから交流会や仕事で出会う新規）の営業活動を支える、Next.js + Notion API 連携のツールを設計しました。
 
+## 🔗 グループセッション共有用URL（必読）
+
+| 種別 | URL | 用途 |
+|------|-----|------|
+| **課題図解（公開デプロイ）** | **https://network-sales-overview.surge.sh/** | グループセッションで画面共有する代わりに、各自で開いてもらう想定。Surge.sh にデプロイ済み、検索エンジン非インデックス |
+| ローカル原本 | [submission/tool-overview.html](submission/tool-overview.html) | 上記の元ファイル |
+| GitHub リポジトリ | https://github.com/dan-yuta/personal-network-sales | 設計・実装の全履歴 |
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │   workspace-ui-kit  (Next.js 16 / 4ペイン UI)               │
@@ -18,21 +26,23 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 ## ディレクトリ構造
 
 ```
-004_5回目宿題/
-├── README.md           ← このファイル (全体index)
-├── docs/               ← 設計ドキュメント (合意済みの設計)
+personal-network-sales/          ← リポジトリルート
+├── README.md                    ← このファイル (全体index)
+├── docs/                        ← 設計ドキュメント (合意済みの設計)
+│   ├── 00_ツール起動・確認方法.md
 │   ├── 01_プロジェクト概要.md
 │   ├── 02_UI設計書.md
 │   ├── 03_データ設計書.md
 │   ├── 04_技術仕様書.md
 │   ├── 05_実装ロードマップ.md
-│   └── 06_やることリスト.md
-├── tool/               ← 実装モジュール (workspace-ui-kit のコピー、編集対象)
-├── assets/             ← 画像・スクリーンショット・図表素材
-├── notes/              ← 実装中の雑記・議事録・KPT・振り返り
-├── submission/         ← 最終提出物 (tool-overview.html ほか)
-├── references/         ← 外部資料・参考リンク集
-└── .gitignore          ← Git管理除外設定
+│   ├── 06_やることリスト.md
+│   └── 07_工夫したポイント.md
+├── tool/                        ← 実装モジュール (workspace-ui-kit のコピー、編集対象)
+├── assets/                      ← 画像・スクリーンショット・図表素材
+├── notes/                       ← 実装中の雑記・議事録・KPT・振り返り
+├── submission/                  ← 最終提出物 (tool-overview.html ほか)
+├── references/                  ← 外部資料・参考リンク集
+└── .gitignore                   ← Git管理除外設定
 ```
 
 ## ドキュメント一覧
@@ -50,9 +60,10 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 
 ### 提出物（グループセッション準備）
 
-| 形式 | ファイル | 内容 |
-|------|----------|------|
-| HTML | [submission/tool-overview.html](submission/tool-overview.html) | 必須「解決したい課題」+ 任意1「ペイン構成」+ 連絡文作成タブ + **工夫したポイント** の図解。グループセッションで画面共有する想定 |
+| 形式 | URL / ファイル | 内容 |
+|------|---------------|------|
+| **公開デプロイ** | **https://network-sales-overview.surge.sh/** | グループセッションで共有する公開 URL。Surge.sh、検索エンジン非インデックス |
+| HTML 原本 | [submission/tool-overview.html](submission/tool-overview.html) | 必須「解決したい課題」+ 任意1「ペイン構成」+ 連絡文作成タブ（11シーン）+ **工夫したポイント** の図解 |
 
 ---
 
@@ -95,23 +106,29 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 
 ---
 
-## 現在地（2026-05-11時点）
+## 現在地（2026-05-13時点）
 
 ```
-グループセッション準備（必須+任意1+任意2）
-├─ 必須: grill-meで「解決したい課題」を話せる状態  ✓ 完了
-│   └─ 図解として可視化(submission/tool-overview.html)  ✓ 完了
-├─ 任意1: ペイン構成の図解(必須と同一ファイル)        ✓ 完了
+グループセッション準備（必須+任意1+任意2） — 全て達成
+├─ 必須: grill-meで「解決したい課題」を話せる状態   ✓ 完了
+│   └─ 図解として可視化(submission/tool-overview.html) ✓ 完了
+│   └─ Surge.shに公開デプロイ                         ✓ 完了
+│       → https://network-sales-overview.surge.sh/
+├─ 任意1: ペイン構成の図解(必須と同一ファイルに同居)  ✓ 完了
 └─ 任意2: UI画面の作成に着手                         ✓ 第一歩完了
     ├─ tool/ にテンプレートをコピー                  ✓
     ├─ データ層の最小修正(JSON 3ファイル)             ✓
     ├─ labels.ts (ステージ/評価軸/セクション名)       ✓
     ├─ コンポーネント内ハードコード採用→営業置換       ✓
-    └─ Pane4 タブ化・連絡文機能の実装                 未着手 (本格実装フェーズで)
+    ├─ Pane1 ステージタブ転用                        ✓
+    ├─ Pane4 タブ化（接触ログ + 連絡文作成）          ✓ モック実装まで
+    └─ 連絡文作成 11 シーン対応（営業フェーズ全体）   ✓ モック実装まで
+        ※ Notion / Anthropic API 接続は次月Phase 2-3
 ```
 
 | 起動環境 | URL | 状態 |
 |----------|-----|------|
+| **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | グループセッション共有用 |
 | テンプレート (参照のみ) | http://localhost:3000 | 採用管理サンプル表示中 |
 | 実装モジュール `tool/` | http://localhost:3001 | 「人脈営業ワークスペース」+ 5人サンプル候補者 |
 
@@ -122,7 +139,7 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 ## 作成情報
 
 - 作成日: 2026-05-10
-- 最終更新: 2026-05-11
+- 最終更新: 2026-05-13
 - 作成者: 段木 裕太
 - 設計手法: `grill-me` スキルによる対話的グリル
 - 提出先: AI-Driven School 受講生ポータル
