@@ -7,10 +7,8 @@
  *   保持し、各ペインに props として渡す。
  *   `previousDetail` state は ADR-0011 §6 大決定 D で削除した（戻り先が候詳に固定
  *   されたため、直前の詳細を 1 段階覚える概念が不要になった）。
- * - Pane 3 = 候補者ダッシュボード（人物軸の編集: ヘッダー帯 + 採用条件 + 選考フロー）
- * - Pane 4 = ステージ軸の編集（選考ステージ詳細のみ）
- *   ADR-0015 §9 大決定 G により、Pane 4 のデフォルト state は `null`
- *   （ステージ未選択 = 畳み状態）。◀ ボタンは撤廃。
+ * - Pane 3 = 候補者ダッシュボード（人物軸の編集: ヘッダー + 候補者情報 + 営業条件）
+ * - Pane 4 = 次の一手領域（接触ログ / 連絡文作成のタブ切替、常時開きが基本動線）
  *
  * レイアウト構造（shadcn/ui Sidebar を採用、ADR-0006 §3/§5 を本実装で改訂）:
  *
@@ -64,10 +62,7 @@ import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane"
 //
 // 種データは `data/*.json` → Server Component（app/page.tsx）で Zod parse → props で受け取る。
 // ヘルパー関数（createMinimalProfile）は `lib/data/factories.ts`。
-// Pane 2 の表示用派生型 (CandidateRow / Group) と `SelectedDetail` 型は
-// `lib/schema.ts` に集約（複数ペインで共有するため）。
-// Pane 4 モード 2 用の `EditableScorecardKey` は
-// `components/workspace/CandidateDetailPane.tsx` 内部の閉じた型。
+// Pane 2 の表示用派生型 (CandidateRow / Group) は `lib/schema.ts` に集約（複数ペインで共有するため）。
 
 type WorkspaceProps = {
   initialDepartments: Department[];
@@ -89,7 +84,7 @@ export function Workspace({
   const [selectedStage, setSelectedStage] = useState<StageKey | null>(null);
   // ユーザーが手動で Pane 4 を畳んだか。
   const [pane4ManuallyClosed, setPane4ManuallyClosed] = useState(false);
-  // Pane 3 ヘッダー帯（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
+  // Pane 3「候補者情報」カード（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
   const [applicationInfoOpen, setApplicationInfoOpen] = useState(false);
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
@@ -97,7 +92,7 @@ export function Workspace({
   // ユーザーが手動で畳めば閉じる、というシンプルな制御に変更。
   const pane4Open = !pane4ManuallyClosed;
 
-  // アクティブ候補者を取得。`INITIAL_CANDIDATES` が常に最低 1 名持つ前提だが、
+  // アクティブ候補者を取得。candidates が常に最低 1 名持つ前提だが、
   // 万一 find が undefined を返す（未来に candidates の削除機能が入った場合等）
   // ケースに備えて先頭候補者にフォールバックする。
   const activeCandidate =
@@ -105,8 +100,8 @@ export function Workspace({
   const profile = activeCandidate.profile;
   const scorecards = activeCandidate.scorecards;
 
-  // Mode1ProfileDetail は `setProfile: React.Dispatch<React.SetStateAction<Profile>>`
-  // を期待している（採用案 X）。子コンポーネント側の signature を変えないために、
+  // CandidateDashboardPane の編集 UI は `setProfile: React.Dispatch<React.SetStateAction<Profile>>`
+  // を期待している。子コンポーネント側の signature を変えないために、
   // candidates 配列を更新するアダプタをここで作る。
   // 関数形 (p => next) と値形 (next) の両方に対応する。
   const setProfile = useCallback<React.Dispatch<React.SetStateAction<Profile>>>(

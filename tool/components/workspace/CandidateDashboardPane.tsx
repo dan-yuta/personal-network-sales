@@ -1,15 +1,16 @@
 "use client";
 
 /**
- * Pane 3: 候補者ダッシュボード（ADR-0015 §19 で再設計）。
+ * Pane 3: 候補者ダッシュボード。
  *
- * 「人物軸の編集」として、ヘッダー帯（Collapsible）+ 採用条件カード + 選考フローカード
- * の 3 要素で構成。判断の 3 問い（Q1: 採る価値 / Q2: 採れるか / Q3: 手遅れか）に
+ * 「人物軸の編集」として、候補者ヘッダー + 候補者情報カード（Collapsible）+ 営業条件カード
+ * の 3 要素で構成。アクティブな営業候補の現状（プロフィール・接触経路・営業条件）に
  * スクロールなしで即答できることが目標。
  *
- * セクション順序: ヘッダー帯 → 採用条件 → 選考フロー
+ * セクション順序: 候補者ヘッダー → 候補者情報 → 営業条件
  *
- * `AxisScoreRow` は Pane 4 モード 2 評価セクションでも使うため引き続き export する。
+ * `AxisScoreRow` は雛形由来の評価表示用ヘルパー。Phase 1 の画面では未使用だが、
+ * 後フェーズで「関係性スコア」等を再導入する際に再利用できるよう残している。
  */
 
 import { useState } from "react";
@@ -54,7 +55,7 @@ import {
   type ComboOption,
 } from "@/components/primitives";
 
-// ===== AxisScoreRow（Pane 4 モード 2 でも使う、export） =====
+// ===== AxisScoreRow（雛形由来の評価表示ヘルパー、後フェーズの再利用に備えて export） =====
 
 export function AxisScoreRow({
   label,
@@ -160,7 +161,7 @@ export function AxisScoreRow({
   );
 }
 
-// ===== Card: 採用条件（ADR-0015 §19.4 追加決定 M） =====
+// ===== Card: 営業条件 =====
 
 function RecruitingConditionsCard({
   profile,
@@ -254,7 +255,7 @@ function ContactRow({
   );
 }
 
-// ===== Card: 応募情報（折りたたみ可能） =====
+// ===== Card: 候補者情報（折りたたみ可能） =====
 
 function ApplicationInfoCardContent({
   profile,
@@ -277,7 +278,7 @@ function ApplicationInfoCardContent({
 
   return (
     <div className="flex flex-col">
-      {/* 基本（名前 / 生年月日 / 応募経路 / 採用担当） — Card タイトル「応募情報」が見出しを兼ねる */}
+      {/* 基本（名前 / 生年月日 / 接触経路 / 営業担当） — Card タイトル「候補者情報」が見出しを兼ねる */}
       <section className="flex flex-col gap-3 pb-4">
         <dl className="flex flex-col gap-2.5 text-sm">
           <InlineFieldRow label="名前">
