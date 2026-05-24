@@ -6,7 +6,9 @@ import {
   ArchiveRestore,
   ArrowUpDown,
   ChevronDown,
+  Inbox,
   MoreHorizontal,
+  MoveDown,
   Plus,
   Star,
   X,
@@ -409,7 +411,12 @@ function StageGroup({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 -mx-3 mb-2 flex items-center justify-between gap-2 bg-background px-5 py-1.5">
+      <div
+        className={cn(
+          "sticky top-0 z-10 -mx-3 mb-2 flex items-center justify-between gap-2 px-5 py-1.5",
+          theme.bg,
+        )}
+      >
         <div className="flex min-w-0 items-center gap-1.5">
           <span
             aria-hidden="true"
@@ -418,10 +425,7 @@ function StageGroup({
           <h3 className={cn("truncate text-xs font-semibold", theme.text)}>
             {label}
           </h3>
-          <Badge
-            size="xs"
-            className={cn("border-0", theme.bg, theme.text)}
-          >
+          <Badge size="xs" className={cn("border-0 bg-background/60", theme.text)}>
             {items.length}
           </Badge>
         </div>
@@ -453,12 +457,22 @@ function StageGroup({
           {items.length === 0 ? (
             <li
               className={cn(
-                "pointer-events-none flex h-8 items-center justify-center text-xs",
+                "pointer-events-none flex h-10 items-center justify-center gap-1.5 text-xs",
                 isOver ? "text-primary" : "text-muted-foreground",
               )}
               aria-hidden="true"
             >
-              ここへドラッグ
+              {isOver ? (
+                <>
+                  <MoveDown className="size-3.5" aria-hidden="true" />
+                  <span>ここに移動</span>
+                </>
+              ) : (
+                <>
+                  <Inbox className="size-3.5" aria-hidden="true" />
+                  <span>候補者がいません (ここへドラッグで追加)</span>
+                </>
+              )}
             </li>
           ) : (
             items.map((cand) => (
