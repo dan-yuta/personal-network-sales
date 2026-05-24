@@ -53,7 +53,7 @@ export const ARCHIVED_GROUP_LABEL = "アーカイブ済み";
 export const STAGE_THEME: Record<
   StageKey,
   {
-    /** バッジや薄い背景に使う色 (bg-XXX-100 系) */
+    /** バッジや薄い背景に使う色 (bg-XXX-100/200 系) */
     bg: string;
     /** バッジ等のテキスト色 (text-XXX-700/800 系、コントラスト確保) */
     text: string;
@@ -75,11 +75,14 @@ export const STAGE_THEME: Record<
     leftBar: "border-l-amber-500",
     dot: "text-amber-500",
   },
+  // second (商談中) を orange-200 / orange-900 に一段濃く。
+  // amber-100 (アプローチ中) との色相差 14度 + 明度差 2.8% の判別困難
+  // 問題を改善 (UI/UX レビュー指摘 B3)。
   second: {
-    bg: "bg-orange-100",
-    text: "text-orange-800",
-    leftBar: "border-l-orange-500",
-    dot: "text-orange-500",
+    bg: "bg-orange-200",
+    text: "text-orange-900",
+    leftBar: "border-l-orange-600",
+    dot: "text-orange-600",
   },
   final: {
     bg: "bg-emerald-100",
@@ -93,9 +96,12 @@ export const STAGE_THEME: Record<
     leftBar: "border-l-rose-500",
     dot: "text-rose-500",
   },
+  // held (保留) を slate-50 ベースに薄める。
+  // screening (slate-100) と区別が弱かった問題を改善、「ペンディング感」を
+  // 文字色も含めて薄く表現。
   held: {
-    bg: "bg-slate-100",
-    text: "text-slate-600",
+    bg: "bg-slate-50",
+    text: "text-slate-500",
     leftBar: "border-l-slate-300",
     dot: "text-slate-300",
   },

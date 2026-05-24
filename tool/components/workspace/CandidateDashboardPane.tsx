@@ -382,10 +382,13 @@ function ApplicationInfoCardContent({
               inputType="tel"
             />
           </ContactRow>
+          {/* MapPin (住所) は中立色 (slate) に変更。
+              orange は STAGE 商談中と完全同色になり、関連ない要素が
+              同じ意味グループに見える問題を回避 (B2 レビュー指摘)。 */}
           <ContactRow
             icon={<MapPin className="size-3.5" />}
             label="住所"
-            color="bg-orange-100 text-orange-700"
+            color="bg-slate-100 text-slate-700"
           >
             <InlineTextField
               value={profile.address}
