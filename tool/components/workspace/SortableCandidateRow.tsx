@@ -66,6 +66,17 @@ export function SortableCandidateRow({
   const avatarColor = avatarColorFor(cand.name);
   const deadline = getDeadlineBadge(cand.nextActionDate);
 
+  // ホバー時のブラウザ標準ツールチップ。Pane2 の限られた幅で truncate されてしまう
+  // source や日付・スコアの「全体像」を確認できるようにする。
+  const tooltipParts = [
+    cand.source || null,
+    cand.nextActionDate ? `次回アクション: ${cand.nextActionDate}` : null,
+    cand.averageScore !== null
+      ? `平均スコア: ${cand.averageScore.toFixed(1)} / 5`
+      : "平均スコア: 未評価",
+  ].filter(Boolean) as string[];
+  const tooltipText = `${cand.name}\n${tooltipParts.join("\n")}\n(クリックで詳細を Pane3 で開く)`;
+
   return (
     <li
       ref={setNodeRef}
@@ -78,6 +89,7 @@ export function SortableCandidateRow({
       <button
         type="button"
         onClick={() => onSelect(cand.id)}
+        title={tooltipText}
         className={cn(
           "flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left transition-colors",
           "outline-none focus-visible:ring-3 focus-visible:ring-ring/50",

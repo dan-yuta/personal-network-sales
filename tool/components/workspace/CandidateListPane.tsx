@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   MoveDown,
   Plus,
+  Search,
   Star,
   X,
 } from "lucide-react";
@@ -94,6 +95,10 @@ type CandidateListPaneProps = {
   sortKey: SortKey;
   /** ソートキー変更ハンドラ */
   onSortKeyChange: (key: SortKey) => void;
+  /** 候補者の名前/会社/接触経路でのフリーテキスト検索クエリ */
+  searchQuery: string;
+  /** 検索クエリ変更ハンドラ */
+  onSearchQueryChange: (q: string) => void;
 };
 
 export function CandidateListPane({
@@ -108,6 +113,8 @@ export function CandidateListPane({
   onClearFilter,
   sortKey,
   onSortKeyChange,
+  searchQuery,
+  onSearchQueryChange,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -280,6 +287,34 @@ export function CandidateListPane({
           </DropdownMenu>
         </div>
       </header>
+
+      {/* 検索バー: 名前 / 接触経路 / 会社・職務メモ にフリーテキスト部分一致 */}
+      <div className="border-b border-border px-3 py-2">
+        <div className="relative">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.target.value)}
+            placeholder="名前・会社・経路で検索"
+            aria-label="候補者を検索"
+            className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchQueryChange("")}
+              aria-label="検索クリア"
+              className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X aria-hidden="true" className="size-3" />
+            </button>
+          )}
+        </div>
+      </div>
       <ScrollArea className="min-h-0 flex-1">
         <DndContext
           // 固定 id を渡して SSR/CSR 間の `aria-describedby` 採番ズレ

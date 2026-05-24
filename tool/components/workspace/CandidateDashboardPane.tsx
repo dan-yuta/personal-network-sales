@@ -32,8 +32,16 @@ import {
   type Scorecard,
   type StageKey,
   AXIS_ORDER,
+  STAGE_ORDER,
 } from "@/lib/schema";
 import { PANE3_SECTION, STAGE_LABELS, STAGE_THEME, EVALUATION_AXIS } from "@/lib/labels";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   getScorecardsAverageScore,
   getLatestDoneScorecard,
@@ -507,10 +515,12 @@ function CandidateHeader({
   profile,
   scorecards,
   stage,
+  onChangeStage,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
   stage: StageKey;
+  onChangeStage: (next: StageKey) => void;
 }) {
   const stageTheme = STAGE_THEME[stage];
   const stageLabel = STAGE_LABELS[stage];
@@ -533,20 +543,50 @@ function CandidateHeader({
           {profile.name || "名前未設定"}
         </h2>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span
-            className={cn(
-              "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
-              stageTheme.bg,
-              stageTheme.text,
-            )}
-            aria-label={`ステージ: ${stageLabel}`}
-          >
-            <span
-              aria-hidden="true"
-              className={cn("size-1.5 rounded-full bg-current", stageTheme.dot)}
-            />
-            {stageLabel}
-          </span>
+          {/* ステージバッジ自体をクリック可能にして、ドロップダウンでステージ変更 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-opacity outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50",
+                    stageTheme.bg,
+                    stageTheme.text,
+                  )}
+                  aria-label={`ステージ: ${stageLabel} (クリックで変更)`}
+                  title="クリックでステージ変更"
+                />
+              }
+            >
+              <span
+                aria-hidden="true"
+                className={cn("size-1.5 rounded-full bg-current", stageTheme.dot)}
+              />
+              {stageLabel}
+              <ChevronDown aria-hidden="true" className="size-3 opacity-60" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                {STAGE_ORDER.map((s) => (
+                  <DropdownMenuItem
+                    key={s}
+                    onSelect={() => onChangeStage(s)}
+                    className={cn(
+                      s === stage && "font-semibold text-primary",
+                    )}
+                  >
+                    {s === stage && (
+                      <span aria-hidden="true" className="text-primary">
+                        ●
+                      </span>
+                    )}
+                    <span>{STAGE_LABELS[s]}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {profile.birthday && <span>{calculateAge(profile.birthday)}</span>}
           {profile.birthday && <span aria-hidden="true">·</span>}
           <ScoreLabel value={getScorecardsAverageScore(scorecards)} />
@@ -579,6 +619,7 @@ export function CandidateDashboardPane({
   applicationInfoOpen,
   onApplicationInfoOpenChange,
   selectedCandidateId,
+  onChangeStage,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
@@ -587,6 +628,8 @@ export function CandidateDashboardPane({
   applicationInfoOpen: boolean;
   onApplicationInfoOpenChange: (open: boolean) => void;
   selectedCandidateId: string;
+  /** ステージバッジドロップダウンからのステージ変更要求 */
+  onChangeStage: (next: StageKey) => void;
 }) {
   return (
     <section className="min-w-0 flex-1 bg-canvas">
@@ -596,6 +639,7 @@ export function CandidateDashboardPane({
             profile={profile}
             scorecards={scorecards}
             stage={stage}
+            onChangeStage={onChangeStage}
           />
 
           <ApplicationInfoCard

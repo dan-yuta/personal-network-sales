@@ -38,7 +38,7 @@
  *   - openspec/changes/add-4pane-workspace-template/design.md D51〜D56 / D65
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 
 import {
   type Profile,
@@ -94,6 +94,8 @@ export function Workspace({
   //   - name: 氏名昇順 (五十音順で探したいとき)
   // 空欄日付は末尾、null スコアも末尾扱い。
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
+  // Pane 2 候補者の名前/会社/接触経路でのフリーテキスト検索。空文字なら全表示。
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
   // （接触ログ・連絡文作成タブの操作領域として）。
@@ -322,12 +324,24 @@ export function Workspace({
       return da.localeCompare(db);
     };
 
+    // フリーテキスト検索フィルタ: name / source に部分一致 (case insensitive)。
+    // 空クエリなら素通り。
+    const q = searchQuery.trim().toLowerCase();
+    const matchSearch = (c: Candidate) => {
+      if (!q) return true;
+      return (
+        c.profile.name.toLowerCase().includes(q) ||
+        c.profile.source.toLowerCase().includes(q) ||
+        c.profile.careerText.toLowerCase().includes(q)
+      );
+    };
+
     const stageGroups: Group[] = visibleStages.map((stage) => ({
       kind: "stage" as const,
       stage,
       label: STAGE_LABELS[stage],
       items: candidates
-        .filter((c) => !c.archived && c.stage === stage)
+        .filter((c) => !c.archived && c.stage === stage && matchSearch(c))
         .sort(compareFn)
         .map((c) => ({
           id: c.id,
@@ -342,7 +356,7 @@ export function Workspace({
     if (selectedStage !== null) return stageGroups;
 
     const archivedItems = candidates
-      .filter((c) => c.archived)
+      .filter((c) => c.archived && matchSearch(c))
       .sort(compareFn)
       .map((c) => ({
         id: c.id,
@@ -357,7 +371,7 @@ export function Workspace({
       ...stageGroups,
       { kind: "archived" as const, label: ARCHIVED_GROUP_LABEL, items: archivedItems },
     ];
-  }, [candidates, selectedStage, sortKey]);
+  }, [candidates, selectedStage, sortKey, searchQuery]);
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
@@ -367,6 +381,42 @@ export function Workspace({
     const key = positionId.slice("stage-".length);
     if (!isStageKey(key)) return;
     setSelectedStage((prev) => (prev === key ? null : key));
+  }, []);
+
+  // ===== キーボードショートカット =====
+  // 1〜6 でステージ絞り込み (同じキーで解除)、Esc で絞り込み + 検索をリセット。
+  // 入力欄 (input/textarea/contenteditable) にフォーカス中は無効化して、
+  // フォーム入力と衝突しないようにする。
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      // 修飾キー付き (Cmd+1 等) はブラウザのタブ切替なので素通り
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === "Escape") {
+        setSelectedStage(null);
+        setSearchQuery("");
+        return;
+      }
+      // 1-6 → STAGE_ORDER[0..5] にマッピング
+      const num = Number.parseInt(e.key, 10);
+      if (!Number.isNaN(num) && num >= 1 && num <= STAGE_ORDER.length) {
+        const stage = STAGE_ORDER[num - 1];
+        setSelectedStage((prev) => (prev === stage ? null : stage));
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
 
   return (
@@ -414,6 +464,8 @@ export function Workspace({
             onClearFilter={() => setSelectedStage(null)}
             sortKey={sortKey}
             onSortKeyChange={setSortKey}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
           />
           <CandidateDashboardPane
             profile={profile}
@@ -423,6 +475,9 @@ export function Workspace({
             applicationInfoOpen={applicationInfoOpen}
             onApplicationInfoOpenChange={setApplicationInfoOpen}
             selectedCandidateId={selectedCandidateId}
+            onChangeStage={(next) =>
+              moveCandidate(selectedCandidateId, next, 0)
+            }
           />
           <CandidateDetailPane
             candidate={activeCandidate}
