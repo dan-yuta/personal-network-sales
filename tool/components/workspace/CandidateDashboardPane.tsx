@@ -22,6 +22,8 @@ import {
   X,
   Star,
   StarHalf,
+  User,
+  Target,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -176,7 +178,11 @@ function RecruitingConditionsCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle emphasis="prominent">
+        <CardTitle emphasis="prominent" className="flex items-center gap-2">
+          <Target
+            aria-hidden="true"
+            className="size-4 text-primary"
+          />
           {PANE3_SECTION.recruitingConditions}
         </CardTitle>
       </CardHeader>
@@ -405,7 +411,8 @@ function ApplicationInfoCard({
             <CardHeader className="group/trigger cursor-pointer rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
           }
         >
-          <CardTitle emphasis="prominent">
+          <CardTitle emphasis="prominent" className="flex items-center gap-2">
+            <User aria-hidden="true" className="size-4 text-primary" />
             {PANE3_SECTION.applicationInfo}
           </CardTitle>
           <CardAction>
