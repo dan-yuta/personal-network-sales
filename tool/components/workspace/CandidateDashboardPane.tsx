@@ -13,7 +13,6 @@
  * 後フェーズで「関係性スコア」等を再導入する際に再利用できるよう残している。
  */
 
-import { useState } from "react";
 import {
   ChevronDown,
   Mail,
@@ -67,12 +66,10 @@ import { Separator } from "@/components/ui/separator";
 import {
   InlineTextField,
   InlineDateField,
-  InlineComboboxField,
   InlineTextareaField,
   InlineFieldRow,
   ScoreLabel,
   SectionLabel,
-  type ComboOption,
 } from "@/components/primitives";
 
 // ===== AxisScoreRow（雛形由来の評価表示ヘルパー、後フェーズの再利用に備えて export） =====
@@ -243,18 +240,11 @@ function RecruitingConditionsCard({
   );
 }
 
-// ===== 接触経路の選択肢（Pane 3 ヘッダー帯トグル内で使用） =====
-// 人脈営業ツールに合わせ、人脈ベースの接触経路に書き換え。
-
-const INITIAL_SOURCE_OPTIONS: ComboOption[] = [
-  { value: "既存知人", description: "前職同僚・友人など以前からの知り合い" },
-  { value: "紹介経由（バック人脈）", description: "知人からの紹介で接触" },
-  { value: "コミュニティ・同期", description: "学校同期・コミュニティ経由" },
-  { value: "交流会・イベント", description: "ビジネス交流会や勉強会で名刺交換" },
-  { value: "仕事先で出会う", description: "仕事の場で出会った人" },
-];
-
 // ===== ヘッダー帯トグル内の連絡先行 =====
+// (旧 INITIAL_SOURCE_OPTIONS / InlineComboboxField は撤回。
+//  Pane 2 候補者行で表示する `cand.source` の自由テキストエピソード
+//  「△△交流会で名刺交換」「山田さんからの紹介」と Pane 3 入力欄の表示が
+//  乖離するため、Pane 3 も InlineTextField に統一した。)
 
 function ContactRow({
   icon,
@@ -295,17 +285,8 @@ function ApplicationInfoCardContent({
   profile: Profile;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
 }) {
-  const [sourceOptions, setSourceOptions] = useState<ComboOption[]>(
-    INITIAL_SOURCE_OPTIONS,
-  );
-
   const updateField = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     setProfile((p) => ({ ...p, [key]: value }));
-
-  const handleAddSource = (newOpt: ComboOption) =>
-    setSourceOptions((prev) =>
-      prev.find((o) => o.value === newOpt.value) ? prev : [...prev, newOpt],
-    );
 
   return (
     <div className="flex flex-col">
@@ -334,11 +315,12 @@ function ApplicationInfoCardContent({
             </div>
           </InlineFieldRow>
           <InlineFieldRow label="接触経路">
-            <InlineComboboxField
+            {/* 自由テキスト入力に変更 (旧: InlineComboboxField)。
+                Pane 2 候補者行の副情報と表記を統一し、「△△交流会で名刺交換」
+                のような具体的エピソードをそのまま編集できる。 */}
+            <InlineTextField
               value={profile.source}
-              options={sourceOptions}
               onSave={(v) => updateField("source", v)}
-              onCreate={handleAddSource}
               ariaLabel="接触経路"
             />
           </InlineFieldRow>
