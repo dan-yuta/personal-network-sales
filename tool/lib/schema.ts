@@ -90,8 +90,19 @@ export const AXIS_ORDER = axisKeySchema.options;
 
 // ===== 選考フロー =====
 
-/** 選考ステージのキー。`STAGE_ORDER` と一致する 4 段階。 */
-export const stageKeySchema = z.enum(["screening", "first", "second", "final"]);
+/**
+ * 営業ステージのキー。`STAGE_ORDER` と一致する 6 段階。
+ * メイン4 (screening / first / second / final) + サブ2 (lost / held)。
+ * サブステージは「失注」「保留」で、メインの流れから外れた候補者を扱う。
+ */
+export const stageKeySchema = z.enum([
+  "screening",
+  "first",
+  "second",
+  "final",
+  "lost",
+  "held",
+]);
 export type StageKey = z.infer<typeof stageKeySchema>;
 
 /** ステージの実施ステータス。done = 実施済 / planned = 予定済 / pending = 未定。 */

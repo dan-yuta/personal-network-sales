@@ -25,15 +25,17 @@ export const EVALUATION_AXIS: Record<AxisKey, string> = {
 // 列としてのステージ名なので Record で固定）。
 //
 // 営業候補リスト向けの表示ラベル。
-// 既存 zod スキーマの key (screening/first/second/final) はそのままで、
-// 表示ラベルだけ「未連絡 / アプローチ中 / 商談中 / 契約」に差し替えている。
-// 失注・保留はサブステージとして扱う想定だが、Phase 1 では
-// アーカイブ機能で代替する。
+// zod スキーマで stageKey は 6 種類 (メイン4 + サブ2) として定義されており、
+// それぞれの日本語表示ラベルをここでマッピングする。
+// メイン: 未連絡 → アプローチ中 → 商談中 → 契約 の標準フロー。
+// サブ: 失注 (成約しなかった) / 保留 (いったん中断、再開可能性あり)。
 export const STAGE_LABELS: Record<StageKey, string> = {
   screening: "未連絡",
   first: "アプローチ中",
   second: "商談中",
   final: "契約",
+  lost: "失注",
+  held: "保留",
 };
 
 // Pane 2 末尾の「アーカイブ済み」グループの見出しラベル。
