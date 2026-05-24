@@ -58,6 +58,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddItemDialog } from "@/components/workspace/AddItemDialog";
 import { STAGE_LABELS, STAGE_THEME } from "@/lib/labels";
+import { avatarColorFor } from "@/lib/computed/avatar";
 
 // dnd-kit のスクリーンリーダー向け日本語化。
 const screenReaderInstructions: ScreenReaderInstructions = {
@@ -325,7 +326,12 @@ export function CandidateListPane({
             {activeDragRow && (
               <div className="flex items-center gap-2 rounded-md bg-accent px-2.5 py-2.5 text-accent-foreground shadow-lg">
                 <Avatar className="size-8 shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-xs text-primary">
+                  <AvatarFallback
+                    className={cn(
+                      "text-xs font-semibold",
+                      avatarColorFor(activeDragRow.row.name),
+                    )}
+                  >
                     {activeDragRow.row.name[0] ?? "?"}
                   </AvatarFallback>
                 </Avatar>
@@ -566,7 +572,9 @@ function ArchivedRowItem({
         )}
       >
         <Avatar className="size-8 shrink-0">
-          <AvatarFallback className="bg-primary/10 text-xs text-primary">
+          <AvatarFallback
+            className={cn("text-xs font-semibold", avatarColorFor(cand.name))}
+          >
             {cand.name[0] ?? "?"}
           </AvatarFallback>
         </Avatar>

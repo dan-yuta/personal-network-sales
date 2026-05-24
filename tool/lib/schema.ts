@@ -241,6 +241,12 @@ export type CandidateRow = {
   id: string;
   name: string;
   averageScore: number | null;
+  /** 次回アクション日 (`profile.availableStartDate`)。空文字列なら未設定。
+   *  Pane 2 で「6/10」のような短縮表示と、期限警告 (今日・明日・3日以内) に使う。 */
+  nextActionDate: string;
+  /** 接触経路 (`profile.source`)。空文字列なら未設定。
+   *  Pane 2 副情報の 2 行目に短縮表示する。例: 「△△交流会で名刺交換」 */
+  source: string;
 };
 
 // Pane 2 のグループ表示単位（ステージ or アーカイブ済み）。

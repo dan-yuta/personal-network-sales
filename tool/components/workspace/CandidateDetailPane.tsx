@@ -444,36 +444,47 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
             まだ接触ログがありません
           </p>
         ) : (
-          <ul className="flex flex-col gap-2">
+          // タイムライン表示: 左に縦線を 1 本通し、各ログの左端にドット (手段色) を打つ。
+          // 時系列の連続性が視覚的に伝わりやすい。
+          <ol className="relative ml-3 flex flex-col gap-3 border-l-2 border-border pl-5">
             {logs.map((log) => {
               const methodTheme =
                 CONTACT_METHOD_THEME[log.method] ?? CONTACT_METHOD_THEME_DEFAULT;
               return (
-                <li
-                  key={log.id}
-                  className="rounded-md border border-border bg-card p-3"
-                >
-                  <div className="mb-1 flex items-center gap-2 text-xs">
-                    <span className="font-mono text-muted-foreground">
-                      {log.date}
-                    </span>
-                    <span
-                      className={cn(
-                        "rounded px-2 py-0.5 font-medium",
-                        methodTheme.bg,
-                        methodTheme.text,
-                      )}
-                    >
-                      {log.method}
-                    </span>
+                <li key={log.id} className="relative">
+                  {/* タイムラインの起点ドット (手段色を反映、縦線にめり込ませる)
+                      methodTheme.text = "text-XXX-700" を bg-current で背景化することで、
+                      Tailwind の JIT が動的クラス名を検出できない問題を回避 */}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute top-2 left-[-1.65rem] size-3 rounded-full border-2 border-background bg-current",
+                      methodTheme.text,
+                    )}
+                  />
+                  <div className="rounded-md border border-border bg-card p-3">
+                    <div className="mb-1 flex items-center gap-2 text-xs">
+                      <span className="font-mono text-muted-foreground">
+                        {log.date}
+                      </span>
+                      <span
+                        className={cn(
+                          "rounded px-2 py-0.5 font-medium",
+                          methodTheme.bg,
+                          methodTheme.text,
+                        )}
+                      >
+                        {log.method}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {log.content}
+                    </p>
                   </div>
-                  <p className="text-sm leading-relaxed text-foreground">
-                    {log.content}
-                  </p>
                 </li>
               );
             })}
-          </ul>
+          </ol>
         )}
       </section>
     </div>

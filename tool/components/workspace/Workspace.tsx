@@ -333,6 +333,8 @@ export function Workspace({
           id: c.id,
           name: c.profile.name,
           averageScore: getCandidateAverageScore(c),
+          nextActionDate: c.profile.availableStartDate,
+          source: c.profile.source,
         })),
     }));
 
@@ -346,6 +348,8 @@ export function Workspace({
         id: c.id,
         name: c.profile.name,
         averageScore: getCandidateAverageScore(c),
+        nextActionDate: c.profile.availableStartDate,
+        source: c.profile.source,
       }));
 
     if (archivedItems.length === 0) return stageGroups;
@@ -414,6 +418,7 @@ export function Workspace({
           <CandidateDashboardPane
             profile={profile}
             scorecards={scorecards}
+            stage={activeCandidate.stage}
             setProfile={setProfile}
             applicationInfoOpen={applicationInfoOpen}
             onApplicationInfoOpenChange={setApplicationInfoOpen}

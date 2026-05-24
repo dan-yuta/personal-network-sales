@@ -27,10 +27,20 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { type Profile, type Scorecard } from "@/lib/schema";
-import { PANE3_SECTION } from "@/lib/labels";
-import { getScorecardsAverageScore } from "@/lib/computed/scorecards";
+import {
+  type Profile,
+  type Scorecard,
+  type StageKey,
+  AXIS_ORDER,
+} from "@/lib/schema";
+import { PANE3_SECTION, STAGE_LABELS, STAGE_THEME, EVALUATION_AXIS } from "@/lib/labels";
+import {
+  getScorecardsAverageScore,
+  getLatestDoneScorecard,
+} from "@/lib/computed/scorecards";
 import { calculateAge } from "@/lib/computed/profile";
+import { avatarColorFor } from "@/lib/computed/avatar";
+import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
@@ -241,16 +251,23 @@ const INITIAL_SOURCE_OPTIONS: ComboOption[] = [
 function ContactRow({
   icon,
   label,
+  color,
   children,
 }: {
   icon: React.ReactNode;
   label: string;
+  /** Tailwind カラークラス: `bg-XXX-100 text-XXX-700` 形式。
+   *  Mail = blue / Phone = emerald / MapPin = orange など、種別ごとに色分け */
+  color: string;
   children: React.ReactNode;
 }) {
   return (
     <li className="flex items-center gap-3">
       <span
-        className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-md",
+          color,
+        )}
         aria-hidden="true"
       >
         {icon}
@@ -336,6 +353,7 @@ function ApplicationInfoCardContent({
           <ContactRow
             icon={<Mail className="size-3.5" />}
             label="メールアドレス"
+            color="bg-blue-100 text-blue-700"
           >
             <InlineTextField
               value={profile.email}
@@ -344,7 +362,11 @@ function ApplicationInfoCardContent({
               inputType="email"
             />
           </ContactRow>
-          <ContactRow icon={<Phone className="size-3.5" />} label="電話番号">
+          <ContactRow
+            icon={<Phone className="size-3.5" />}
+            label="電話番号"
+            color="bg-emerald-100 text-emerald-700"
+          >
             <InlineTextField
               value={profile.phone}
               onSave={(v) => updateField("phone", v)}
@@ -352,7 +374,11 @@ function ApplicationInfoCardContent({
               inputType="tel"
             />
           </ContactRow>
-          <ContactRow icon={<MapPin className="size-3.5" />} label="住所">
+          <ContactRow
+            icon={<MapPin className="size-3.5" />}
+            label="住所"
+            color="bg-orange-100 text-orange-700"
+          >
             <InlineTextField
               value={profile.address}
               onSave={(v) => updateField("address", v)}
@@ -437,30 +463,106 @@ function ApplicationInfoCard({
   );
 }
 
+// ===== Card: 現時点評価（4軸スコア + 平均、AxisScoreRow を活用） =====
+
+function EvaluationCard({ scorecards }: { scorecards: Scorecard[] }) {
+  const latest = getLatestDoneScorecard(scorecards);
+  if (!latest) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle emphasis="prominent" className="flex items-center gap-2">
+          <Star
+            aria-hidden="true"
+            className="size-4 fill-current text-primary"
+          />
+          現時点評価 (4軸)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <dl className="flex flex-col gap-2.5">
+          {AXIS_ORDER.map((axisKey) => (
+            <AxisScoreRow
+              key={axisKey}
+              label={EVALUATION_AXIS[axisKey]}
+              value={latest.axisScores[axisKey]}
+            />
+          ))}
+          <Separator />
+          <AxisScoreRow
+            label="平均スコア"
+            value={getScorecardsAverageScore(scorecards)}
+            bold
+          />
+        </dl>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ===== 候補者ヘッダー（固定。Avatar + 名前 + 年齢 / スコア） =====
 
 function CandidateHeader({
   profile,
   scorecards,
+  stage,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
+  stage: StageKey;
 }) {
+  const stageTheme = STAGE_THEME[stage];
+  const stageLabel = STAGE_LABELS[stage];
+  const deadline = getDeadlineBadge(profile.availableStartDate);
+
   return (
     <div className="flex items-center gap-5">
       <Avatar className="size-16">
-        <AvatarFallback className="bg-primary/10 text-xl text-primary">
+        <AvatarFallback
+          className={cn(
+            "text-xl font-semibold",
+            avatarColorFor(profile.name),
+          )}
+        >
           {profile.name[0] ?? "?"}
         </AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <h2 className="font-heading truncate text-xl font-semibold text-foreground">
           {profile.name || "名前未設定"}
         </h2>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+              stageTheme.bg,
+              stageTheme.text,
+            )}
+            aria-label={`ステージ: ${stageLabel}`}
+          >
+            <span
+              aria-hidden="true"
+              className={cn("size-1.5 rounded-full bg-current", stageTheme.dot)}
+            />
+            {stageLabel}
+          </span>
           {profile.birthday && <span>{calculateAge(profile.birthday)}</span>}
           {profile.birthday && <span aria-hidden="true">·</span>}
           <ScoreLabel value={getScorecardsAverageScore(scorecards)} />
+          {deadline && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span
+                className={cn(
+                  "inline-flex shrink-0 items-center rounded px-1.5 py-0.5 text-xs font-medium",
+                  deadline.className,
+                )}
+              >
+                次回: {deadline.text}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -472,6 +574,7 @@ function CandidateHeader({
 export function CandidateDashboardPane({
   profile,
   scorecards,
+  stage,
   setProfile,
   applicationInfoOpen,
   onApplicationInfoOpenChange,
@@ -479,6 +582,7 @@ export function CandidateDashboardPane({
 }: {
   profile: Profile;
   scorecards: Scorecard[];
+  stage: StageKey;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   applicationInfoOpen: boolean;
   onApplicationInfoOpenChange: (open: boolean) => void;
@@ -488,7 +592,11 @@ export function CandidateDashboardPane({
     <section className="min-w-0 flex-1 bg-canvas">
       <ScrollArea className="h-full">
         <div className="mx-auto flex max-w-3xl flex-col gap-4 px-8 py-8">
-          <CandidateHeader profile={profile} scorecards={scorecards} />
+          <CandidateHeader
+            profile={profile}
+            scorecards={scorecards}
+            stage={stage}
+          />
 
           <ApplicationInfoCard
             profile={profile}
@@ -497,6 +605,8 @@ export function CandidateDashboardPane({
             onOpenChange={onApplicationInfoOpenChange}
             candidateKey={selectedCandidateId}
           />
+
+          <EvaluationCard scorecards={scorecards} />
 
           {/* key={selectedCandidateId} で候補者切替時に remount。
               これがないと InlineTextField (uncontrolled) の defaultValue

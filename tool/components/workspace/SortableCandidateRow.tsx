@@ -7,6 +7,8 @@ import { GripVertical, MoreHorizontal, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { type CandidateRow, type StageKey } from "@/lib/schema";
+import { avatarColorFor } from "@/lib/computed/avatar";
+import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +28,10 @@ import {
  *
  * archived グループの行はドラッグさせないため、本コンポーネントは stage グループ
  * 専用。archived は CandidateListPane 側の通常 `<li>` で描画する。
+ *
+ * 表示情報:
+ *   - 1 行目: アバター (候補者ごとに色違い) + 氏名 + スコアバッジ (高/中/低 色分け)
+ *   - 2 行目: 接触経路 (source) の短縮 + 期限バッジ (今日/明日/あとN日/MM-DD)
  */
 export function SortableCandidateRow({
   cand,
@@ -57,6 +63,9 @@ export function SortableCandidateRow({
     transition,
   };
 
+  const avatarColor = avatarColorFor(cand.name);
+  const deadline = getDeadlineBadge(cand.nextActionDate);
+
   return (
     <li
       ref={setNodeRef}
@@ -70,7 +79,7 @@ export function SortableCandidateRow({
         type="button"
         onClick={() => onSelect(cand.id)}
         className={cn(
-          "flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left transition-colors",
+          "flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left transition-colors",
           "outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           selected
             ? "bg-accent text-accent-foreground"
@@ -82,7 +91,7 @@ export function SortableCandidateRow({
           {...listeners}
           aria-label={`${cand.name} の並び替え`}
           className={cn(
-            "flex size-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground",
+            "mt-1 flex size-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground",
             "opacity-0 transition-opacity group-focus-within/candidate:opacity-100 group-hover/candidate:opacity-100",
             "hover:text-foreground active:cursor-grabbing",
             "outline-none focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
@@ -92,17 +101,48 @@ export function SortableCandidateRow({
         >
           <GripVertical aria-hidden="true" className="size-4" />
         </span>
-        <Avatar className="size-8 shrink-0">
-          <AvatarFallback className="bg-primary/10 text-xs text-primary">
+        <Avatar className="mt-0.5 size-8 shrink-0">
+          <AvatarFallback
+            className={cn("text-xs font-semibold", avatarColor)}
+          >
             {cand.name[0] ?? "?"}
           </AvatarFallback>
         </Avatar>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm">{cand.name}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          {/* 1 行目: 氏名 + スコア */}
+          <div className="flex items-center gap-2">
+            <p className="min-w-0 flex-1 truncate text-sm">{cand.name}</p>
+            <span className="shrink-0 transition-opacity group-focus-within/candidate:opacity-0 group-hover/candidate:opacity-0">
+              <ScoreBadge avg={cand.averageScore} selected={selected} />
+            </span>
+          </div>
+          {/* 2 行目: 接触経路の短縮 + 期限バッジ */}
+          {(cand.source || deadline) && (
+            <div
+              className={cn(
+                "flex items-center gap-2 text-[10px]",
+                selected ? "text-accent-foreground/70" : "text-muted-foreground",
+              )}
+            >
+              {cand.source && (
+                <span className="min-w-0 flex-1 truncate" title={cand.source}>
+                  {cand.source}
+                </span>
+              )}
+              {deadline && (
+                <span
+                  className={cn(
+                    "shrink-0 rounded px-1.5 py-0.5 font-medium",
+                    deadline.className,
+                  )}
+                  aria-label={`次回アクション日 ${cand.nextActionDate}`}
+                >
+                  {deadline.text}
+                </span>
+              )}
+            </div>
+          )}
         </div>
-        <span className="transition-opacity group-focus-within/candidate:opacity-0 group-hover/candidate:opacity-0">
-          <ScoreBadge avg={cand.averageScore} selected={selected} />
-        </span>
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger
@@ -112,7 +152,7 @@ export function SortableCandidateRow({
               variant="ghost"
               size="icon-xs"
               className={cn(
-                "absolute top-1/2 right-1 -translate-y-1/2",
+                "absolute top-2 right-1",
                 "opacity-0 group-focus-within/candidate:opacity-100 group-hover/candidate:opacity-100",
                 "transition-opacity",
                 "text-muted-foreground hover:text-foreground",
@@ -131,6 +171,14 @@ export function SortableCandidateRow({
   );
 }
 
+/**
+ * 平均スコアのバッジ表示。
+ *   - 4.5 以上: emerald (緑) — 注力候補が一目でわかる
+ *   - 3.0 未満: rose (赤) — 関係性/レスポンスが弱い候補
+ *   - 中間 (3.0〜4.4): デフォルト色
+ *   - selected (= Pane 3 で開いている候補者) は背景変化との衝突を避けて
+ *     accent-foreground 一本
+ */
 function ScoreBadge({
   avg,
   selected,
@@ -151,11 +199,18 @@ function ScoreBadge({
       </span>
     );
   }
+  const scoreColor = selected
+    ? "text-accent-foreground"
+    : avg >= 4.5
+      ? "text-emerald-600"
+      : avg < 3.0
+        ? "text-rose-600"
+        : "text-foreground/80";
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-0.5 text-xs tabular-nums",
-        selected ? "text-accent-foreground" : "text-foreground/80",
+        scoreColor,
       )}
       aria-label={`平均スコア ${avg.toFixed(1)} / 5`}
     >
