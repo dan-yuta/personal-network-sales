@@ -11,7 +11,15 @@
  *   - それ以降: "M/D" (デフォルト色、通常表示)
  *
  * UI は Pane 2 候補者行と Pane 3 営業条件カードで使う。
+ *
+ * タイムゾーン対応: `parseISODate` (lib/computed/profile.ts) を使い、
+ * `"2026-05-25"` のような ISO date-only を **ローカルタイム 0 時**として
+ * パースする。素朴な `new Date("2026-05-25")` は UTC 0 時パースで、
+ * UTC-X 圏 (米西海岸 UTC-8 等) のブラウザで「1 日早い」警告が出る不具合
+ * を回避。
  */
+
+import { parseISODate } from "./profile";
 
 export type DeadlineBadge = {
   /** 表示文字列 (例: "今日" / "あと3日" / "6/10" / "期限超過") */
@@ -25,19 +33,27 @@ export type DeadlineBadge = {
 /**
  * YYYY-MM-DD 形式の日付文字列から期限バッジ情報を返す。
  * 空文字列・無効な日付なら null を返す (= 表示しない)。
+ *
+ * 日数差は年月日成分のみで計算 (Date.UTC) し、夏時間境界 (米欧の DST) の
+ * 23h/25h 日が混じっても安定。
  */
 export function getDeadlineBadge(date: string): DeadlineBadge | null {
-  if (!date) return null;
-  const target = new Date(date);
-  if (Number.isNaN(target.getTime())) return null;
-  target.setHours(0, 0, 0, 0);
+  const target = parseISODate(date);
+  if (!target) return null;
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const diffDays = Math.round(
-    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  // ローカル日付ベースで年月日成分のみを UTC 化して diff を取る (DST 安全)。
+  const targetUtc = Date.UTC(
+    target.getFullYear(),
+    target.getMonth(),
+    target.getDate(),
   );
+  const todayUtc = Date.UTC(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  const diffDays = Math.round((targetUtc - todayUtc) / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {
     return {

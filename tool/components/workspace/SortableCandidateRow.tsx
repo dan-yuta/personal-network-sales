@@ -68,14 +68,16 @@ export function SortableCandidateRow({
 
   // ホバー時のブラウザ標準ツールチップ。Pane2 の限られた幅で truncate されてしまう
   // source や日付・スコアの「全体像」を確認できるようにする。
+  // 改行 `\n` は Mac Safari など一部ブラウザで半角スペース化されるので、
+  // 区切り文字を ` / ` に統一して全ブラウザで読める形に。
   const tooltipParts = [
     cand.source || null,
-    cand.nextActionDate ? `次回アクション: ${cand.nextActionDate}` : null,
+    cand.nextActionDate ? `次回アクション ${cand.nextActionDate}` : null,
     cand.averageScore !== null
-      ? `平均スコア: ${cand.averageScore.toFixed(1)} / 5`
-      : "平均スコア: 未評価",
+      ? `★ ${cand.averageScore.toFixed(1)}/5`
+      : "未評価",
   ].filter(Boolean) as string[];
-  const tooltipText = `${cand.name}\n${tooltipParts.join("\n")}\n(クリックで詳細を Pane3 で開く)`;
+  const tooltipText = `${cand.name} — ${tooltipParts.join(" / ")} (クリックで詳細表示)`;
 
   return (
     <li
@@ -98,6 +100,15 @@ export function SortableCandidateRow({
             : "text-foreground hover:bg-muted",
         )}
       >
+        {/*
+          ドラッグハンドル。HTML5 仕様上 `<button>` の子孫に interactive 要素を
+          置くのは厳密には違反 (nested interactive)。今は `<span>` (= phrasing content)
+          + dnd-kit の listeners + stopPropagation で機能上の衝突は回避しているが、
+          a11y ツリー的には grip が button 内に存在し続ける。Tab で 2 段階フォーカス
+          が起きる可能性あり (focus-visible で grip にもリングが出る挙動はこれに依存)。
+          将来 grip を <button> 外に absolute 配置する場合、MoreHorizontal ボタンと
+          同じ構造に揃えるとよい。
+        */}
         <span
           {...attributes}
           {...listeners}
@@ -108,7 +119,6 @@ export function SortableCandidateRow({
             "hover:text-foreground active:cursor-grabbing",
             "outline-none focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
           )}
-          // ドラッグハンドルだけのクリックで選択動作が走らないようにする
           onClick={(e) => e.stopPropagation()}
         >
           <GripVertical aria-hidden="true" className="size-4" />
@@ -132,7 +142,7 @@ export function SortableCandidateRow({
           {(cand.source || deadline) && (
             <div
               className={cn(
-                "flex items-center gap-2 text-[10px]",
+                "flex items-center gap-2 text-xs",
                 selected ? "text-accent-foreground/70" : "text-muted-foreground",
               )}
             >

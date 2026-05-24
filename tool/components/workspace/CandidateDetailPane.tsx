@@ -80,10 +80,11 @@ export function CandidateDetailPane({
 
           <ScrollArea className="min-h-0 flex-1">
             {/* key={activeTab} で remount → tw-animate-css の fade-in が発火。
-                タブ切替時のフェードで「コンテンツが切り替わった」感を出す。 */}
+                タブ切替時のフェードで「コンテンツが切り替わった」感を出す。
+                motion-reduce 設定のユーザーにはアニメーションを切る。 */}
             <div
               key={activeTab}
-              className="animate-in fade-in duration-150"
+              className="animate-in fade-in duration-150 motion-reduce:animate-none"
             >
               {activeTab === "log" ? (
                 <ContactLogTab candidate={candidate} />

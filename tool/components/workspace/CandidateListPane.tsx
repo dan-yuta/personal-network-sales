@@ -40,6 +40,7 @@ import {
   type Group,
   type StageKey,
   type SortKey,
+  SORT_KEYS,
 } from "@/lib/schema";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
 import { SortableCandidateRow } from "@/components/workspace/SortableCandidateRow";
@@ -268,17 +269,20 @@ export function CandidateListPane({
             />
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+                {SORT_KEYS.map((key) => (
                   <DropdownMenuItem
                     key={key}
                     onSelect={() => onSortKeyChange(key)}
                     className={cn(sortKey === key && "font-semibold text-primary")}
                   >
-                    {sortKey === key && (
-                      <span aria-hidden="true" className="text-primary">
-                        ●
-                      </span>
-                    )}
+                    {/* 常時 size-3 の inline-flex を出して幅を揃え、選択中行と
+                        未選択行の左インデントを統一する (UX レビュー指摘) */}
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex size-3 items-center justify-center text-primary"
+                    >
+                      {sortKey === key ? "●" : ""}
+                    </span>
                     <span>{SORT_LABELS[key]}</span>
                   </DropdownMenuItem>
                 ))}
@@ -299,7 +303,7 @@ export function CandidateListPane({
             type="search"
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            placeholder="名前・会社・経路で検索"
+            placeholder="名前・接触経路・メモで検索"
             aria-label="候補者を検索"
             className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
           />

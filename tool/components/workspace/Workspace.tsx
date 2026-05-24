@@ -152,6 +152,13 @@ export function Workspace({
 
   // 候補者をアーカイブ（論理削除）する。データは残し `archived: true` を立てる。
   // アクティブ候補者をアーカイブした場合は、非 archived の先頭候補者にフォールバック。
+  //
+  // 設計メモ: setCandidates の reducer 関数内で setSelectedCandidateId を呼ぶ
+  // のは「副作用なしの純関数」原則からは外れるが、純粋に id を計算するだけで
+  // idempotent (同じ id を 2 回 set しても結果同じ) なので React 19 StrictMode
+  // の二重呼び出しでも安全。「archive 後の最新 candidates から fallback を取る」
+  // ロジックを setCandidates の外に置くと、古い candidates クロージャを参照する
+  // バグが入るため、ネスト形を意識的に維持する。
   const archiveCandidate = useCallback((id: string) => {
     setCandidates((prev) => {
       const next = prev.map((c) =>
@@ -318,9 +325,11 @@ export function Workspace({
         // 降順 (高いスコアが先頭)
         return sb - sa;
       }
-      // sortKey === "deadline": 次回アクション日が近い順 (空欄は末尾)
-      const da = a.profile.availableStartDate || "9999-99-99";
-      const db = b.profile.availableStartDate || "9999-99-99";
+      // sortKey === "deadline": 次回アクション日が近い順 (空欄は末尾)。
+      // sentinel "9999-12-31" は文字列順 = 日付順が成立する正規日付。
+      // (旧: "9999-99-99" は文字列ソートには使えるが Date 解釈不能で脆い)
+      const da = a.profile.availableStartDate || "9999-12-31";
+      const db = b.profile.availableStartDate || "9999-12-31";
       return da.localeCompare(db);
     };
 

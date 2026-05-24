@@ -478,7 +478,6 @@ function ApplicationInfoCard({
 
 function EvaluationCard({ scorecards }: { scorecards: Scorecard[] }) {
   const latest = getLatestDoneScorecard(scorecards);
-  if (!latest) return null;
 
   return (
     <Card>
@@ -492,21 +491,31 @@ function EvaluationCard({ scorecards }: { scorecards: Scorecard[] }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <dl className="flex flex-col gap-2.5">
-          {AXIS_ORDER.map((axisKey) => (
+        {!latest ? (
+          // 未評価 (scorecards 空 or done なし) でもカード自体は出して
+          // 「データ入力が必要」を明示する。null return だとカードが消えて
+          // 「ロード中? バグ?」とユーザーに混乱を与える (UX レビュー指摘)。
+          <p className="text-sm text-muted-foreground">
+            まだ評価がありません。Pane4 接触ログを追加するか、Notion 接続後に
+            自動評価される予定です。
+          </p>
+        ) : (
+          <dl className="flex flex-col gap-2.5">
+            {AXIS_ORDER.map((axisKey) => (
+              <AxisScoreRow
+                key={axisKey}
+                label={EVALUATION_AXIS[axisKey]}
+                value={latest.axisScores[axisKey]}
+              />
+            ))}
+            <Separator />
             <AxisScoreRow
-              key={axisKey}
-              label={EVALUATION_AXIS[axisKey]}
-              value={latest.axisScores[axisKey]}
+              label="平均スコア"
+              value={getScorecardsAverageScore(scorecards)}
+              bold
             />
-          ))}
-          <Separator />
-          <AxisScoreRow
-            label="平均スコア"
-            value={getScorecardsAverageScore(scorecards)}
-            bold
-          />
-        </dl>
+          </dl>
+        )}
       </CardContent>
     </Card>
   );
@@ -584,11 +593,13 @@ function CandidateHeader({
                       s === stage && "font-semibold text-primary",
                     )}
                   >
-                    {s === stage && (
-                      <span aria-hidden="true" className="text-primary">
-                        ●
-                      </span>
-                    )}
+                    {/* 常時 size-3 placeholder で選択中/未選択の左インデント統一 */}
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex size-3 items-center justify-center text-primary"
+                    >
+                      {s === stage ? "●" : ""}
+                    </span>
                     <span>{STAGE_LABELS[s]}</span>
                   </DropdownMenuItem>
                 ))}
@@ -643,10 +654,11 @@ export function CandidateDashboardPane({
     <section className="min-w-0 flex-1 bg-canvas">
       <ScrollArea className="h-full">
         {/* key={selectedCandidateId} で候補者切替時に remount → fade-in。
-            内部の InlineTextField 群も新しい defaultValue で初期化し直される。 */}
+            内部の InlineTextField 群も新しい defaultValue で初期化し直される。
+            motion-reduce 設定のユーザーにはアニメーションを切る (a11y 配慮)。 */}
         <div
           key={selectedCandidateId}
-          className="mx-auto flex max-w-3xl animate-in fade-in flex-col gap-4 px-8 py-8 duration-200"
+          className="mx-auto flex max-w-3xl animate-in fade-in flex-col gap-4 px-8 py-8 duration-200 motion-reduce:animate-none"
         >
           <CandidateHeader
             profile={profile}
