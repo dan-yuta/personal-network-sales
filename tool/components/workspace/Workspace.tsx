@@ -385,17 +385,29 @@ export function Workspace({
 
   // ===== キーボードショートカット =====
   // 1〜6 でステージ絞り込み (同じキーで解除)、Esc で絞り込み + 検索をリセット。
-  // 入力欄 (input/textarea/contenteditable) にフォーカス中は無効化して、
-  // フォーム入力と衝突しないようにする。
+  //
+  // 注意: deps を [] にできるのは、ハンドラが state を直接読まず setState の
+  // 関数形 (prev) => ... のみを使っているため。stage に依存して
+  // `setSelectedStage(stage)` のように値形を書く場合は必ず deps に追加する
+  // (さもなくば閉包の古い値を参照する)。STAGE_ORDER は immutable なので OK。
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // IME 変換中は素通り (日本語入力中の数字確定で誤発火しないように)。
+      // isComposing は Chrome/Safari/Firefox の最新版で動く、keyCode 229 は
+      // 旧 Edge / IE のフォールバック。
+      if (e.isComposing || e.keyCode === 229) return;
+
       const target = e.target as HTMLElement | null;
       if (
         target &&
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
           target.tagName === "SELECT" ||
-          target.isContentEditable)
+          target.isContentEditable ||
+          // Base UI の Combobox / Dialog は role 属性で識別
+          target.closest('[role="combobox"]') ||
+          target.closest('[role="dialog"]') ||
+          target.closest('[role="menu"]'))
       ) {
         return;
       }
@@ -405,6 +417,7 @@ export function Workspace({
       if (e.key === "Escape") {
         setSelectedStage(null);
         setSearchQuery("");
+        e.preventDefault();
         return;
       }
       // 1-6 → STAGE_ORDER[0..5] にマッピング

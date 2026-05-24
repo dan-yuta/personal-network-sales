@@ -543,7 +543,9 @@ function CandidateHeader({
           {profile.name || "名前未設定"}
         </h2>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {/* ステージバッジ自体をクリック可能にして、ドロップダウンでステージ変更 */}
+          {/* ステージバッジ自体をクリック可能にして、ドロップダウンでステージ変更。
+              Base UI の render prop パターンでは render 要素の中に children を
+              入れる (他の DropdownMenuTrigger 使用箇所と統一)。 */}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -556,16 +558,19 @@ function CandidateHeader({
                   )}
                   aria-label={`ステージ: ${stageLabel} (クリックで変更)`}
                   title="クリックでステージ変更"
-                />
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-1.5 rounded-full bg-current",
+                      stageTheme.dot,
+                    )}
+                  />
+                  {stageLabel}
+                  <ChevronDown aria-hidden="true" className="size-3 opacity-60" />
+                </button>
               }
-            >
-              <span
-                aria-hidden="true"
-                className={cn("size-1.5 rounded-full bg-current", stageTheme.dot)}
-              />
-              {stageLabel}
-              <ChevronDown aria-hidden="true" className="size-3 opacity-60" />
-            </DropdownMenuTrigger>
+            />
             <DropdownMenuContent align="start">
               <DropdownMenuGroup>
                 {STAGE_ORDER.map((s) => (
