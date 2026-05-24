@@ -498,7 +498,14 @@ export function CandidateDashboardPane({
             candidateKey={selectedCandidateId}
           />
 
-          <RecruitingConditionsCard profile={profile} setProfile={setProfile} />
+          {/* key={selectedCandidateId} で候補者切替時に remount。
+              これがないと InlineTextField (uncontrolled) の defaultValue
+              変更が無視され、Base UI が console.warn を出す。 */}
+          <RecruitingConditionsCard
+            key={selectedCandidateId}
+            profile={profile}
+            setProfile={setProfile}
+          />
         </div>
       </ScrollArea>
     </section>
