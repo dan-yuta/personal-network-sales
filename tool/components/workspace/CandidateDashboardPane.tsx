@@ -634,7 +634,12 @@ export function CandidateDashboardPane({
   return (
     <section className="min-w-0 flex-1 bg-canvas">
       <ScrollArea className="h-full">
-        <div className="mx-auto flex max-w-3xl flex-col gap-4 px-8 py-8">
+        {/* key={selectedCandidateId} で候補者切替時に remount → fade-in。
+            内部の InlineTextField 群も新しい defaultValue で初期化し直される。 */}
+        <div
+          key={selectedCandidateId}
+          className="mx-auto flex max-w-3xl animate-in fade-in flex-col gap-4 px-8 py-8 duration-200"
+        >
           <CandidateHeader
             profile={profile}
             scorecards={scorecards}
