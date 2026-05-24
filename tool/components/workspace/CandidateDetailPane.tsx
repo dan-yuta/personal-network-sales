@@ -12,8 +12,13 @@
  */
 
 import { useState } from "react";
+import { Clock, PlusCircle, Sparkles, type LucideIcon } from "lucide-react";
 
 import { type Candidate } from "@/lib/schema";
+import {
+  CONTACT_METHOD_THEME,
+  CONTACT_METHOD_THEME_DEFAULT,
+} from "@/lib/labels";
 import { Pane4Toggle } from "@/components/workspace/Pane4Toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -62,12 +67,14 @@ export function CandidateDetailPane({
               activeTab={activeTab}
               onSelect={setActiveTab}
               label="接触ログ"
+              Icon={Clock}
             />
             <TabButton
               tabId="draft"
               activeTab={activeTab}
               onSelect={setActiveTab}
               label="連絡文作成"
+              Icon={Sparkles}
             />
           </div>
 
@@ -95,11 +102,13 @@ function TabButton({
   activeTab,
   onSelect,
   label,
+  Icon,
 }: {
   tabId: TabId;
   activeTab: TabId;
   onSelect: (id: TabId) => void;
   label: string;
+  Icon: LucideIcon;
 }) {
   const active = activeTab === tabId;
   return (
@@ -109,13 +118,14 @@ function TabButton({
       aria-selected={active}
       onClick={() => onSelect(tabId)}
       className={cn(
-        "flex-1 px-4 py-2.5 text-sm transition-colors",
+        "flex flex-1 items-center justify-center gap-1.5 px-4 py-2.5 text-sm transition-colors",
         "outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
         active
-          ? "border-b-2 border-primary font-semibold text-foreground"
+          ? "border-b-2 border-primary bg-primary/5 font-semibold text-primary"
           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
       )}
     >
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
       {label}
     </button>
   );
@@ -355,13 +365,14 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
       {/* 新規ログ追加フォーム（モック・送信は未実装） */}
       <section
         aria-labelledby="log-add-heading"
-        className="rounded-lg border border-border bg-card p-3"
+        className="rounded-lg border border-primary/30 bg-primary/5 p-3"
       >
         <h3
           id="log-add-heading"
-          className="mb-3 text-xs font-semibold text-muted-foreground"
+          className="mb-3 flex items-center gap-1.5 text-xs font-bold text-primary"
         >
-          + 新規ログを追加
+          <PlusCircle aria-hidden="true" className="size-3.5" />
+          新規ログを追加
         </h3>
         <div className="flex flex-col gap-2 text-sm">
           <label className="flex items-center gap-2">
@@ -430,24 +441,34 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {logs.map((log) => (
-              <li
-                key={log.id}
-                className="rounded-md border border-border bg-card p-3"
-              >
-                <div className="mb-1 flex items-center gap-2 text-xs">
-                  <span className="font-mono text-muted-foreground">
-                    {log.date}
-                  </span>
-                  <span className="rounded bg-primary/10 px-2 py-0.5 text-primary">
-                    {log.method}
-                  </span>
-                </div>
-                <p className="text-sm leading-relaxed text-foreground">
-                  {log.content}
-                </p>
-              </li>
-            ))}
+            {logs.map((log) => {
+              const methodTheme =
+                CONTACT_METHOD_THEME[log.method] ?? CONTACT_METHOD_THEME_DEFAULT;
+              return (
+                <li
+                  key={log.id}
+                  className="rounded-md border border-border bg-card p-3"
+                >
+                  <div className="mb-1 flex items-center gap-2 text-xs">
+                    <span className="font-mono text-muted-foreground">
+                      {log.date}
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded px-2 py-0.5 font-medium",
+                        methodTheme.bg,
+                        methodTheme.text,
+                      )}
+                    >
+                      {log.method}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {log.content}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
