@@ -55,7 +55,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddItemDialog } from "@/components/workspace/AddItemDialog";
-import { STAGE_LABELS } from "@/lib/labels";
+import { STAGE_LABELS, STAGE_THEME } from "@/lib/labels";
 
 // dnd-kit のスクリーンリーダー向け日本語化。
 const screenReaderInstructions: ScreenReaderInstructions = {
@@ -345,14 +345,23 @@ function StageGroup({
     data: { containerId: stage },
   });
 
+  const theme = STAGE_THEME[stage];
+
   return (
     <div>
       <div className="sticky top-0 z-10 -mx-3 mb-2 flex items-center justify-between gap-2 bg-background px-5 py-1.5">
         <div className="flex min-w-0 items-center gap-1.5">
-          <h3 className="truncate text-xs font-medium text-muted-foreground">
+          <span
+            aria-hidden="true"
+            className={cn("size-2 shrink-0 rounded-full bg-current", theme.dot)}
+          />
+          <h3 className={cn("truncate text-xs font-semibold", theme.text)}>
             {label}
           </h3>
-          <Badge variant="secondary" size="xs">
+          <Badge
+            size="xs"
+            className={cn("border-0", theme.bg, theme.text)}
+          >
             {items.length}
           </Badge>
         </div>
@@ -566,11 +575,23 @@ function ScoreBadge({
       </span>
     );
   }
+  // 高 (4.5+): emerald (緑) — 関係性/優先度ともに高い注力候補
+  // 中 (3.0-4.4): デフォルト色 — 標準的な進行
+  // 低 (3.0未満): rose (赤系) — フォロー要・優先度低の判断材料
+  // selected (= Pane3 で開いている候補者) の場合は accent-foreground 一本にする
+  // (背景が変わるので色付けすると逆に視認性が落ちる)
+  const scoreColor = selected
+    ? "text-accent-foreground"
+    : avg >= 4.5
+      ? "text-emerald-600"
+      : avg < 3.0
+        ? "text-rose-600"
+        : "text-foreground/80";
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-0.5 text-xs tabular-nums",
-        selected ? "text-accent-foreground" : "text-foreground/80",
+        scoreColor,
       )}
       aria-label={`平均スコア ${avg.toFixed(1)} / 5`}
     >
