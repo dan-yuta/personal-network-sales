@@ -42,6 +42,89 @@ export const STAGE_LABELS: Record<StageKey, string> = {
 // archived === true の候補者を束ねる仮想グループで、ステージとは直交した概念。
 export const ARCHIVED_GROUP_LABEL = "アーカイブ済み";
 
+// ===== ステージ別テーマカラー =====
+
+/**
+ * ステージごとの Tailwind カラークラス集約。
+ * Pane1 のアクセントバー、Pane2 グループ見出しのバッジ、Pane3 のヘッダー等で
+ * 同じテーマカラーを使ってステージを視覚的に識別できるようにする。
+ * 提出図解 (submission/tool-overview.html) のカラーパレットとも揃えている。
+ */
+export const STAGE_THEME: Record<
+  StageKey,
+  {
+    /** バッジや薄い背景に使う色 (bg-XXX-100 系) */
+    bg: string;
+    /** バッジ等のテキスト色 (text-XXX-700/800 系、コントラスト確保) */
+    text: string;
+    /** Pane1 タブの左ボーダーアクセント色 (border-l-XXX-500 系) */
+    leftBar: string;
+    /** ドットマーカー等の単色 (text-XXX-500 系) */
+    dot: string;
+  }
+> = {
+  screening: {
+    bg: "bg-slate-100",
+    text: "text-slate-700",
+    leftBar: "border-l-slate-400",
+    dot: "text-slate-400",
+  },
+  first: {
+    bg: "bg-amber-100",
+    text: "text-amber-800",
+    leftBar: "border-l-amber-500",
+    dot: "text-amber-500",
+  },
+  second: {
+    bg: "bg-orange-100",
+    text: "text-orange-800",
+    leftBar: "border-l-orange-500",
+    dot: "text-orange-500",
+  },
+  final: {
+    bg: "bg-emerald-100",
+    text: "text-emerald-800",
+    leftBar: "border-l-emerald-500",
+    dot: "text-emerald-500",
+  },
+  lost: {
+    bg: "bg-rose-100",
+    text: "text-rose-800",
+    leftBar: "border-l-rose-500",
+    dot: "text-rose-500",
+  },
+  held: {
+    bg: "bg-slate-100",
+    text: "text-slate-600",
+    leftBar: "border-l-slate-300",
+    dot: "text-slate-300",
+  },
+};
+
+// ===== 接触ログ手段の色マッピング =====
+
+/**
+ * 接触ログの「手段」(電話・メール・LINE・訪問・オンライン会議・SNS・その他)
+ * ごとに表示する Tailwind カラークラス。
+ * Pane4 接触ログ一覧で手段バッジを色分けして一目で識別できるようにする。
+ */
+export const CONTACT_METHOD_THEME: Record<string, { bg: string; text: string }> =
+  {
+    電話: { bg: "bg-blue-100", text: "text-blue-700" },
+    メール: { bg: "bg-emerald-100", text: "text-emerald-700" },
+    LINE: { bg: "bg-green-100", text: "text-green-700" },
+    訪問: { bg: "bg-orange-100", text: "text-orange-700" },
+    オンライン会議: { bg: "bg-violet-100", text: "text-violet-700" },
+    SNS: { bg: "bg-pink-100", text: "text-pink-700" },
+    その他: { bg: "bg-slate-100", text: "text-slate-700" },
+  };
+
+/** デフォルト値 (未知の手段の場合のフォールバック) */
+export const CONTACT_METHOD_THEME_DEFAULT = {
+  bg: "bg-slate-100",
+  text: "text-slate-700",
+};
+
 // ===== Pane 3 ダッシュボードのセクション見出し =====
 
 // 営業候補向けの Pane 3 セクション見出し。

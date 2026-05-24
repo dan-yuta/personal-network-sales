@@ -1,10 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  Briefcase,
+  CheckCircle,
+  MessageCircle,
+  MoreHorizontal,
+  PauseCircle,
+  Trash2,
+  UserPlus,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 
-import { type Department } from "@/lib/schema";
+import {
+  type Department,
+  type StageKey,
+  STAGE_ORDER,
+} from "@/lib/schema";
+import { STAGE_THEME } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
+
+// 各ステージの代表アイコン (Lucide)。
+//   - screening (未連絡): UserPlus → これから声をかける人を象徴
+//   - first (アプローチ中): MessageCircle → 接触を取り始めた段階
+//   - second (商談中): Briefcase → 商談・条件すり合わせ
+//   - final (契約): CheckCircle → 成約・完了
+//   - lost (失注): XCircle → 失注・打ち切り
+//   - held (保留): PauseCircle → 一時停止
+const STAGE_ICON: Record<StageKey, LucideIcon> = {
+  screening: UserPlus,
+  first: MessageCircle,
+  second: Briefcase,
+  final: CheckCircle,
+  lost: XCircle,
+  held: PauseCircle,
+};
+
+/** position.id ("stage-screening" 等) から StageKey を抽出する。非ステージなら null。 */
+function getStageKey(posId: string): StageKey | null {
+  if (!posId.startsWith("stage-")) return null;
+  const key = posId.slice("stage-".length) as StageKey;
+  if ((STAGE_ORDER as readonly StageKey[]).includes(key)) return key;
+  return null;
+}
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,6 +127,9 @@ export function PositionPane({
                 <SidebarMenu>
                   {dept.positions.map((pos) => {
                     const active = pos.name === selectedPositionName;
+                    const stageKey = getStageKey(pos.id);
+                    const Icon = stageKey ? STAGE_ICON[stageKey] : null;
+                    const theme = stageKey ? STAGE_THEME[stageKey] : null;
                     return (
                       <SidebarMenuItem key={pos.id}>
                         <SidebarMenuButton
@@ -94,25 +137,31 @@ export function PositionPane({
                           isActive={active}
                           aria-current={active ? "page" : undefined}
                           onClick={() => onSelectPosition?.(pos.id)}
-                          className={
+                          className={cn(
+                            "border-l-4 border-l-transparent",
+                            theme && active && theme.leftBar,
                             active
                               ? "bg-primary/15 font-semibold text-primary hover:bg-primary/20 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                              : ""
-                          }
+                              : "",
+                          )}
                         >
-                          <span className="truncate">
-                            {active && (
-                              <span aria-hidden="true" className="mr-1.5">
-                                ●
-                              </span>
-                            )}
-                            {pos.name}
-                          </span>
+                          {Icon && (
+                            <Icon
+                              aria-hidden="true"
+                              className={cn(
+                                "size-4 shrink-0",
+                                active && theme
+                                  ? theme.dot
+                                  : "text-muted-foreground",
+                              )}
+                            />
+                          )}
+                          <span className="truncate">{pos.name}</span>
                           <span
-                            className={
-                              "ml-auto text-xs tabular-nums " +
-                              (active ? "text-primary" : "text-muted-foreground")
-                            }
+                            className={cn(
+                              "ml-auto text-xs tabular-nums",
+                              active ? "text-primary" : "text-muted-foreground",
+                            )}
                           >
                             {pos.count}
                           </span>
