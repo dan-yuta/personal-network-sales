@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Archive,
   ArchiveRestore,
+  ArrowUpDown,
   ChevronDown,
   MoreHorizontal,
   Plus,
@@ -63,6 +64,15 @@ const screenReaderInstructions: ScreenReaderInstructions = {
     "Space または Enter で候補者を持ち上げ、矢印キーで移動、Space で確定、Esc でキャンセルします。",
 };
 
+/** ソートキー (Workspace と共有)。次回アクション日順 / スコア順 / 名前順。 */
+type SortKey = "deadline" | "score" | "name";
+
+const SORT_LABELS: Record<SortKey, string> = {
+  deadline: "次回アクション日順",
+  score: "スコア順 (高 → 低)",
+  name: "名前順 (五十音)",
+};
+
 type CandidateListPaneProps = {
   groups: Group[];
   selectedCandidateId: string;
@@ -75,6 +85,10 @@ type CandidateListPaneProps = {
   filteredStageLabel?: string;
   /** 絞り込み解除ボタンのハンドラ。filteredStageLabel が指定されたときに呼ばれる */
   onClearFilter?: () => void;
+  /** Pane2 候補者リストのソートキー (Workspace 側で管理) */
+  sortKey: SortKey;
+  /** ソートキー変更ハンドラ */
+  onSortKeyChange: (key: SortKey) => void;
 };
 
 export function CandidateListPane({
@@ -87,6 +101,8 @@ export function CandidateListPane({
   onMoveCandidate,
   filteredStageLabel,
   onClearFilter,
+  sortKey,
+  onSortKeyChange,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -209,19 +225,55 @@ export function CandidateListPane({
         <h2 className="truncate text-sm font-semibold text-foreground">
           営業候補リスト
         </h2>
-        {filteredStageLabel && onClearFilter && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilter}
-            className="h-7 shrink-0 gap-1 px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label={`${filteredStageLabel} の絞り込みを解除して全候補者を表示`}
-          >
-            <X aria-hidden="true" className="size-3.5" />
-            <span>{filteredStageLabel} を解除</span>
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-1">
+          {filteredStageLabel && onClearFilter && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClearFilter}
+              className="h-7 shrink-0 gap-1 px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label={`${filteredStageLabel} の絞り込みを解除して全候補者を表示`}
+            >
+              <X aria-hidden="true" className="size-3.5" />
+              <span>{filteredStageLabel} を解除</span>
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label={`並び順を変更 (現在: ${SORT_LABELS[sortKey]})`}
+                  title={`並び順: ${SORT_LABELS[sortKey]}`}
+                >
+                  <ArrowUpDown className="size-4" aria-hidden="true" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+                  <DropdownMenuItem
+                    key={key}
+                    onSelect={() => onSortKeyChange(key)}
+                    className={cn(sortKey === key && "font-semibold text-primary")}
+                  >
+                    {sortKey === key && (
+                      <span aria-hidden="true" className="text-primary">
+                        ●
+                      </span>
+                    )}
+                    <span>{SORT_LABELS[key]}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
       <ScrollArea className="min-h-0 flex-1">
         <DndContext

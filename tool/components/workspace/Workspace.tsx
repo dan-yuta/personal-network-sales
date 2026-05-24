@@ -86,6 +86,14 @@ export function Workspace({
   const [pane4ManuallyClosed, setPane4ManuallyClosed] = useState(false);
   // Pane 3「候補者情報」カード（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
   const [applicationInfoOpen, setApplicationInfoOpen] = useState(false);
+  // Pane 2 候補者リストのソートキー。
+  //   - deadline: 次回アクション日が近い順 (デフォルト、営業ツールのテンポに合う)
+  //   - score: 平均スコア降順 (注力候補から見たいとき)
+  //   - name: 氏名昇順 (五十音順で探したいとき)
+  // 空欄日付は末尾、null スコアも末尾扱い。
+  const [sortKey, setSortKey] = useState<"deadline" | "score" | "name">(
+    "deadline",
+  );
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
   // （接触ログ・連絡文作成タブの操作領域として）。
@@ -296,12 +304,30 @@ export function Workspace({
       ? STAGE_ORDER.filter((s) => s === selectedStage)
       : STAGE_ORDER;
 
+    // ソート関数。null/空欄値は末尾扱いになるよう、Infinity 相当の値を当てる。
+    const compareFn = (a: Candidate, b: Candidate): number => {
+      if (sortKey === "name") {
+        return a.profile.name.localeCompare(b.profile.name, "ja");
+      }
+      if (sortKey === "score") {
+        const sa = getCandidateAverageScore(a) ?? -1;
+        const sb = getCandidateAverageScore(b) ?? -1;
+        // 降順 (高いスコアが先頭)
+        return sb - sa;
+      }
+      // sortKey === "deadline": 次回アクション日が近い順 (空欄は末尾)
+      const da = a.profile.availableStartDate || "9999-99-99";
+      const db = b.profile.availableStartDate || "9999-99-99";
+      return da.localeCompare(db);
+    };
+
     const stageGroups: Group[] = visibleStages.map((stage) => ({
       kind: "stage" as const,
       stage,
       label: STAGE_LABELS[stage],
       items: candidates
         .filter((c) => !c.archived && c.stage === stage)
+        .sort(compareFn)
         .map((c) => ({
           id: c.id,
           name: c.profile.name,
@@ -314,6 +340,7 @@ export function Workspace({
 
     const archivedItems = candidates
       .filter((c) => c.archived)
+      .sort(compareFn)
       .map((c) => ({
         id: c.id,
         name: c.profile.name,
@@ -325,7 +352,7 @@ export function Workspace({
       ...stageGroups,
       { kind: "archived" as const, label: ARCHIVED_GROUP_LABEL, items: archivedItems },
     ];
-  }, [candidates, selectedStage]);
+  }, [candidates, selectedStage, sortKey]);
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
@@ -379,6 +406,8 @@ export function Workspace({
               selectedStage ? STAGE_LABELS[selectedStage] : undefined
             }
             onClearFilter={() => setSelectedStage(null)}
+            sortKey={sortKey}
+            onSortKeyChange={setSortKey}
           />
           <CandidateDashboardPane
             profile={profile}
