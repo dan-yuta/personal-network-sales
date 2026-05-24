@@ -419,7 +419,11 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
             <Button
               type="button"
               size="sm"
-              onClick={() => alert("保存（モック）: 実装は Phase 3 で")}
+              onClick={() =>
+                alert(
+                  "現在モック動作のため、入力内容は記録されません。\nNotion 接続は Phase 3 (来月以降) で実装予定。",
+                )
+              }
             >
               保存
             </Button>
@@ -776,10 +780,16 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
     }, 300);
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!output) return;
-    navigator.clipboard?.writeText(output);
-    alert("クリップボードにコピーしました（モック）");
+    // navigator.clipboard.writeText は Promise を返すので、成功 / 失敗を
+    // 待ってから alert を出す。古いブラウザや権限拒否時の誤フィードバックを防ぐ。
+    try {
+      await navigator.clipboard.writeText(output);
+      alert("クリップボードにコピーしました");
+    } catch {
+      alert("コピーに失敗しました。手動で選択してコピーしてください");
+    }
   };
 
   return (

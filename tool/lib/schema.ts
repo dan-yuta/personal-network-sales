@@ -165,6 +165,28 @@ export type Scorecard = z.infer<typeof scorecardSchema>;
  */
 export const STAGE_ORDER = stageKeySchema.options;
 
+// ===== Pane 2 ソートキー =====
+
+/**
+ * Pane 2 候補者リストのソートキー。Workspace と CandidateListPane で共有する。
+ *   - deadline: 次回アクション日 (`profile.availableStartDate`) 昇順
+ *   - score: 平均スコア (`getCandidateAverageScore`) 降順
+ *   - name: 氏名昇順 (五十音、`localeCompare("ja")`)
+ */
+export const SORT_KEYS = ["deadline", "score", "name"] as const;
+export type SortKey = (typeof SORT_KEYS)[number];
+
+// ===== ステージキーの型ガード =====
+
+/**
+ * 任意の string が StageKey か判定する型ガード。
+ * `pos.id.slice("stage-".length) as StageKey` のような潜在的に
+ * 範囲外な値を持つ可能性のある場面で使う。
+ */
+export function isStageKey(x: string): x is StageKey {
+  return (STAGE_ORDER as readonly string[]).includes(x);
+}
+
 // ===== 候補者 =====
 
 /**

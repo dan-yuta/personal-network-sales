@@ -13,38 +13,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import {
-  type Department,
-  type StageKey,
-  STAGE_ORDER,
-} from "@/lib/schema";
+import { type Department, type StageKey, isStageKey } from "@/lib/schema";
 import { STAGE_THEME } from "@/lib/labels";
 import { cn } from "@/lib/utils";
-import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
-
-// 各ステージの代表アイコン (Lucide)。
-//   - screening (未連絡): UserPlus → これから声をかける人を象徴
-//   - first (アプローチ中): MessageCircle → 接触を取り始めた段階
-//   - second (商談中): Briefcase → 商談・条件すり合わせ
-//   - final (契約): CheckCircle → 成約・完了
-//   - lost (失注): XCircle → 失注・打ち切り
-//   - held (保留): PauseCircle → 一時停止
-const STAGE_ICON: Record<StageKey, LucideIcon> = {
-  screening: UserPlus,
-  first: MessageCircle,
-  second: Briefcase,
-  final: CheckCircle,
-  lost: XCircle,
-  held: PauseCircle,
-};
-
-/** position.id ("stage-screening" 等) から StageKey を抽出する。非ステージなら null。 */
-function getStageKey(posId: string): StageKey | null {
-  if (!posId.startsWith("stage-")) return null;
-  const key = posId.slice("stage-".length) as StageKey;
-  if ((STAGE_ORDER as readonly StageKey[]).includes(key)) return key;
-  return null;
-}
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,6 +37,30 @@ import {
 } from "@/components/ui/sidebar";
 import { Pane1Toggle } from "@/components/workspace/Pane1Toggle";
 import { AddItemDialog } from "@/components/workspace/AddItemDialog";
+import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
+
+// 各ステージの代表アイコン (Lucide)。
+//   - screening (未連絡): UserPlus → これから声をかける人を象徴
+//   - first (アプローチ中): MessageCircle → 接触を取り始めた段階
+//   - second (商談中): Briefcase → 商談・条件すり合わせ
+//   - final (契約): CheckCircle → 成約・完了
+//   - lost (失注): XCircle → 失注・打ち切り
+//   - held (保留): PauseCircle → 一時停止
+const STAGE_ICON: Record<StageKey, LucideIcon> = {
+  screening: UserPlus,
+  first: MessageCircle,
+  second: Briefcase,
+  final: CheckCircle,
+  lost: XCircle,
+  held: PauseCircle,
+};
+
+/** position.id ("stage-screening" 等) から StageKey を抽出する。非ステージなら null。 */
+function getStageKey(posId: string): StageKey | null {
+  if (!posId.startsWith("stage-")) return null;
+  const key = posId.slice("stage-".length);
+  return isStageKey(key) ? key : null;
+}
 
 type PositionPaneProps = {
   workspaceName: string;

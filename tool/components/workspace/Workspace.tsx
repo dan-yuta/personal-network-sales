@@ -46,7 +46,9 @@ import {
   type Department,
   type Candidate,
   type Group,
+  type SortKey,
   STAGE_ORDER,
+  isStageKey,
 } from "@/lib/schema";
 import { createMinimalProfile } from "@/lib/data/factories";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
@@ -86,14 +88,12 @@ export function Workspace({
   const [pane4ManuallyClosed, setPane4ManuallyClosed] = useState(false);
   // Pane 3「候補者情報」カード（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
   const [applicationInfoOpen, setApplicationInfoOpen] = useState(false);
-  // Pane 2 候補者リストのソートキー。
+  // Pane 2 候補者リストのソートキー。SortKey 型は lib/schema.ts に集約。
   //   - deadline: 次回アクション日が近い順 (デフォルト、営業ツールのテンポに合う)
   //   - score: 平均スコア降順 (注力候補から見たいとき)
   //   - name: 氏名昇順 (五十音順で探したいとき)
   // 空欄日付は末尾、null スコアも末尾扱い。
-  const [sortKey, setSortKey] = useState<"deadline" | "score" | "name">(
-    "deadline",
-  );
+  const [sortKey, setSortKey] = useState<SortKey>("deadline");
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
   // （接触ログ・連絡文作成タブの操作領域として）。
@@ -263,7 +263,8 @@ export function Workspace({
 
   // Pane1 ステージタブの件数バッジを candidates から動的派生する。
   // positions.json の count はハードコード値なので、実データとズレないよう
-  // この派生計算で上書きする (archived は除外、メインステージ4種のみ集計)。
+  // この派生計算で上書きする (archived は除外、6種類すべて集計)。
+  // c.stage の型は StageKey なので includes チェックは不要だが、念のため。
   const stageCountMap = useMemo(() => {
     const map: Record<StageKey, number> = {
       screening: 0,
@@ -274,7 +275,7 @@ export function Workspace({
       held: 0,
     };
     for (const c of candidates) {
-      if (!c.archived && (STAGE_ORDER as readonly StageKey[]).includes(c.stage)) {
+      if (!c.archived) {
         map[c.stage]++;
       }
     }
@@ -282,15 +283,15 @@ export function Workspace({
   }, [candidates]);
 
   // departments の position.count を派生値で上書きしたものを PositionPane に渡す。
-  // 失注・保留などの非メインステージ (id が "stage-screening" 等以外) は count=0 のまま。
+  // 想定外の id (Phase 3 でユーザー定義カテゴリを許容する場合等) はそのまま。
   const departmentsWithLiveCount = useMemo(() => {
     return departments.map((dept) => ({
       ...dept,
       positions: dept.positions.map((pos) => {
         if (!pos.id.startsWith("stage-")) return pos;
-        const stageKey = pos.id.slice("stage-".length) as StageKey;
-        if ((STAGE_ORDER as readonly StageKey[]).includes(stageKey)) {
-          return { ...pos, count: stageCountMap[stageKey] };
+        const key = pos.id.slice("stage-".length);
+        if (isStageKey(key)) {
+          return { ...pos, count: stageCountMap[key] };
         }
         return pos;
       }),
@@ -356,11 +357,12 @@ export function Workspace({
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
+  // 非ステージ ID (Phase 3 の独自カテゴリ用) は弾く。
   const handleSelectPosition = useCallback((positionId: string) => {
-    if (!positionId.startsWith("stage-")) return; // メインステージ以外（lost/held等）は無視
-    const stageKey = positionId.slice("stage-".length) as StageKey;
-    if (!STAGE_ORDER.includes(stageKey)) return;
-    setSelectedStage((prev) => (prev === stageKey ? null : stageKey));
+    if (!positionId.startsWith("stage-")) return;
+    const key = positionId.slice("stage-".length);
+    if (!isStageKey(key)) return;
+    setSelectedStage((prev) => (prev === key ? null : key));
   }, []);
 
   return (

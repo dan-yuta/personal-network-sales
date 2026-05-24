@@ -36,6 +36,7 @@ import {
   type CandidateRow,
   type Group,
   type StageKey,
+  type SortKey,
 } from "@/lib/schema";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
 import { SortableCandidateRow } from "@/components/workspace/SortableCandidateRow";
@@ -64,9 +65,10 @@ const screenReaderInstructions: ScreenReaderInstructions = {
     "Space または Enter で候補者を持ち上げ、矢印キーで移動、Space で確定、Esc でキャンセルします。",
 };
 
-/** ソートキー (Workspace と共有)。次回アクション日順 / スコア順 / 名前順。 */
-type SortKey = "deadline" | "score" | "name";
-
+/**
+ * SortKey の日本語表示ラベル。SortKey 型は lib/schema.ts に集約済みなので
+ * import して使う。ここではドロップダウンの表示文字列のみを保持。
+ */
 const SORT_LABELS: Record<SortKey, string> = {
   deadline: "次回アクション日順",
   score: "スコア順 (高 → 低)",
