@@ -90,13 +90,30 @@ export function PositionPane({
                     return (
                       <SidebarMenuItem key={pos.id}>
                         <SidebarMenuButton
-                          tooltip={pos.name}
+                          tooltip={`${pos.name}${active ? " (選択中 — もう一度クリックで全候補者に戻す)" : ""}`}
                           isActive={active}
                           aria-current={active ? "page" : undefined}
                           onClick={() => onSelectPosition?.(pos.id)}
+                          className={
+                            active
+                              ? "bg-primary/15 font-semibold text-primary hover:bg-primary/20 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                              : ""
+                          }
                         >
-                          <span className="truncate">{pos.name}</span>
-                          <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                          <span className="truncate">
+                            {active && (
+                              <span aria-hidden="true" className="mr-1.5">
+                                ●
+                              </span>
+                            )}
+                            {pos.name}
+                          </span>
+                          <span
+                            className={
+                              "ml-auto text-xs tabular-nums " +
+                              (active ? "text-primary" : "text-muted-foreground")
+                            }
+                          >
                             {pos.count}
                           </span>
                         </SidebarMenuButton>

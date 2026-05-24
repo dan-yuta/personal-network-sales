@@ -6,7 +6,6 @@ import { type Department } from "@/lib/schema";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -45,11 +44,11 @@ export function GlobalHeader({
       >
         <BreadcrumbList className="flex-nowrap text-[11px]">
           <BreadcrumbItem className="shrink-0">
-            <BreadcrumbLink>{departmentTitle}</BreadcrumbLink>
+            <span>{departmentTitle}</span>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem className="shrink-0">
-            <BreadcrumbLink>{positionTitle}</BreadcrumbLink>
+            <span>{positionTitle}</span>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem className="min-w-0">

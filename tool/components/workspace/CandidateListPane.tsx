@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Plus,
   Star,
+  X,
 } from "lucide-react";
 import {
   DndContext,
@@ -70,6 +71,10 @@ type CandidateListPaneProps = {
   onArchiveCandidate: (id: string) => void;
   onRestoreCandidate: (id: string) => void;
   onMoveCandidate: (id: string, toStage: StageKey, toIndex: number) => void;
+  /** 現在絞り込み中のステージ名。undefined なら絞り込みなし (全候補者表示) */
+  filteredStageLabel?: string;
+  /** 絞り込み解除ボタンのハンドラ。filteredStageLabel が指定されたときに呼ばれる */
+  onClearFilter?: () => void;
 };
 
 export function CandidateListPane({
@@ -80,6 +85,8 @@ export function CandidateListPane({
   onArchiveCandidate,
   onRestoreCandidate,
   onMoveCandidate,
+  filteredStageLabel,
+  onClearFilter,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -198,10 +205,23 @@ export function CandidateListPane({
 
   return (
     <section className="flex w-[280px] shrink-0 flex-col border-r border-border bg-background">
-      <header className="flex h-12 shrink-0 items-center border-b border-border px-3">
+      <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
         <h2 className="truncate text-sm font-semibold text-foreground">
           営業候補リスト
         </h2>
+        {filteredStageLabel && onClearFilter && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilter}
+            className="h-7 shrink-0 gap-1 px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label={`${filteredStageLabel} の絞り込みを解除して全候補者を表示`}
+          >
+            <X aria-hidden="true" className="size-3.5" />
+            <span>{filteredStageLabel} を解除</span>
+          </Button>
+        )}
       </header>
       <ScrollArea className="min-h-0 flex-1">
         <DndContext

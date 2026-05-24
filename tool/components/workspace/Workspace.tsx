@@ -253,6 +253,42 @@ export function Workspace({
     : "全候補者";
   const departmentTitle = "営業ステージ";
 
+  // Pane1 ステージタブの件数バッジを candidates から動的派生する。
+  // positions.json の count はハードコード値なので、実データとズレないよう
+  // この派生計算で上書きする (archived は除外、メインステージ4種のみ集計)。
+  const stageCountMap = useMemo(() => {
+    const map: Record<StageKey, number> = {
+      screening: 0,
+      first: 0,
+      second: 0,
+      final: 0,
+      lost: 0,
+      held: 0,
+    };
+    for (const c of candidates) {
+      if (!c.archived && (STAGE_ORDER as readonly StageKey[]).includes(c.stage)) {
+        map[c.stage]++;
+      }
+    }
+    return map;
+  }, [candidates]);
+
+  // departments の position.count を派生値で上書きしたものを PositionPane に渡す。
+  // 失注・保留などの非メインステージ (id が "stage-screening" 等以外) は count=0 のまま。
+  const departmentsWithLiveCount = useMemo(() => {
+    return departments.map((dept) => ({
+      ...dept,
+      positions: dept.positions.map((pos) => {
+        if (!pos.id.startsWith("stage-")) return pos;
+        const stageKey = pos.id.slice("stage-".length) as StageKey;
+        if ((STAGE_ORDER as readonly StageKey[]).includes(stageKey)) {
+          return { ...pos, count: stageCountMap[stageKey] };
+        }
+        return pos;
+      }),
+    }));
+  }, [departments, stageCountMap]);
+
   const candidateGroups: Group[] = useMemo(() => {
     // 営業ツール用: selectedStage が null なら全ステージを表示、
     // ステージ選択中はそのステージだけに絞り込む（Pane1 タブクリックでフィルタ）。
@@ -313,7 +349,7 @@ export function Workspace({
     >
       <PositionPane
         workspaceName={workspace.name}
-        departments={departments}
+        departments={departmentsWithLiveCount}
         selectedPositionName={positionTitle}
         onAddPosition={addPosition}
         onDeletePosition={deletePosition}
@@ -339,6 +375,10 @@ export function Workspace({
             onArchiveCandidate={archiveCandidate}
             onRestoreCandidate={restoreCandidate}
             onMoveCandidate={moveCandidate}
+            filteredStageLabel={
+              selectedStage ? STAGE_LABELS[selectedStage] : undefined
+            }
+            onClearFilter={() => setSelectedStage(null)}
           />
           <CandidateDashboardPane
             profile={profile}
