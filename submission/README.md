@@ -68,7 +68,7 @@ surge whoami
 # 期待値: dangi.yuta.business@gmail.com
 
 # 2. デプロイ用フォルダ準備
-$src  = "C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\004_5回目宿題\personal-network-sales\submission\tool-overview.html"
+$src  = "C:\Users\dangi\src\personal-network-sales\submission\tool-overview.html"
 $dest = "C:\Users\dangi\deploy\personal-network-sales-overview"
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 Copy-Item -Force $src -Destination "$dest\index.html"
@@ -80,7 +80,7 @@ surge $dest network-sales-overview.surge.sh
 ### 更新時の再デプロイ
 
 ```powershell
-Copy-Item -Force "C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\004_5回目宿題\personal-network-sales\submission\tool-overview.html" -Destination "C:\Users\dangi\deploy\personal-network-sales-overview\index.html"
+Copy-Item -Force "C:\Users\dangi\src\personal-network-sales\submission\tool-overview.html" -Destination "C:\Users\dangi\deploy\personal-network-sales-overview\index.html"
 cd "C:\Users\dangi\deploy\personal-network-sales-overview"
 surge . network-sales-overview.surge.sh
 ```

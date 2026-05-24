@@ -99,47 +99,56 @@ personal-network-sales/          ← リポジトリルート
 
 ## 関連リソース
 
-- **テンプレート（参照のみ・絶対に書き換えない）**: `C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\100_tool\workspace-ui-kit\`
-- **実装モジュール（編集対象）**: `C:\Users\dangi\OneDrive\18_AI-Driven School用フォルダ\004_5回目宿題\personal-network-sales\tool\`
+- **作業正本リポジトリ**: `C:\Users\dangi\src\personal-network-sales\` (2026-05-24 に OneDrive 外に移行)
+- **GitHub**: https://github.com/dan-yuta/personal-network-sales (2台 PC 同期は git push/pull で)
+- **テンプレート（参照のみ・絶対に書き換えない）**: OneDrive 配下の `100_tool/workspace-ui-kit/` (タッチしない)
 - **既存Notion DB**: 営業候補リスト（自社の業務関連ページ配下に配置）
 - **設計ベース**: workspace-ui-kit（4ペイン構造の踏襲ルート、`designing-workspace-ui` スキル）
 
 ---
 
-## 現在地（2026-05-13時点）
+## 現在地（2026-05-24 時点）
 
 ```
-グループセッション準備（必須+任意1+任意2） — 全て達成
-├─ 必須: grill-meで「解決したい課題」を話せる状態   ✓ 完了
-│   └─ 図解として可視化(submission/tool-overview.html) ✓ 完了
-│   └─ Surge.shに公開デプロイ                         ✓ 完了
-│       → https://network-sales-overview.surge.sh/
-├─ 任意1: ペイン構成の図解(必須と同一ファイルに同居)  ✓ 完了
-└─ 任意2: UI画面の作成に着手                         ✓ 第一歩完了
-    ├─ tool/ にテンプレートをコピー                  ✓
-    ├─ データ層の最小修正(JSON 3ファイル)             ✓
-    ├─ labels.ts (ステージ/評価軸/セクション名)       ✓
-    ├─ コンポーネント内ハードコード採用→営業置換       ✓
-    ├─ Pane1 ステージタブ転用                        ✓
-    ├─ Pane4 タブ化（接触ログ + 連絡文作成）          ✓ モック実装まで
-    └─ 連絡文作成 11 シーン対応（営業フェーズ全体）   ✓ モック実装まで
-        ※ Notion / Anthropic API 接続は次月Phase 2-3
+第7回ワーク発表 (5月末) 準備フェーズ — 画面完成度を仕上げ中
+├─ 第3回グループセッション準備 (5/13)              ✓ 完了
+│   └─ 図解 + Surge.sh 公開: https://network-sales-overview.surge.sh/
+├─ 第6回講義受講後の機能追加 (5/24)
+│   ├─ 候補者データ 5人 → 14人に拡張             ✓
+│   │   (失注 c11/c12 + 保留 c13/c14 含む 6 ステージ分布)
+│   ├─ schema 拡張: stageKey 4種類 → 6種類       ✓ (lost / held 追加)
+│   ├─ Pane1 ステージタブ: アイコン + ステージ色   ✓
+│   ├─ Pane2: スコアバッジ色分け + ソート機能     ✓
+│   │       (次回アクション日 / スコア / 名前 順)
+│   ├─ Pane2 ヘッダー: 「× 絞り込み解除」ボタン   ✓
+│   ├─ Pane3 セクション見出し: アイコン付き       ✓
+│   ├─ Pane4 タブ強化: アイコン + 手段別バッジ色  ✓
+│   ├─ Pane1 件数バッジ: candidates から動的派生  ✓
+│   ├─ パンくず: span 化 (クリック不能を明示)    ✓
+│   ├─ Next.js dev indicator 非表示              ✓
+│   └─ リポジトリを OneDrive 外に移行            ✓ src 配下
+└─ 第7回提出 (残タスク)
+    ├─ 画面スクリーンショット撮影                 (進行中)
+    ├─ 苦戦したポイントの整理 → HTML 追加         (進行中)
+    ├─ submission/tool-overview.html 仕上げ      (進行中)
+    └─ Surge.sh 再デプロイ + 提出フォーム送信    (未)
 ```
 
 | 起動環境 | URL | 状態 |
 |----------|-----|------|
-| **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | グループセッション共有用 |
-| テンプレート (参照のみ) | http://localhost:3000 | 採用管理サンプル表示中 |
-| 実装モジュール `tool/` | http://localhost:3001 | 「人脈営業ワークスペース」+ 5人サンプル候補者 |
+| **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | グループセッション共有用 (5/13 時点の 38KB 版、5月末提出までに 89KB 拡張版で再デプロイ予定) |
+| 実装モジュール `tool/` | http://localhost:3001 | 「人脈営業ワークスペース」+ 14人サンプル候補者 (6 ステージ分布) |
 
-詳細は [docs/06_やることリスト.md](docs/06_やることリスト.md) を参照。
+> Notion / Anthropic API 接続は **来月 (4ヶ月目講義) スコープ**で実装予定。今月のゴールは「画面の見た目を仕上げる」まで。
+
+詳細は [docs/06_やることリスト.md](docs/06_やることリスト.md) と [notes/2026-05-24_session-record.md](notes/2026-05-24_session-record.md) を参照。
 
 ---
 
 ## 作成情報
 
 - 作成日: 2026-05-10
-- 最終更新: 2026-05-13
+- 最終更新: 2026-05-25
 - 作成者: 段木 裕太
 - 設計手法: `grill-me` スキルによる対話的グリル
 - 提出先: AI-Driven School 受講生ポータル

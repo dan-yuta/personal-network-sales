@@ -179,7 +179,7 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 
 ### 何をしたか
 
-`workspace-ui-kit` の原本は **絶対に書き換えない** ルールで `100_tool/workspace-ui-kit/` に保管し、実装は `004_5回目宿題/personal-network-sales/tool/` に robocopy したコピーを書き換える方針を採用。
+`workspace-ui-kit` の原本は **絶対に書き換えない** ルールで `100_tool/workspace-ui-kit/` に保管し、実装は `personal-network-sales/tool/` (2026-05-12 当時は OneDrive 配下、2026-05-24 に `C:\Users\dangi\src\` 配下へ移行) に robocopy したコピーを書き換える方針を採用。
 
 ```
    100_tool/workspace-ui-kit/          ← テンプレート (書き換え禁止)
