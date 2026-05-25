@@ -7,7 +7,6 @@ import { GripVertical, MoreHorizontal, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { type CandidateRow, type StageKey } from "@/lib/schema";
-import { avatarColorFor } from "@/lib/computed/avatar";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,6 @@ export function SortableCandidateRow({
     transition,
   };
 
-  const avatarColor = avatarColorFor(cand.name);
   const deadline = getDeadlineBadge(cand.nextActionDate);
 
   // ホバー時のブラウザ標準ツールチップ。Pane2 の限られた幅で truncate されてしまう
@@ -124,9 +122,7 @@ export function SortableCandidateRow({
           <GripVertical aria-hidden="true" className="size-4" />
         </span>
         <Avatar className="mt-0.5 size-8 shrink-0">
-          <AvatarFallback
-            className={cn("text-xs font-semibold", avatarColor)}
-          >
+          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
             {cand.name[0] ?? "?"}
           </AvatarFallback>
         </Avatar>

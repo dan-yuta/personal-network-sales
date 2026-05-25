@@ -46,7 +46,6 @@ import {
   getLatestDoneScorecard,
 } from "@/lib/computed/scorecards";
 import { calculateAge } from "@/lib/computed/profile";
-import { avatarColorFor } from "@/lib/computed/avatar";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -523,12 +522,7 @@ function CandidateHeader({
   return (
     <div className="flex items-center gap-5">
       <Avatar className="size-16">
-        <AvatarFallback
-          className={cn(
-            "text-xl font-semibold",
-            avatarColorFor(profile.name),
-          )}
-        >
+        <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
           {profile.name[0] ?? "?"}
         </AvatarFallback>
       </Avatar>
