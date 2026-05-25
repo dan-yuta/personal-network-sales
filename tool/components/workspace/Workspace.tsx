@@ -162,7 +162,10 @@ export function Workspace({
   }, []);
 
   const addCandidate = useCallback((stage: StageKey, name: string) => {
-    const newId = `c-${Date.now()}`;
+    // crypto.randomUUID は SSR Node 19+ / 全モダンブラウザで利用可能。
+    // 旧 `c-${Date.now()}` は同一ミリ秒で衝突する (100 件まとめて import する
+    // シナリオで現実的に起こりうる) ため UUID に置き換え。
+    const newId = `c-${crypto.randomUUID()}`;
     const newCandidate: Candidate = {
       id: newId,
       profile: createMinimalProfile(name),

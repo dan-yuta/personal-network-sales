@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Archive,
   ArchiveRestore,
@@ -546,6 +546,11 @@ function StageGroup({
     data: { containerId: stage },
   });
 
+  // dnd-kit は items 配列の identity 変化で内部の collision detection 用 indexing
+  // を rebuild するため、毎レンダ `items.map((i) => i.id)` だと 100 件 × 6 ステージで
+  // タイプ毎にコストがかかる。items の参照が変わったときだけ id 配列を作り直す。
+  const itemIds = useMemo(() => items.map((i) => i.id), [items]);
+
   const theme = STAGE_THEME[stage];
 
   return (
@@ -585,7 +590,7 @@ function StageGroup({
       </div>
       <SortableContext
         id={stage}
-        items={items.map((i) => i.id)}
+        items={itemIds}
         strategy={verticalListSortingStrategy}
       >
         <ul

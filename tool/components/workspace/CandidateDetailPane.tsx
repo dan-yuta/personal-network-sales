@@ -148,8 +148,10 @@ type MockLogEntry = {
   content: string;
 };
 
-// 候補者ごとに異なるモックログを返す簡易データ。
-function getMockLogs(candidateId: string): MockLogEntry[] {
+// 候補者ごとに異なるモックログ。Pane3 編集中に頻繁に再レンダされるため、
+// dataset は const としてモジュールトップレベルに置き、render 中の object 再生成
+// (100 件超の object literal の GC 圧) を回避する。
+const MOCK_LOG_DATASET: Record<string, MockLogEntry[]> = (() => {
   const dataset: Record<string, MockLogEntry[]> = {
     c1: [
       {
@@ -362,7 +364,14 @@ function getMockLogs(candidateId: string): MockLogEntry[] {
       },
     ],
   };
-  return dataset[candidateId] ?? [];
+  return dataset;
+})();
+
+// O(1) lookup。未登録 ID は空配列で読み出すため、共有 EMPTY_LOGS を返して
+// 参照を安定化させ、ContactLogTab の useMemo deps が無駄に変わらないように。
+const EMPTY_LOGS: MockLogEntry[] = [];
+function getMockLogs(candidateId: string): MockLogEntry[] {
+  return MOCK_LOG_DATASET[candidateId] ?? EMPTY_LOGS;
 }
 
 function ContactLogTab({ candidate }: { candidate: Candidate }) {
