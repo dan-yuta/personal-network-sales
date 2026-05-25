@@ -43,6 +43,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useDeferredValue,
 } from "react";
 
@@ -68,6 +69,7 @@ import { PositionPane } from "@/components/workspace/PositionPane";
 import { CandidateListPane } from "@/components/workspace/CandidateListPane";
 import { CandidateDashboardPane } from "@/components/workspace/CandidateDashboardPane";
 import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane";
+import { ShortcutsHelpDialog } from "@/components/workspace/ShortcutsHelpDialog";
 import { ToasterProvider, useToast } from "@/components/workspace/Toaster";
 
 // ========== UI 内部型 ==========
@@ -133,6 +135,11 @@ function WorkspaceContent({
   // 検索対象範囲。100 人規模では「全部マッチ」だと意図しないヒットが
   // 邪魔をするので、ユーザーが対象を絞れるようにする。
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
+  // ショートカット `?` でヘルプダイアログを開く
+  const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
+  // Pane2 検索 input への ref。`/` キーでフォーカスを当てるために
+  // CandidateListPane に渡して内部の <input> に attach させる。
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
   // （接触ログ・連絡文作成タブの操作領域として）。
@@ -658,13 +665,21 @@ function WorkspaceContent({
   }, []);
 
   // ===== キーボードショートカット =====
-  // 1〜6 でステージ絞り込み (同じキーで解除)、Esc で絞り込み + 検索をリセット。
+  // - 1〜6 でステージ絞り込み (同じキーで解除)、Esc で絞り込み + 検索をリセット
+  // - ↑ / k で前の候補者、↓ / j で次の候補者 (現在表示中の flat list を巡回)
+  // - / で Pane2 検索 input にフォーカス
+  // - ? (Shift+/) でショートカットヘルプを開く
   //
-  // 注意: deps を [] にできるのは、ハンドラが state を直接読まず setState の
-  // 関数形 (prev) => ... のみを使っているため。stage に依存して
-  // `setSelectedStage(stage)` のように値形を書く場合は必ず deps に追加する
-  // (さもなくば閉包の古い値を参照する)。STAGE_ORDER は immutable なので OK。
+  // 注意: 候補者切替のハンドラは visibleCandidateIds (Set) に依存するので
+  // deps に含める必要がある (古い閉包だと並び替え後に巡回がズレる)。
+  // STAGE_ORDER / selectCandidate は immutable / stable callback なので OK。
   useEffect(() => {
+    // flat list を作る (Pane2 の表示順 = candidateGroups の順 = 並び順)
+    const flatIds: string[] = [];
+    for (const g of candidateGroups) {
+      for (const item of g.items) flatIds.push(item.id);
+    }
+
     const handler = (e: KeyboardEvent) => {
       // IME 変換中は素通り (日本語入力中の数字確定で誤発火しないように)。
       // isComposing は Chrome/Safari/Firefox の最新版で動く、keyCode 229 は
@@ -672,28 +687,76 @@ function WorkspaceContent({
       if (e.isComposing || e.keyCode === 229) return;
 
       const target = e.target as HTMLElement | null;
-      if (
-        target &&
+      const inEditable =
+        !!target &&
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
           target.tagName === "SELECT" ||
           target.isContentEditable ||
           // Base UI の Combobox / Dialog は role 属性で識別
-          target.closest('[role="combobox"]') ||
-          target.closest('[role="dialog"]') ||
-          target.closest('[role="menu"]'))
-      ) {
-        return;
-      }
-      // 修飾キー付き (Cmd+1 等) はブラウザのタブ切替なので素通り
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+          !!target.closest('[role="combobox"]') ||
+          !!target.closest('[role="dialog"]') ||
+          !!target.closest('[role="menu"]'));
 
+      // Escape は入力欄からも効くようにする (検索欄に居ても全解除できる)
       if (e.key === "Escape") {
         setSelectedStage(null);
         setSearchQuery("");
+        // input にフォーカスがあれば外す (UX: 「終わった」感を出す)
+        if (
+          inEditable &&
+          target instanceof HTMLElement &&
+          typeof target.blur === "function"
+        ) {
+          target.blur();
+        }
         e.preventDefault();
         return;
       }
+
+      // 入力欄では他のショートカットは素通り
+      if (inEditable) return;
+      // 修飾キー付き (Cmd+1 等) はブラウザのタブ切替なので素通り
+      // ただし ? は Shift+/ なので shiftKey は許容する
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // ヘルプ: `?` (Shift+/) で開く。? は e.key の文字表現で来る。
+      if (e.key === "?") {
+        setShortcutsHelpOpen((v) => !v);
+        e.preventDefault();
+        return;
+      }
+
+      // 検索フォーカス: `/`
+      if (e.key === "/") {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+        e.preventDefault();
+        return;
+      }
+
+      // 候補者切替: ↑/k = 前、↓/j = 次
+      if (e.key === "ArrowDown" || e.key === "j") {
+        if (flatIds.length === 0) return;
+        const cur = flatIds.indexOf(selectedCandidateId);
+        // 未選択 (cur=-1) or 末尾なら、先頭に巡回しない方が混乱が少ない:
+        // 末尾 → 先頭にラップせず、末尾でクランプする。
+        // (Gmail も「次のメール」は末尾でクランプ)
+        const next = cur < 0 ? 0 : Math.min(cur + 1, flatIds.length - 1);
+        if (next !== cur) selectCandidate(flatIds[next]);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "ArrowUp" || e.key === "k") {
+        if (flatIds.length === 0) return;
+        const cur = flatIds.indexOf(selectedCandidateId);
+        // 未選択 / 先頭は no-op (先頭でクランプ)
+        const next = cur < 0 ? 0 : Math.max(cur - 1, 0);
+        if (next !== cur) selectCandidate(flatIds[next]);
+        e.preventDefault();
+        return;
+      }
+
       // 1-6 → STAGE_ORDER[0..5] にマッピング
       const num = Number.parseInt(e.key, 10);
       if (!Number.isNaN(num) && num >= 1 && num <= STAGE_ORDER.length) {
@@ -704,7 +767,7 @@ function WorkspaceContent({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [candidateGroups, selectedCandidateId, selectCandidate]);
 
   return (
     // shadcn/ui の SidebarProvider が外側を取り、Pane 1 (`<Sidebar>`) を全高で固定
@@ -756,6 +819,7 @@ function WorkspaceContent({
             searchScope={searchScope}
             onSearchScopeChange={setSearchScope}
             totalVisibleCount={totalVisibleCount}
+            searchInputRef={searchInputRef}
           />
           <CandidateDashboardPane
             profile={profile}
@@ -785,6 +849,10 @@ function WorkspaceContent({
           />
         </div>
       </SidebarInset>
+      <ShortcutsHelpDialog
+        open={shortcutsHelpOpen}
+        onOpenChange={setShortcutsHelpOpen}
+      />
     </SidebarProvider>
   );
 }

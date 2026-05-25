@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, type RefObject } from "react";
 import {
   Archive,
   ArchiveRestore,
@@ -133,6 +133,9 @@ type CandidateListPaneProps = {
   /** 検索 + ステージ絞り込み適用後に表示される候補者の総数 (アーカイブ含む)。
    *  0 件のとき「該当する候補者が見つかりません」空状態を出すために使う。 */
   totalVisibleCount: number;
+  /** Pane2 検索 input への ref。Workspace 側で `/` キー押下時に
+   *  `searchInputRef.current?.focus()` してフォーカスを当てるために使う。 */
+  searchInputRef?: RefObject<HTMLInputElement | null>;
 };
 
 export function CandidateListPane({
@@ -152,6 +155,7 @@ export function CandidateListPane({
   searchScope,
   onSearchScopeChange,
   totalVisibleCount,
+  searchInputRef,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -383,11 +387,12 @@ export function CandidateListPane({
               className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
             />
             <input
+              ref={searchInputRef}
               type="search"
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               placeholder={SEARCH_SCOPE_PLACEHOLDERS[searchScope]}
-              aria-label={`${SEARCH_SCOPE_LABELS[searchScope]} で候補者を検索`}
+              aria-label={`${SEARCH_SCOPE_LABELS[searchScope]} で候補者を検索 (/ キーでフォーカス)`}
               className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             />
             {searchQuery && (
