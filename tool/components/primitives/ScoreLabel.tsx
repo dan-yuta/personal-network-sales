@@ -13,6 +13,9 @@
 
 import { Star } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+import { getScoreColorClass } from "@/lib/computed/scoreColor";
+
 export type ScoreLabelProps = {
   /** 平均スコア（null = 未評価） */
   value: number | null;
@@ -20,9 +23,14 @@ export type ScoreLabelProps = {
 
 export function ScoreLabel({ value }: ScoreLabelProps) {
   const displayValue = value !== null ? value.toFixed(1) : "—";
+  // Pane2 行のスコア色と統一 (≥4.5 緑 / <3.0 赤 / 中間デフォルト / null 灰)。
+  // 「同じ 2.8 が Pane2 で赤、Pane3 で黒」という非一貫性を解消する。
   return (
     <span
-      className="inline-flex items-center gap-1 text-sm text-muted-foreground tabular-nums"
+      className={cn(
+        "inline-flex items-center gap-1 text-sm tabular-nums",
+        getScoreColorClass(value),
+      )}
       aria-label={
         value !== null ? `評価平均 ${displayValue} 点` : "評価平均 未評価"
       }

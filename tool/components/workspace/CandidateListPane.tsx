@@ -62,6 +62,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddItemDialog } from "@/components/workspace/AddItemDialog";
 import { STAGE_LABELS, STAGE_THEME } from "@/lib/labels";
+import { getScoreColorClass } from "@/lib/computed/scoreColor";
 
 // dnd-kit のスクリーンリーダー向け日本語化。
 const screenReaderInstructions: ScreenReaderInstructions = {
@@ -444,9 +445,13 @@ function StageGroup({
 
   return (
     <div>
+      {/* sticky group header: 左は親 px-3 を打ち消して viewport 端まで色を伸ばすが、
+          右側は ScrollArea の縦スクロールバー (w-2.5 = 10px) と被らないよう、
+          親 px-3 (= 12px) ぶんの右マージン分を残す。`-ml-3 mr-0` で右だけ
+          parent content boundary に揃え、スクロールバーは色のないガター扱いに。 */}
       <div
         className={cn(
-          "sticky top-0 z-10 -mx-3 mb-2 flex items-center justify-between gap-2 px-5 py-1.5",
+          "sticky top-0 z-10 -ml-3 mb-2 flex items-center justify-between gap-2 px-5 py-1.5",
           theme.bg,
         )}
       >
@@ -557,7 +562,9 @@ function ArchivedGroup({
         render={
           <div
             className={cn(
-              "group/archived-trigger sticky top-0 z-10 -mx-3 mb-2 flex cursor-pointer items-center justify-between gap-2 bg-background px-5 py-1.5",
+              // StageGroup と同じく、右側はスクロールバーを避けるため
+              // `-ml-3` のみ (右マージンなし)。
+              "group/archived-trigger sticky top-0 z-10 -ml-3 mb-2 flex cursor-pointer items-center justify-between gap-2 bg-background px-5 py-1.5",
               "rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
             )}
           />
@@ -682,18 +689,12 @@ function ScoreBadge({
       </span>
     );
   }
-  // 高 (4.5+): emerald (緑) — 関係性/優先度ともに高い注力候補
-  // 中 (3.0-4.4): デフォルト色 — 標準的な進行
-  // 低 (3.0未満): rose (赤系) — フォロー要・優先度低の判断材料
   // selected (= Pane3 で開いている候補者) の場合は accent-foreground 一本にする
-  // (背景が変わるので色付けすると逆に視認性が落ちる)
+  // (背景が変わるので色付けすると逆に視認性が落ちる)。それ以外は共通の
+  // しきい値 (≥4.5 緑 / <3.0 赤 / 中間デフォルト) で色分け。
   const scoreColor = selected
     ? "text-accent-foreground"
-    : avg >= 4.5
-      ? "text-emerald-600"
-      : avg < 3.0
-        ? "text-rose-600"
-        : "text-foreground/80";
+    : getScoreColorClass(avg);
   return (
     <span
       className={cn(

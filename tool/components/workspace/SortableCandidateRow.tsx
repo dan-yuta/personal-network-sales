@@ -8,6 +8,7 @@ import { GripVertical, MoreHorizontal, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type CandidateRow, type StageKey } from "@/lib/schema";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
+import { getScoreColorClass } from "@/lib/computed/scoreColor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -219,11 +220,7 @@ function ScoreBadge({
   }
   const scoreColor = selected
     ? "text-accent-foreground"
-    : avg >= 4.5
-      ? "text-emerald-600"
-      : avg < 3.0
-        ? "text-rose-600"
-        : "text-foreground/80";
+    : getScoreColorClass(avg);
   return (
     <span
       className={cn(

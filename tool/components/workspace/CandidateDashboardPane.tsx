@@ -47,6 +47,7 @@ import {
 } from "@/lib/computed/scorecards";
 import { calculateAge } from "@/lib/computed/profile";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
+import { getScoreColorClass } from "@/lib/computed/scoreColor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
@@ -155,9 +156,13 @@ export function AxisScoreRow({
         </span>
         <span
           className={cn(
-            "min-w-[2.25rem] text-right text-foreground tabular-nums",
+            "min-w-[2.25rem] text-right tabular-nums",
+            // 平均行 (bold) は Pane2 ScoreBadge と同じ色分けで「2.8 が場所
+            // ごとに色が違う」非一貫性を解消。個別軸 (bold なし) は従来通り
+            // 区別なし (4 軸の高低はバー型の Star 表示で十分視認可能)。
+            bold ? getScoreColorClass(value) : "text-foreground",
             bold && "font-medium",
-            value === null && "text-muted-foreground",
+            !bold && value === null && "text-muted-foreground",
           )}
         >
           {value !== null ? value.toFixed(1) : "—"}
