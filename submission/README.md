@@ -19,9 +19,10 @@ AI-Driven School 5回目宿題 / 第3回 グループセッションで共有す
 |---------|------|------|
 | [tool-overview.html](tool-overview.html) | 課題図解の原本 (Hero + Section 0〜8 構成) | 2026-05-15 拡張版に差し替え済 (89KB / 1454行)。Surge 公開版は再デプロイ待ち |
 | README.md | このファイル | — |
+| assets/screenshots/ | 提出時に画面キャプチャを置く | **空 (撮影待ち)**。tool-overview.html に埋め込み後に再デプロイ |
 
 > `tool-overview.html` は単一ファイル（CDN ベース、ビルド不要）。ブラウザでローカル直接開いても、Surge にデプロイしても同じ見た目になる。
-> 14人ぶんの架空候補者データを `tool/data/candidates.json` にシードしているが、本図解内は Pane モック内で代表 3 件を抜粋して図示。
+> 30人ぶんの架空候補者データを `tool/data/candidates.json` にシードしているが、本図解内は Pane モック内で代表 3 件を抜粋して図示。
 
 ---
 
@@ -117,7 +118,7 @@ surge teardown network-sales-overview.surge.sh
 
 ## 注意
 
-- **個人情報・本物の営業データは含めない**: tool-overview.html は架空候補者データを使用 (`tool/data/candidates.json` シードは 14人、本図解内の Pane モックは代表 3 件を抜粋)
+- **個人情報・本物の営業データは含めない**: tool-overview.html は架空候補者データを使用 (`tool/data/candidates.json` シードは 30 人、本図解内の Pane モックは代表 3 件を抜粋)
 - **検索エンジン非インデックス**: `<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">` 設定済み、外部にリンクが漏れても拡散しない
 - **Surge アカウント**: 公開資料は `dangi.yuta.business@gmail.com` で運用（複数アカウントあるため `surge whoami` で必ず確認）
 
