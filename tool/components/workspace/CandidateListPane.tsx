@@ -82,6 +82,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   deadline: "次回アクション日順",
   score: "スコア順 (高 → 低)",
   name: "名前順 (五十音)",
+  priority: "優先度順 (高 → 中 → 低)",
 };
 
 /**

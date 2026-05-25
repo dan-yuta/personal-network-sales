@@ -618,6 +618,18 @@ function WorkspaceContent({
         // 「未設定グループ内での順序」なのでユーザー体感の混乱は最小)
         return collator.compare(a.profile.name, b.profile.name);
       }
+      if (sortKey === "priority") {
+        // 優先度ソート: 高 (1) → 中 (2) → 低 (3) → 未設定 (4)
+        // 同 priority は furigana 順 (fallback name 順) で tie-break。
+        const order = { high: 1, medium: 2, low: 3, "": 4 } as const;
+        const pa = order[a.profile.priority];
+        const pb = order[b.profile.priority];
+        if (pa !== pb) return pa - pb;
+        return collator.compare(
+          a.profile.furigana || a.profile.name,
+          b.profile.furigana || b.profile.name,
+        );
+      }
       if (sortKey === "score") {
         // 未評価 (null) は末尾。同点は furigana 順で安定化 (tie-break)。
         const sa = getCandidateAverageScore(a);
@@ -692,6 +704,7 @@ function WorkspaceContent({
           nextActionDate: c.profile.availableStartDate,
           source: c.profile.source,
           lastContactDate: getLastContactDate(c.id),
+          priority: c.profile.priority,
         })),
     }));
 
@@ -708,6 +721,7 @@ function WorkspaceContent({
         nextActionDate: c.profile.availableStartDate,
         source: c.profile.source,
         lastContactDate: getLastContactDate(c.id),
+        priority: c.profile.priority,
       }));
 
     if (archivedItems.length === 0) return stageGroups;

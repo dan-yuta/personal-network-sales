@@ -31,6 +31,11 @@ export function createMinimalProfile(name: string): Profile {
     desiredSalaryMax: "",
     availableStartDate: "",
 
+    // 営業フォロー (3、Notion DB 由来で 2026-05-25 追加)
+    nextActionMemo: "",
+    priority: "",
+    backNetwork: "",
+
     // 読み物 (2)
     careerText: "",
     motivationFull: "",

@@ -66,10 +66,36 @@ export const profileSchema = z.object({
   desiredSalaryMin: z.string(),
   desiredSalaryMax: z.string(),
   availableStartDate: z.string(),
+  /**
+   * 次回アクションメモ (例: "電話で見積確認" / "資料送付")。
+   * 「次回アクション日」と組で使うことで初めて意味のある計画になるため、
+   * 日付だけでなくテキストもセットで持つ (Notion 側の「次回アクション」列に
+   * 対応)。JSON シードでは省略可 (.default("") で補完)。
+   */
+  nextActionMemo: z.string().default(""),
+  /**
+   * 優先度 (高/中/低/空)。営業候補のフォローアップ密度を表す。
+   * Pane2 で優先度マーカーを表示、ソートキーにも使える (高→中→低→未設定)。
+   * Notion 側の「優先度」select 列 (high/medium/low) と対応。
+   * 空文字は「未設定」(JSON シード未指定でも壊れないように optional)。
+   */
+  priority: z.enum(["high", "medium", "low", ""]).default(""),
+  /**
+   * バック人脈 (例: "△△会幹事の山田さん")。紹介の後ろ盾の名前。
+   * 提出図解 Section 0「用語ミニ辞書」で独自概念として説明済み。
+   * Notion 側の「バック人脈」列に対応。空文字許容 (JSON シード未指定対応)。
+   */
+  backNetwork: z.string().default(""),
   careerText: z.string(),
   motivationFull: z.string(),
 });
 export type Profile = z.infer<typeof profileSchema>;
+
+/**
+ * 優先度キー。Pane2 マーカー・ソート・Pane3 入力で共通使用。
+ */
+export const PRIORITY_KEYS = ["high", "medium", "low"] as const;
+export type PriorityKey = (typeof PRIORITY_KEYS)[number];
 
 // ===== 評価観点（4 軸固定、ADR-0005 §13 / design.md D57） =====
 // この雛形は 実績 / 思考力 / コミュニケーション / カルチャーフィット の 4 軸を採用する
@@ -180,7 +206,7 @@ export const STAGE_ORDER = stageKeySchema.options;
  *   - score: 平均スコア (`getCandidateAverageScore`) 降順
  *   - name: 氏名昇順 (五十音、`localeCompare("ja")`)
  */
-export const SORT_KEYS = ["deadline", "score", "name"] as const;
+export const SORT_KEYS = ["deadline", "score", "name", "priority"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
 /**
@@ -271,6 +297,9 @@ export type CandidateRow = {
    *  Phase 1 は MOCK_LOG_DATASET 由来、Phase 3 で Notion 接続後は
    *  「接触ログ DB の createdTime 降順 1 件」に差し替わる。 */
   lastContactDate: string | null;
+  /** 優先度 (`profile.priority`)。Pane 2 の優先度マーカー表示と
+   *  ソート (priority 順) に使う。空文字は未設定。 */
+  priority: "high" | "medium" | "low" | "";
 };
 
 // Pane 2 のグループ表示単位（ステージ or アーカイブ済み）。
