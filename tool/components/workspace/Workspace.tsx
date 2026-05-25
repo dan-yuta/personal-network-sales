@@ -340,28 +340,57 @@ export function Workspace({
       ? STAGE_ORDER.filter((s) => s === selectedStage)
       : STAGE_ORDER;
 
-    // ソート関数。null/空欄値は末尾扱いになるよう、Infinity 相当の値を当てる。
+    // Intl.Collator を一度だけ生成 (毎比較で new するより高速)。
+    // ロケール ja で五十音順 + sensitivity base で大文字小文字無視。
+    const collator = new Intl.Collator("ja", { sensitivity: "base" });
+
+    // ソート関数。null/空欄値は末尾扱いになるよう、sentinel 値を当てる。
+    // Notion 取り込み等で多数の候補者が furigana 空欄になる現実シナリオで、
+    // 「漢字 charcode 順と五十音順が混在」する崩壊を防ぐため、furigana 空欄は
+    // ソート末尾にまとめる (グループ化 → そのグループ内は name 漢字順)。
     const compareFn = (a: Candidate, b: Candidate): number => {
       if (sortKey === "name") {
-        // フリガナ優先で五十音順ソート、空なら name で fallback。
-        // (漢字 charcode 順だと「中島・中村」より「林・藤田」が後ろにくる
-        //  ような非五十音順になるので、必ず furigana を入れる運用が望ましい)
-        const af = a.profile.furigana || a.profile.name;
-        const bf = b.profile.furigana || b.profile.name;
-        return af.localeCompare(bf, "ja");
+        const aHasFurigana = a.profile.furigana.length > 0;
+        const bHasFurigana = b.profile.furigana.length > 0;
+        if (aHasFurigana !== bHasFurigana) {
+          // フリガナあり = 先、フリガナなし = 末尾
+          return aHasFurigana ? -1 : 1;
+        }
+        if (aHasFurigana) {
+          return collator.compare(a.profile.furigana, b.profile.furigana);
+        }
+        // 両方フリガナなし → name (kanji) で順序を安定化 (charcode 順だが
+        // 「未設定グループ内での順序」なのでユーザー体感の混乱は最小)
+        return collator.compare(a.profile.name, b.profile.name);
       }
       if (sortKey === "score") {
-        const sa = getCandidateAverageScore(a) ?? -1;
-        const sb = getCandidateAverageScore(b) ?? -1;
-        // 降順 (高いスコアが先頭)
-        return sb - sa;
+        // 未評価 (null) は末尾。同点は furigana 順で安定化 (tie-break)。
+        const sa = getCandidateAverageScore(a);
+        const sb = getCandidateAverageScore(b);
+        if (sa === null && sb === null) {
+          return collator.compare(
+            a.profile.furigana || a.profile.name,
+            b.profile.furigana || b.profile.name,
+          );
+        }
+        if (sa === null) return 1;
+        if (sb === null) return -1;
+        if (sa !== sb) return sb - sa; // 降順
+        return collator.compare(
+          a.profile.furigana || a.profile.name,
+          b.profile.furigana || b.profile.name,
+        );
       }
       // sortKey === "deadline": 次回アクション日が近い順 (空欄は末尾)。
       // sentinel "9999-12-31" は文字列順 = 日付順が成立する正規日付。
-      // (旧: "9999-99-99" は文字列ソートには使えるが Date 解釈不能で脆い)
+      // 同日は furigana 順で tie-break。
       const da = a.profile.availableStartDate || "9999-12-31";
       const db = b.profile.availableStartDate || "9999-12-31";
-      return da.localeCompare(db);
+      if (da !== db) return da.localeCompare(db);
+      return collator.compare(
+        a.profile.furigana || a.profile.name,
+        b.profile.furigana || b.profile.name,
+      );
     };
 
     // フリーテキスト検索フィルタ: searchScope で対象範囲を切替。
