@@ -8,6 +8,7 @@ import { GripVertical, MoreHorizontal, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type CandidateRow, type StageKey } from "@/lib/schema";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
+import { getLastContactBadge } from "@/lib/computed/lastContact";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,12 @@ import {
  *
  * 表示情報:
  *   - 1 行目: アバター (候補者ごとに色違い) + 氏名 + スコアバッジ (高/中/低 色分け)
- *   - 2 行目: 接触経路 (source) の短縮 + 期限バッジ (今日/明日/あとN日/MM-DD)
+ *   - 2 行目: 接触経路 (source) の短縮 (空欄ならスキップ)
+ *   - 3 行目: 最終接触からの相対表記 (12日前 / 3週間前) + 次回アクション期限バッジ
+ *
+ *   100 人運用では「最後にいつ触ったか」と「次にいつまでに動くか」の両方が
+ *   一覧で必要 (片方だけでは「放置しているか」「直近対応待ちか」が判別できない)
+ *   ため、相対表記 (lastContactBadge) と期限バッジ (deadlineBadge) を並べる。
  */
 export function SortableCandidateRow({
   cand,
@@ -64,6 +70,7 @@ export function SortableCandidateRow({
   };
 
   const deadline = getDeadlineBadge(cand.nextActionDate);
+  const lastContact = getLastContactBadge(cand.lastContactDate);
 
   // ホバー時のブラウザ標準ツールチップ。Pane2 の限られた幅で truncate されてしまう
   // source や日付・スコアの「全体像」を確認できるようにする。
@@ -71,6 +78,9 @@ export function SortableCandidateRow({
   // 区切り文字を ` / ` に統一して全ブラウザで読める形に。
   const tooltipParts = [
     cand.source || null,
+    cand.lastContactDate
+      ? `最終接触 ${cand.lastContactDate}`
+      : "接触ログなし",
     cand.nextActionDate ? `次回アクション ${cand.nextActionDate}` : null,
     cand.averageScore !== null
       ? `★ ${cand.averageScore.toFixed(1)}/5`
@@ -135,17 +145,40 @@ export function SortableCandidateRow({
               <ScoreBadge avg={cand.averageScore} selected={selected} />
             </span>
           </div>
-          {/* 2 行目: 接触経路の短縮 + 期限バッジ */}
-          {(cand.source || deadline) && (
+          {/* 2 行目: 接触経路の短縮 (空欄ならスキップ) */}
+          {cand.source && (
+            <div
+              className={cn(
+                "min-w-0 truncate text-xs",
+                selected ? "text-accent-foreground/70" : "text-muted-foreground",
+              )}
+              title={cand.source}
+            >
+              {cand.source}
+            </div>
+          )}
+          {/* 3 行目: 最終接触相対 + 次回アクション期限。
+              100 人運用で「いつ触った / いつまでに動く」を一覧視認するため
+              両方並べる。片方が無い場合は片方だけ表示、両方無いなら行スキップ。 */}
+          {(lastContact || deadline) && (
             <div
               className={cn(
                 "flex items-center gap-2 text-xs",
                 selected ? "text-accent-foreground/70" : "text-muted-foreground",
               )}
             >
-              {cand.source && (
-                <span className="min-w-0 flex-1 truncate" title={cand.source}>
-                  {cand.source}
+              {lastContact && (
+                <span
+                  className={cn(
+                    "min-w-0 shrink truncate font-medium",
+                    // selected 行は accent 背景 (薄緑) と相対色 (emerald/amber/rose)
+                    // のコントラストが弱くなる場合があるが、視認性のため一貫した
+                    // 色を維持 (スコア色と同じ方針)。
+                    lastContact.className,
+                  )}
+                  aria-label={`最終接触 ${cand.lastContactDate} (${lastContact.text})`}
+                >
+                  {lastContact.text}
                 </span>
               )}
               {deadline && (

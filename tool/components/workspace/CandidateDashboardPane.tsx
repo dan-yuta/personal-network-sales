@@ -47,6 +47,8 @@ import {
 } from "@/lib/computed/scorecards";
 import { calculateAge } from "@/lib/computed/profile";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
+import { getLastContactBadge } from "@/lib/computed/lastContact";
+import { getLastContactDate } from "@/lib/data/mockLogs";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -523,16 +525,23 @@ function CandidateHeader({
   profile,
   scorecards,
   stage,
+  candidateId,
   onChangeStage,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
   stage: StageKey;
+  candidateId: string;
   onChangeStage: (next: StageKey) => void;
 }) {
   const stageTheme = STAGE_THEME[stage];
   const stageLabel = STAGE_LABELS[stage];
   const deadline = getDeadlineBadge(profile.availableStartDate);
+  // 最終接触は接触ログ DB から派生 (Phase 1 は MOCK_LOG_DATASET)。
+  // Pane2 と同じバッジで「12 日前 / 3 週間前」を表示し、Pane3 ヘッダーだけを
+  // 見ても「最後にいつ触った人か」が即座にわかるようにする。
+  const lastContactDate = getLastContactDate(candidateId);
+  const lastContact = getLastContactBadge(lastContactDate);
 
   return (
     <div className="flex items-center gap-5">
@@ -600,6 +609,20 @@ function CandidateHeader({
           {profile.birthday && <span>{calculateAge(profile.birthday)}</span>}
           {profile.birthday && <span aria-hidden="true">·</span>}
           <ScoreLabel value={getScorecardsAverageScore(scorecards)} />
+          {lastContact && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span
+                className={cn(
+                  "inline-flex shrink-0 items-center text-xs font-medium",
+                  lastContact.className,
+                )}
+                title={`最終接触日 ${lastContactDate ?? "—"}`}
+              >
+                最終接触 {lastContact.text}
+              </span>
+            </>
+          )}
           {deadline && (
             <>
               <span aria-hidden="true">·</span>
@@ -682,6 +705,7 @@ export function CandidateDashboardPane({
             profile={profile}
             scorecards={scorecards}
             stage={stage}
+            candidateId={selectedCandidateId}
             onChangeStage={onChangeStage}
           />
 

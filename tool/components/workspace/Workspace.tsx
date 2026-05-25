@@ -58,6 +58,7 @@ import {
   isStageKey,
 } from "@/lib/schema";
 import { createMinimalProfile } from "@/lib/data/factories";
+import { getLastContactDate } from "@/lib/data/mockLogs";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
 import { normalizeForSearch } from "@/lib/computed/searchNormalize";
 import { ARCHIVED_GROUP_LABEL, STAGE_LABELS } from "@/lib/labels";
@@ -439,6 +440,7 @@ export function Workspace({
           averageScore: getCandidateAverageScore(c),
           nextActionDate: c.profile.availableStartDate,
           source: c.profile.source,
+          lastContactDate: getLastContactDate(c.id),
         })),
     }));
 
@@ -454,6 +456,7 @@ export function Workspace({
         averageScore: getCandidateAverageScore(c),
         nextActionDate: c.profile.availableStartDate,
         source: c.profile.source,
+        lastContactDate: getLastContactDate(c.id),
       }));
 
     if (archivedItems.length === 0) return stageGroups;
