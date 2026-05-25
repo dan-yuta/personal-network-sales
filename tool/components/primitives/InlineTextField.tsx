@@ -61,6 +61,13 @@ export function InlineTextField({
   // IME 変換中 (compositionstart 〜 compositionend) は autosave を抑制し、
   // 半角→全角への確定前に発火して未確定文字列が確定保存される事故を防ぐ。
   const composingRef = useRef(false);
+  // 最後に compositionend が発火した時刻 (ms)。Chrome は document.activeElement.blur()
+  // を呼ぶと「blur 直前に compositionend を自動発火」して IME を確定するため、
+  // composingRef ガードを通過してしまう。「compositionend → 直後の blur」を
+  // 時間差で識別してブロックする。閾値 50ms は Chrome の自動 commit 連鎖
+  // (< 1ms) は確実にカット、ユーザーの「変換確定 → Tab で blur」(典型 >100ms) は
+  // 通す絶妙な境界。
+  const lastCompositionEndAtRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -121,6 +128,7 @@ export function InlineTextField({
         }}
         onCompositionEnd={(e) => {
           composingRef.current = false;
+          lastCompositionEndAtRef.current = Date.now();
           // 変換確定後の値で draft 更新 + autosave 再スケジュール
           setDraft((e.target as HTMLInputElement).value);
           scheduleAutosave();
@@ -129,9 +137,13 @@ export function InlineTextField({
           clearAutosaveTimer();
           // IME 変換中に blur されたケース (例: Pane2 で別候補者切替の
           // document.activeElement.blur() が走った場合) は、未確定の文字列を
-          // そのまま保存しない。Chrome 等は blur 時に compositionend を発火するが、
-          // Firefox は発火しない場合があり「未確定文字列が保存される」事故になる。
+          // そのまま保存しない。
           if (composingRef.current) return;
+          // Chrome は document.activeElement.blur() を呼ぶと compositionend を
+          // 同期発火してから blur を発火するため、composingRef を通過してしまう。
+          // 「compositionend が 50ms 以内に発火」していたら IME の自動 commit と
+          // 見なして保存をブロック (ユーザーが意図的に確定したわけではない)。
+          if (Date.now() - lastCompositionEndAtRef.current < 50) return;
           if (e.target.value !== value) onSave(e.target.value);
         }}
         onKeyDown={(e) => {

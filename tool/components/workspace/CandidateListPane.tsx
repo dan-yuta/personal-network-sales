@@ -400,7 +400,10 @@ export function CandidateListPane({
               onChange={(e) => onSearchQueryChange(e.target.value)}
               placeholder={SEARCH_SCOPE_PLACEHOLDERS[searchScope]}
               aria-label={`${SEARCH_SCOPE_LABELS[searchScope]} で候補者を検索 (/ キーでフォーカス)`}
-              className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+              // ネイティブの × クリアボタン (Chrome/Edge/Safari) を非表示にする。
+              // 自前の × ボタン (右側) と二重表示になる問題への対処。
+              // type="search" は Esc キーでクリア等のセマンティクスを保つため維持。
+              className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             />
             {searchQuery && (
               <button

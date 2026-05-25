@@ -37,9 +37,12 @@ export function InlineTextareaField({
   placeholder,
 }: InlineTextareaFieldProps) {
   // IME 変換中 (compositionstart 〜 compositionend) は blur 経路で
-  // 未確定文字列を保存しない。Chrome では blur 前に compositionend が発火するが、
-  // Firefox 等は発火しないケースがあり、対症療法として composingRef でガード。
+  // 未確定文字列を保存しない。Chrome は document.activeElement.blur() を呼ぶと
+  // 「blur 直前に compositionend を自動発火」して IME を確定するため、
+  // composingRef だけだとガードを通過してしまう。「compositionend → 直後の
+  // blur」を 50ms 閾値で識別してブロックする。
   const composingRef = useRef(false);
+  const lastCompositionEndAtRef = useRef(0);
 
   return (
     <Textarea
@@ -51,9 +54,13 @@ export function InlineTextareaField({
       }}
       onCompositionEnd={() => {
         composingRef.current = false;
+        lastCompositionEndAtRef.current = Date.now();
       }}
       onBlur={(e) => {
         if (composingRef.current) return;
+        // Chrome の IME 自動 commit (blur 直前の compositionend) を 50ms 閾値で
+        // 識別。ユーザーの「変換確定 → Tab で blur」は >100ms 経つので通る。
+        if (Date.now() - lastCompositionEndAtRef.current < 50) return;
         if (e.target.value !== value) onSave(e.target.value);
       }}
       onKeyDown={(e) => {
