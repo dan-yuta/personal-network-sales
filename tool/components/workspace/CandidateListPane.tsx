@@ -94,11 +94,14 @@ const SEARCH_SCOPE_LABELS: Record<SearchScope, string> = {
   source: "接触経路",
   memo: "メモ",
 };
+// Pane2 (280px 幅) 内のスコープ chip + 検索 input は実効幅が ~180px しかない。
+// text-xs でも 15 文字以上は truncate されるため、プレースホルダは短く保つ。
+// 詳細 (どのフィールドが対象か) は aria-label と chip 表示で代替する。
 const SEARCH_SCOPE_PLACEHOLDERS: Record<SearchScope, string> = {
-  all: "名前・接触経路・メモで検索",
-  name: "名前 (漢字・フリガナ) で検索",
+  all: "キーワードで検索",
+  name: "名前で検索",
   source: "接触経路で検索",
-  memo: "メモ (経歴・動機) で検索",
+  memo: "メモで検索",
 };
 
 type CandidateListPaneProps = {
