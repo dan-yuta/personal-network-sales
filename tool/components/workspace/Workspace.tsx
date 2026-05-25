@@ -121,6 +121,22 @@ function WorkspaceContent({
   const [evaluationOpen, setEvaluationOpen] = useState(true);
   const [recruitingConditionsOpen, setRecruitingConditionsOpen] =
     useState(true);
+  // Pane 2 ステージグループの開閉状態。100 人運用では「未連絡・アプローチが
+  // 大量で他ステージが埋もれる」シナリオが起こりうるため、ステージごとに畳める
+  // ようにする (Pane3 のカードと同じ思想)。デフォルトは全 open。
+  const [stageOpenMap, setStageOpenMap] = useState<Record<StageKey, boolean>>(
+    () => ({
+      screening: true,
+      first: true,
+      second: true,
+      final: true,
+      lost: true,
+      held: true,
+    }),
+  );
+  const setStageOpen = useCallback((stage: StageKey, open: boolean) => {
+    setStageOpenMap((prev) => ({ ...prev, [stage]: open }));
+  }, []);
   // Pane 2 候補者リストのソートキー。SortKey 型は lib/schema.ts に集約。
   //   - deadline: 次回アクション日が近い順 (デフォルト、営業ツールのテンポに合う)
   //   - score: 平均スコア降順 (注力候補から見たいとき)
@@ -820,6 +836,8 @@ function WorkspaceContent({
             onSearchScopeChange={setSearchScope}
             totalVisibleCount={totalVisibleCount}
             searchInputRef={searchInputRef}
+            stageOpenMap={stageOpenMap}
+            onStageOpenChange={setStageOpen}
           />
           <CandidateDashboardPane
             profile={profile}

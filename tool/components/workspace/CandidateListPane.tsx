@@ -136,6 +136,10 @@ type CandidateListPaneProps = {
   /** Pane2 検索 input への ref。Workspace 側で `/` キー押下時に
    *  `searchInputRef.current?.focus()` してフォーカスを当てるために使う。 */
   searchInputRef?: RefObject<HTMLInputElement | null>;
+  /** ステージグループの開閉状態 (Workspace で保持、候補者切替でも維持)。 */
+  stageOpenMap: Record<StageKey, boolean>;
+  /** ステージグループの開閉トグルハンドラ */
+  onStageOpenChange: (stage: StageKey, open: boolean) => void;
 };
 
 export function CandidateListPane({
@@ -156,6 +160,8 @@ export function CandidateListPane({
   onSearchScopeChange,
   totalVisibleCount,
   searchInputRef,
+  stageOpenMap,
+  onStageOpenChange,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -472,6 +478,10 @@ export function CandidateListPane({
                     }
                     searchActive={searchQuery.trim().length > 0}
                     searchTokens={searchTokens}
+                    open={stageOpenMap[group.stage]}
+                    onOpenChange={(open) =>
+                      onStageOpenChange(group.stage, open)
+                    }
                   />
                 ))}
                 {archivedGroup && (
@@ -551,6 +561,8 @@ function StageGroup({
   onArchiveRequest,
   searchActive,
   searchTokens,
+  open,
+  onOpenChange,
 }: {
   stage: StageKey;
   label: string;
@@ -565,6 +577,9 @@ function StageGroup({
   searchActive: boolean;
   /** 検索ハイライト用 tokens (CandidateListPane で生成して引き継ぎ) */
   searchTokens: readonly string[];
+  /** ステージグループの開閉 (Workspace の stageOpenMap で保持) */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   // 空ステージでもドロップを受け取れるようにする（最後の 1 名を別ステージへ
   // 動かした後の戻し先を保つため、ステージは常時表示）。
@@ -583,18 +598,32 @@ function StageGroup({
   const theme = STAGE_THEME[stage];
 
   return (
-    <div>
+    <Collapsible open={open} onOpenChange={onOpenChange}>
       {/* sticky group header: 左は親 px-3 を打ち消して viewport 端まで色を伸ばすが、
           右側は ScrollArea の縦スクロールバー (w-2.5 = 10px) と被らないよう、
           親 px-3 (= 12px) ぶんの右マージン分を残す。`-ml-3 mr-0` で右だけ
           parent content boundary に揃え、スクロールバーは色のないガター扱いに。 */}
-      <div
-        className={cn(
-          "sticky top-0 z-10 -ml-3 mb-2 flex items-center justify-between gap-2 px-5 py-1.5",
-          theme.bg,
-        )}
+      <CollapsibleTrigger
+        nativeButton={false}
+        render={
+          <div
+            className={cn(
+              "group/stage-trigger sticky top-0 z-10 -ml-3 mb-2 flex cursor-pointer items-center justify-between gap-2 px-5 py-1.5 outline-none",
+              "focus-visible:ring-3 focus-visible:ring-ring/50",
+              theme.bg,
+            )}
+          />
+        }
       >
         <div className="flex min-w-0 items-center gap-1.5">
+          {/* ApplicationInfoCard / ArchivedGroup と同じ向き (閉: ↓ → 開: ↑) */}
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              "size-3.5 shrink-0 transition-[color,transform] in-data-[panel-open]:rotate-180",
+              theme.text,
+            )}
+          />
           <span
             aria-hidden="true"
             className={cn("size-2 shrink-0 rounded-full bg-current", theme.dot)}
@@ -606,17 +635,23 @@ function StageGroup({
             {items.length}
           </Badge>
         </div>
+        {/* 「+ 追加」ボタンはトリガー領域内に置きつつ、クリックで親 (Collapsible)
+            のトグルが発火しないよう stopPropagation する。 */}
         <Button
           type="button"
           variant="ghost"
           size="icon-xs"
-          onClick={onAddRequest}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddRequest();
+          }}
           aria-label={`${label} に候補者を追加`}
           className="text-muted-foreground hover:text-foreground"
         >
           <Plus aria-hidden="true" />
         </Button>
-      </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
       <SortableContext
         id={stage}
         items={itemIds}
@@ -679,7 +714,8 @@ function StageGroup({
           )}
         </ul>
       </SortableContext>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
