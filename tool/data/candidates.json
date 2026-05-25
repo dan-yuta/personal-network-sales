@@ -3,6 +3,7 @@
     "id": "c1",
     "profile": {
       "name": "田中 一郎",
+      "furigana": "タナカ イチロウ",
       "birthday": "1975-04-12",
       "source": "○○同期会経由",
       "email": "tanaka.ichiro@example.com",
@@ -38,6 +39,7 @@
     "id": "c2",
     "profile": {
       "name": "鈴木 太郎",
+      "furigana": "スズキ タロウ",
       "birthday": "1972-09-25",
       "source": "△△交流会で名刺交換",
       "email": "suzuki.taro@example.com",
@@ -73,6 +75,7 @@
     "id": "c3",
     "profile": {
       "name": "佐藤 健",
+      "furigana": "サトウ ケン",
       "birthday": "1980-02-08",
       "source": "山田さんからの紹介",
       "email": "sato.ken@example.com",
@@ -108,6 +111,7 @@
     "id": "c4",
     "profile": {
       "name": "山田 直美",
+      "furigana": "ヤマダ ナオミ",
       "birthday": "1978-11-15",
       "source": "前職同僚",
       "email": "yamada.naomi@example.com",
@@ -143,6 +147,7 @@
     "id": "c5",
     "profile": {
       "name": "高橋 美咲",
+      "furigana": "タカハシ ミサキ",
       "birthday": "1985-07-03",
       "source": "Webセミナーで知り合う",
       "email": "takahashi.misaki@example.com",
@@ -178,6 +183,7 @@
     "id": "c6",
     "profile": {
       "name": "中村 圭介",
+      "furigana": "ナカムラ ケイスケ",
       "birthday": "1988-03-20",
       "source": "ビジネス交流会(渋谷)で名刺交換",
       "email": "nakamura.keisuke@example.com",
@@ -213,6 +219,7 @@
     "id": "c7",
     "profile": {
       "name": "渡辺 さくら",
+      "furigana": "ワタナベ サクラ",
       "birthday": "1982-12-08",
       "source": "山田さんからの紹介(2回目)",
       "email": "watanabe.sakura@example.com",
@@ -248,6 +255,7 @@
     "id": "c8",
     "profile": {
       "name": "伊藤 雅彦",
+      "furigana": "イトウ マサヒコ",
       "birthday": "1968-06-30",
       "source": "◇◇コミュニティ(製造業オーナー会)",
       "email": "ito.masahiko@example.com",
@@ -283,6 +291,7 @@
     "id": "c9",
     "profile": {
       "name": "加藤 由佳",
+      "furigana": "カトウ ユカ",
       "birthday": "1979-08-17",
       "source": "山田さんからの紹介(2026/5月)",
       "email": "kato.yuka@example.com",
@@ -318,6 +327,7 @@
     "id": "c10",
     "profile": {
       "name": "木村 拓也",
+      "furigana": "キムラ タクヤ",
       "birthday": "1990-01-22",
       "source": "△△交流会(2026/5月)で名刺交換",
       "email": "kimura.takuya@example.com",
@@ -353,6 +363,7 @@
     "id": "c11",
     "profile": {
       "name": "中島 浩二",
+      "furigana": "ナカジマ コウジ",
       "birthday": "1976-11-04",
       "source": "前職取引先(IT業界の繋がり)",
       "email": "nakajima.koji@example.com",
@@ -388,6 +399,7 @@
     "id": "c12",
     "profile": {
       "name": "林 美穂",
+      "furigana": "ハヤシ ミホ",
       "birthday": "1981-05-18",
       "source": "▲▲女性経営者会で名刺交換",
       "email": "hayashi.miho@example.com",
@@ -423,6 +435,7 @@
     "id": "c13",
     "profile": {
       "name": "松本 大輔",
+      "furigana": "マツモト ダイスケ",
       "birthday": "1973-08-22",
       "source": "山田さんからの紹介(2026/4月)",
       "email": "matsumoto.daisuke@example.com",
@@ -458,6 +471,7 @@
     "id": "c14",
     "profile": {
       "name": "藤田 千夏",
+      "furigana": "フジタ チナツ",
       "birthday": "1986-02-10",
       "source": "Webセミナー後の個別商談",
       "email": "fujita.chinatsu@example.com",

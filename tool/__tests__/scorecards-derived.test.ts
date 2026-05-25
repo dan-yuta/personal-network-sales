@@ -90,6 +90,7 @@ describe("getCandidateAverageScore / getScorecardsAverageScore", () => {
       id: "c1",
       profile: {
         name: "テスト 太郎",
+        furigana: "",
         birthday: "",
         source: "",
         email: "",

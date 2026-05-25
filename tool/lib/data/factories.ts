@@ -9,6 +9,7 @@ export function createMinimalProfile(name: string): Profile {
   return {
     // プロフィール (3)
     name,
+    furigana: "",
     birthday: "",
     source: "",
 

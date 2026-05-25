@@ -50,6 +50,13 @@ export type Department = z.infer<typeof departmentSchema>;
  */
 export const profileSchema = z.object({
   name: z.string(),
+  /**
+   * フリガナ (全角カタカナ推奨、例: "タナカ イチロウ")。
+   * Pane2 候補者リストの「名前順」ソートで漢字 charcode 順を避けるために使う。
+   * 空文字なら name で fallback (localeCompare("ja")) するので、運用上は
+   * 必須ではない。JSON シードでは省略可 (.default("") で読み込み時に補完)。
+   */
+  furigana: z.string().default(""),
   birthday: z.string(),
   source: z.string(),
   email: z.string(),

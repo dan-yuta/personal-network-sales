@@ -299,6 +299,16 @@ function ApplicationInfoCardContent({
               ariaLabel="名前"
             />
           </InlineFieldRow>
+          <InlineFieldRow label="フリガナ">
+            {/* 全角カタカナ推奨。Pane2 「名前順」ソートが五十音順になる
+                ために必要 (空欄なら name で fallback)。 */}
+            <InlineTextField
+              value={profile.furigana}
+              onSave={(v) => updateField("furigana", v)}
+              ariaLabel="フリガナ"
+              placeholder="例: タナカ イチロウ"
+            />
+          </InlineFieldRow>
           <InlineFieldRow label="生年月日">
             <div className="flex items-center gap-2">
               <div className="flex-1">

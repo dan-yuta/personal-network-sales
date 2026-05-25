@@ -317,7 +317,12 @@ export function Workspace({
     // ソート関数。null/空欄値は末尾扱いになるよう、Infinity 相当の値を当てる。
     const compareFn = (a: Candidate, b: Candidate): number => {
       if (sortKey === "name") {
-        return a.profile.name.localeCompare(b.profile.name, "ja");
+        // フリガナ優先で五十音順ソート、空なら name で fallback。
+        // (漢字 charcode 順だと「中島・中村」より「林・藤田」が後ろにくる
+        //  ような非五十音順になるので、必ず furigana を入れる運用が望ましい)
+        const af = a.profile.furigana || a.profile.name;
+        const bf = b.profile.furigana || b.profile.name;
+        return af.localeCompare(bf, "ja");
       }
       if (sortKey === "score") {
         const sa = getCandidateAverageScore(a) ?? -1;
@@ -333,13 +338,15 @@ export function Workspace({
       return da.localeCompare(db);
     };
 
-    // フリーテキスト検索フィルタ: name / source に部分一致 (case insensitive)。
-    // 空クエリなら素通り。
+    // フリーテキスト検索フィルタ: name / furigana / source / careerText に
+    // 部分一致 (case insensitive)。空クエリなら素通り。
+    // フリガナで「タナカ」検索 → 田中さんがヒット、漢字を打てなくてもOK。
     const q = searchQuery.trim().toLowerCase();
     const matchSearch = (c: Candidate) => {
       if (!q) return true;
       return (
         c.profile.name.toLowerCase().includes(q) ||
+        c.profile.furigana.toLowerCase().includes(q) ||
         c.profile.source.toLowerCase().includes(q) ||
         c.profile.careerText.toLowerCase().includes(q)
       );
