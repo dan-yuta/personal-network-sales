@@ -77,11 +77,15 @@ npm run check:radius # 角丸ドリフト検出
 |---|---|---|
 | 最終接触からの相対表記 (12日前 / 3週間前 / 1ヶ月前) | [`lib/computed/lastContact.ts`](lib/computed/lastContact.ts) | Pane2 行 (3 行目) と Pane3 ヘッダーで常時表示 |
 | 接触ログ追加のクイック日付ボタン (今日/昨日/一昨日) | [`components/workspace/CandidateDetailPane.tsx`](components/workspace/CandidateDetailPane.tsx) `QuickDateButtons` | Pane4 接触ログタブの新規追加フォーム |
+| Pane2 ステージグループの折りたたみ | [`components/workspace/CandidateListPane.tsx`](components/workspace/CandidateListPane.tsx) `StageGroup` | 全 6 ステージ、開閉 state は Workspace の `stageOpenMap` で保持 |
 | Pane3 カードの折りたたみ | [`components/workspace/CandidateDashboardPane.tsx`](components/workspace/CandidateDashboardPane.tsx) | EvaluationCard / RecruitingConditionsCard、開閉 state は Workspace で保持 (候補者切替で維持) |
 | 検索ヒット黄色ハイライト | [`components/workspace/HighlightedText.tsx`](components/workspace/HighlightedText.tsx) + [`lib/computed/searchHighlight.ts`](lib/computed/searchHighlight.ts) | Pane2 候補者行の name / source |
 | アクション Undo (軽量 Toast) | [`components/workspace/Toaster.tsx`](components/workspace/Toaster.tsx) | archiveCandidate / restoreCandidate / moveCandidate (ステージ跨ぎのみ) / deletePosition / deleteDepartment |
-| キーボードショートカット | Workspace useEffect + [`ShortcutsHelpDialog.tsx`](components/workspace/ShortcutsHelpDialog.tsx) | `↑↓` 候補切替 / `j k` 同上 / `/` 検索 / `1-6` ステージ / `Esc` 解除 / `?` ヘルプ |
+| キーボードショートカット | Workspace useEffect + [`ShortcutsHelpDialog.tsx`](components/workspace/ShortcutsHelpDialog.tsx) | `↑↓` 候補切替 / `j k` 同上 / `/` 検索 / `1-6` ステージ / `Esc` 解除 / `?` ヘルプ。設定ダイアログからもアクセス可 |
 | 未保存インジケータ + 自動保存 (800ms debounce) | [`components/primitives/InlineTextField.tsx`](components/primitives/InlineTextField.tsx) | Pane3 のすべての InlineTextField (氏名・フリガナ・接触経路・連絡先など) |
+| 評価 4 軸のクイック編集 | [`components/workspace/CandidateDashboardPane.tsx`](components/workspace/CandidateDashboardPane.tsx) `AxisScoreRow` editable | Pane3「現時点評価 (4軸)」カード、星クリックで 1-5 設定、× でリセット |
+| 優先度マーカー + Pane3 編集 (Notion 同期準備) | [`components/primitives/PrioritySelectField.tsx`](components/primitives/PrioritySelectField.tsx) + [`lib/labels.ts`](lib/labels.ts) `PRIORITY_THEME` | Pane3 営業条件カードで切替、Pane2 Avatar 右上にドット、ソートキーにも追加 |
+| 次回アクションメモ + バック人脈 | Pane3 各カード InlineTextField | Notion DB の「次回アクション」「バック人脈」列と同期予定 |
 
 ### InlineTextField の挙動 (controlled、Base UI Input + ref forward)
 
@@ -102,8 +106,39 @@ npm run check:radius # 角丸ドリフト検出
 - 修飾キー付き (Cmd/Ctrl/Alt) はブラウザのタブ切替なので素通り (例外: ? = Shift+/)
 - 候補者切替 (↑↓) は `candidateGroups` の flat list を使い末尾でクランプ
 
+## Notion DB との同期 (Phase 3 で接続予定)
+
+接続先 DB: `https://www.notion.so/3409452b6de2494997f9b4275be266f1` (営業候補リスト)
+
+Phase 1 (現状) はモック実装で、`tool/data/candidates.json` シードを zod parse で
+読み込む。各 Profile フィールドの Notion 側対応関係:
+
+| アプリ側 (Profile) | Notion 側 | 補足 |
+|---|---|---|
+| name | 顧客名 | アプリでは個人名のみ、Notion の「顧客企業名」は別途必要なら追加検討 |
+| furigana | (Notion になし) | アプリ独自、五十音ソート用 |
+| birthday | (Notion になし) | アプリ独自 |
+| source | 間柄 | Notion 側は別 DB relation、アプリでは自由テキストで簡略化 |
+| email / phone / address | Email / 連絡先 / 住所 | 直結 |
+| recruiter | 担当者 | Notion 側 Person、アプリは自由テキスト (Phase 3 で User 連携検討) |
+| desiredSalaryMin / Max | (Notion になし) | アプリ独自、想定取引規模 |
+| availableStartDate | 次回アクション期限 | 直結 |
+| **nextActionMemo** | **次回アクション** | 2026-05-25 追加 |
+| **priority** | **優先度** (高/中/低) | 2026-05-25 追加、Notion side select と整合 |
+| **backNetwork** | **バック人脈** | 2026-05-25 追加 |
+| careerText / motivationFull | 備考 / 進捗詳細 | アプリ側はテキスト 2 つに分離 |
+| stage | 進捗状況 | 6 種類で完全一致 (未連絡/アプローチ中/商談中/契約/失注/保留) |
+
+未取り込み (Phase 3 検討):
+- 名刺 (file) / 担当者 (Person) / 間柄 (relation) / 親レコード (relation, 自己) /
+  リンク URL / 郵便番号
+
+Notion への書き込みは厳禁 (Phase 1 ではアプリ単体運用、Phase 3 で同期実装時に
+適切な権限分離を検討)。
+
 ## やらないこと
 
 - DB 接続・認証（次フェーズ）
 - `react-beautiful-dnd`（廃止ライブラリ）への置き換え
 - Toast ライブラリ追加 (sonner/radix-toast 等)。自前 [`Toaster.tsx`](components/workspace/Toaster.tsx) で足りる範囲は依存追加しない
+- Notion DB の編集 (Phase 1 はアプリ単体、Phase 3 同期時も書き込み先は十分検討してから)
