@@ -10,6 +10,7 @@ import { type CandidateRow, type StageKey } from "@/lib/schema";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { getLastContactBadge } from "@/lib/computed/lastContact";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
+import { HighlightedText } from "@/components/workspace/HighlightedText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,12 +46,16 @@ export function SortableCandidateRow({
   selected,
   onSelect,
   actions,
+  searchTokens,
 }: {
   cand: CandidateRow;
   stage: StageKey;
   selected: boolean;
   onSelect: (id: string) => void;
   actions: ReactNode;
+  /** Pane2 検索クエリ由来の tokens。空配列なら hightlight なし。
+   *  「鈴木」で検索したら名前・接触経路の中で該当文字列が黄色く光る。 */
+  searchTokens: readonly string[];
 }) {
   const {
     attributes,
@@ -140,7 +145,9 @@ export function SortableCandidateRow({
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {/* 1 行目: 氏名 + スコア */}
           <div className="flex items-center gap-2">
-            <p className="min-w-0 flex-1 truncate text-sm">{cand.name}</p>
+            <p className="min-w-0 flex-1 truncate text-sm">
+              <HighlightedText text={cand.name} tokens={searchTokens} />
+            </p>
             <span className="shrink-0 transition-opacity group-focus-within/candidate:opacity-0 group-hover/candidate:opacity-0">
               <ScoreBadge avg={cand.averageScore} selected={selected} />
             </span>
@@ -154,7 +161,7 @@ export function SortableCandidateRow({
               )}
               title={cand.source}
             >
-              {cand.source}
+              <HighlightedText text={cand.source} tokens={searchTokens} />
             </div>
           )}
           {/* 3 行目: 最終接触相対 + 次回アクション期限。

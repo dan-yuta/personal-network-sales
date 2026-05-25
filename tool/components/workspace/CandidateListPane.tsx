@@ -44,7 +44,9 @@ import {
   SORT_KEYS,
   SEARCH_SCOPES,
 } from "@/lib/schema";
+import { tokenizeQuery } from "@/lib/computed/searchHighlight";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
+import { HighlightedText } from "@/components/workspace/HighlightedText";
 import { SortableCandidateRow } from "@/components/workspace/SortableCandidateRow";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -175,6 +177,14 @@ export function CandidateListPane({
   );
   const archivedGroup = groups.find(
     (g): g is Extract<Group, { kind: "archived" }> => g.kind === "archived",
+  );
+
+  // 検索ヒット箇所のハイライト用 tokens。空配列なら hightlight しない。
+  // searchQuery 変化のたびに再生成だが、子コンポーネントには「変化しないなら
+  // 参照を維持する」useMemo で渡し、リスト全行の再レンダを抑制する。
+  const searchTokens = useMemo(
+    () => tokenizeQuery(searchQuery),
+    [searchQuery],
   );
 
   // ドラッグ中の浮遊行表示用に元データを引く
@@ -456,6 +466,7 @@ export function CandidateListPane({
                       setArchiveTarget({ id, name })
                     }
                     searchActive={searchQuery.trim().length > 0}
+                    searchTokens={searchTokens}
                   />
                 ))}
                 {archivedGroup && (
@@ -467,6 +478,7 @@ export function CandidateListPane({
                     selectedCandidateId={selectedCandidateId}
                     onSelectCandidate={onSelectCandidate}
                     onRestore={onRestoreCandidate}
+                    searchTokens={searchTokens}
                   />
                 )}
               </>
@@ -533,6 +545,7 @@ function StageGroup({
   onAddRequest,
   onArchiveRequest,
   searchActive,
+  searchTokens,
 }: {
   stage: StageKey;
   label: string;
@@ -545,6 +558,8 @@ function StageGroup({
    *  抑制するために使う (検索中はドラッグ元の候補者が見えていない可能性が
    *  高く、ドラッグ追加の文言が文脈外でノイズになる)。 */
   searchActive: boolean;
+  /** 検索ハイライト用 tokens (CandidateListPane で生成して引き継ぎ) */
+  searchTokens: readonly string[];
 }) {
   // 空ステージでもドロップを受け取れるようにする（最後の 1 名を別ステージへ
   // 動かした後の戻し先を保つため、ステージは常時表示）。
@@ -644,6 +659,7 @@ function StageGroup({
                 stage={stage}
                 selected={cand.id === selectedCandidateId}
                 onSelect={onSelectCandidate}
+                searchTokens={searchTokens}
                 actions={
                   <DropdownMenuItem
                     variant="destructive"
@@ -670,6 +686,7 @@ function ArchivedGroup({
   selectedCandidateId,
   onSelectCandidate,
   onRestore,
+  searchTokens,
 }: {
   label: string;
   items: CandidateRow[];
@@ -678,6 +695,7 @@ function ArchivedGroup({
   selectedCandidateId: string;
   onSelectCandidate: (id: string) => void;
   onRestore: (id: string) => void;
+  searchTokens: readonly string[];
 }) {
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
@@ -717,6 +735,7 @@ function ArchivedGroup({
               selected={cand.id === selectedCandidateId}
               onSelect={onSelectCandidate}
               onRestore={onRestore}
+              searchTokens={searchTokens}
             />
           ))}
         </ul>
@@ -730,11 +749,13 @@ function ArchivedRowItem({
   selected,
   onSelect,
   onRestore,
+  searchTokens,
 }: {
   cand: CandidateRow;
   selected: boolean;
   onSelect: (id: string) => void;
   onRestore: (id: string) => void;
+  searchTokens: readonly string[];
 }) {
   return (
     <li className="group/candidate relative">
@@ -755,7 +776,9 @@ function ArchivedRowItem({
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm">{cand.name}</p>
+          <p className="truncate text-sm">
+            <HighlightedText text={cand.name} tokens={searchTokens} />
+          </p>
         </div>
         <span className="transition-opacity group-focus-within/candidate:opacity-0 group-hover/candidate:opacity-0">
           <ScoreBadge avg={cand.averageScore} selected={selected} />
