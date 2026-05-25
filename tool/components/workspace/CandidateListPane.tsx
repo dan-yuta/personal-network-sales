@@ -40,7 +40,9 @@ import {
   type Group,
   type StageKey,
   type SortKey,
+  type SearchScope,
   SORT_KEYS,
+  SEARCH_SCOPES,
 } from "@/lib/schema";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
 import { SortableCandidateRow } from "@/components/workspace/SortableCandidateRow";
@@ -80,6 +82,25 @@ const SORT_LABELS: Record<SortKey, string> = {
   name: "名前順 (五十音)",
 };
 
+/**
+ * SearchScope の日本語表示ラベル + プレースホルダ。検索バーの placeholder と
+ * スコープ切替ドロップダウンの両方で使う。
+ *   - all: 既定値。フィールドを問わず広く拾う
+ *   - 個別 scope: 「接触経路だけで絞り込みたい」など意図が明確なときに使う
+ */
+const SEARCH_SCOPE_LABELS: Record<SearchScope, string> = {
+  all: "全部",
+  name: "名前",
+  source: "接触経路",
+  memo: "メモ",
+};
+const SEARCH_SCOPE_PLACEHOLDERS: Record<SearchScope, string> = {
+  all: "名前・接触経路・メモで検索",
+  name: "名前 (漢字・フリガナ) で検索",
+  source: "接触経路で検索",
+  memo: "メモ (経歴・動機) で検索",
+};
+
 type CandidateListPaneProps = {
   groups: Group[];
   selectedCandidateId: string;
@@ -96,10 +117,14 @@ type CandidateListPaneProps = {
   sortKey: SortKey;
   /** ソートキー変更ハンドラ */
   onSortKeyChange: (key: SortKey) => void;
-  /** 候補者の名前/会社/接触経路でのフリーテキスト検索クエリ */
+  /** 候補者の名前/接触経路/メモでのフリーテキスト検索クエリ */
   searchQuery: string;
   /** 検索クエリ変更ハンドラ */
   onSearchQueryChange: (q: string) => void;
+  /** 検索対象範囲 (全部/名前/接触経路/メモ) */
+  searchScope: SearchScope;
+  /** 検索対象範囲変更ハンドラ */
+  onSearchScopeChange: (scope: SearchScope) => void;
 };
 
 export function CandidateListPane({
@@ -116,6 +141,8 @@ export function CandidateListPane({
   onSortKeyChange,
   searchQuery,
   onSearchQueryChange,
+  searchScope,
+  onSearchScopeChange,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -292,31 +319,71 @@ export function CandidateListPane({
         </div>
       </header>
 
-      {/* 検索バー: 名前 / 接触経路 / 会社・職務メモ にフリーテキスト部分一致 */}
+      {/* 検索バー: スコープ chip + フリーテキスト入力。
+          100 人規模では「全部マッチ」だと意図しないヒットが邪魔をするため、
+          スコープを明示的に選べる UI を入れる (チップ部分タップでドロップダウン)。 */}
       <div className="border-b border-border px-3 py-2">
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
-            placeholder="名前・接触経路・メモで検索"
-            aria-label="候補者を検索"
-            className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchQueryChange("")}
-              aria-label="検索クリア"
-              className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <X aria-hidden="true" className="size-3" />
-            </button>
-          )}
+        <div className="flex items-stretch gap-1.5">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md border border-input bg-background px-2 text-xs text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+                  aria-label={`検索対象: ${SEARCH_SCOPE_LABELS[searchScope]} (クリックで変更)`}
+                  title={`検索対象: ${SEARCH_SCOPE_LABELS[searchScope]}`}
+                >
+                  <span>{SEARCH_SCOPE_LABELS[searchScope]}</span>
+                  <ChevronDown aria-hidden="true" className="size-3 opacity-60" />
+                </button>
+              }
+            />
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                {SEARCH_SCOPES.map((scope) => (
+                  <DropdownMenuItem
+                    key={scope}
+                    onSelect={() => onSearchScopeChange(scope)}
+                    className={cn(
+                      searchScope === scope && "font-semibold text-primary",
+                    )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex size-3 items-center justify-center text-primary"
+                    >
+                      {searchScope === scope ? "●" : ""}
+                    </span>
+                    <span>{SEARCH_SCOPE_LABELS[scope]}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className="relative min-w-0 flex-1">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              placeholder={SEARCH_SCOPE_PLACEHOLDERS[searchScope]}
+              aria-label={`${SEARCH_SCOPE_LABELS[searchScope]} で候補者を検索`}
+              className="w-full rounded-md border border-input bg-background py-1.5 pr-7 pl-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => onSearchQueryChange("")}
+                aria-label="検索クリア"
+                className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X aria-hidden="true" className="size-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <ScrollArea className="min-h-0 flex-1">

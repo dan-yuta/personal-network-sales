@@ -47,6 +47,7 @@ import {
   type Candidate,
   type Group,
   type SortKey,
+  type SearchScope,
   STAGE_ORDER,
   isStageKey,
 } from "@/lib/schema";
@@ -94,8 +95,11 @@ export function Workspace({
   //   - name: 氏名昇順 (五十音順で探したいとき)
   // 空欄日付は末尾、null スコアも末尾扱い。
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
-  // Pane 2 候補者の名前/会社/接触経路でのフリーテキスト検索。空文字なら全表示。
+  // Pane 2 候補者の名前/接触経路/メモ でのフリーテキスト検索。空文字なら全表示。
   const [searchQuery, setSearchQuery] = useState<string>("");
+  // 検索対象範囲。100 人規模では「全部マッチ」だと意図しないヒットが
+  // 邪魔をするので、ユーザーが対象を絞れるようにする。
+  const [searchScope, setSearchScope] = useState<SearchScope>("all");
 
   // Pane 4 の展開状態。営業ツールでは Pane4 が「常に開いている」のが基本動線
   // （接触ログ・連絡文作成タブの操作領域として）。
@@ -338,18 +342,35 @@ export function Workspace({
       return da.localeCompare(db);
     };
 
-    // フリーテキスト検索フィルタ: name / furigana / source / careerText に
+    // フリーテキスト検索フィルタ: searchScope で対象範囲を切替。
     // 部分一致 (case insensitive)。空クエリなら素通り。
     // フリガナで「タナカ」検索 → 田中さんがヒット、漢字を打てなくてもOK。
+    //   - all:    名前 (kanji + furigana) + 接触経路 + メモ (キャリア + 動機)
+    //   - name:   名前のみ (kanji + furigana)
+    //   - source: 接触経路のみ
+    //   - memo:   キャリア + 動機メモ
     const q = searchQuery.trim().toLowerCase();
     const matchSearch = (c: Candidate) => {
       if (!q) return true;
-      return (
-        c.profile.name.toLowerCase().includes(q) ||
-        c.profile.furigana.toLowerCase().includes(q) ||
-        c.profile.source.toLowerCase().includes(q) ||
-        c.profile.careerText.toLowerCase().includes(q)
-      );
+      const p = c.profile;
+      const nameHit =
+        p.name.toLowerCase().includes(q) ||
+        p.furigana.toLowerCase().includes(q);
+      const sourceHit = p.source.toLowerCase().includes(q);
+      const memoHit =
+        p.careerText.toLowerCase().includes(q) ||
+        p.motivationFull.toLowerCase().includes(q);
+      switch (searchScope) {
+        case "name":
+          return nameHit;
+        case "source":
+          return sourceHit;
+        case "memo":
+          return memoHit;
+        case "all":
+        default:
+          return nameHit || sourceHit || memoHit;
+      }
     };
 
     const stageGroups: Group[] = visibleStages.map((stage) => ({
@@ -387,7 +408,7 @@ export function Workspace({
       ...stageGroups,
       { kind: "archived" as const, label: ARCHIVED_GROUP_LABEL, items: archivedItems },
     ];
-  }, [candidates, selectedStage, sortKey, searchQuery]);
+  }, [candidates, selectedStage, sortKey, searchQuery, searchScope]);
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
@@ -495,6 +516,8 @@ export function Workspace({
             onSortKeyChange={setSortKey}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
+            searchScope={searchScope}
+            onSearchScopeChange={setSearchScope}
           />
           <CandidateDashboardPane
             profile={profile}

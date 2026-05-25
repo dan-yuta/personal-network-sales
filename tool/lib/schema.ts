@@ -183,6 +183,18 @@ export const STAGE_ORDER = stageKeySchema.options;
 export const SORT_KEYS = ["deadline", "score", "name"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
+/**
+ * Pane 2 検索の対象範囲。100 人規模では「全部マッチ」だと
+ * 「接触経路で絞りたいのに名前ヒットが邪魔する」状況が起きるため、
+ * ユーザーが明示的に対象を選べるようにする。
+ *   - all:    名前 (kanji + furigana) + 接触経路 + メモ (推奨デフォルト)
+ *   - name:   名前のみ (kanji + furigana)
+ *   - source: 接触経路のみ ("△△交流会" などピンポイント検索用)
+ *   - memo:   経歴 + 動機メモ
+ */
+export const SEARCH_SCOPES = ["all", "name", "source", "memo"] as const;
+export type SearchScope = (typeof SEARCH_SCOPES)[number];
+
 // ===== ステージキーの型ガード =====
 
 /**
