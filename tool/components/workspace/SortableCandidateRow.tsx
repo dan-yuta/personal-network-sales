@@ -7,7 +7,7 @@ import { GripVertical, MoreHorizontal, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { type CandidateRow, type StageKey } from "@/lib/schema";
-import { PRIORITY_LABELS, PRIORITY_THEME } from "@/lib/labels";
+import { PRIORITY_LABELS } from "@/lib/labels";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { getLastContactBadge } from "@/lib/computed/lastContact";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
@@ -139,26 +139,11 @@ export function SortableCandidateRow({
         >
           <GripVertical aria-hidden="true" className="size-4" />
         </span>
-        <div className="relative mt-0.5 shrink-0">
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-              {cand.name[0] ?? "?"}
-            </AvatarFallback>
-          </Avatar>
-          {/* 優先度マーカー: Avatar 右上にドット重ね表示。
-              高 = rose、中 = amber、低 = slate、未設定 = 非表示。
-              Pane2 一覧で「優先度高だけ視線で抜き出す」を可能にする。 */}
-          {cand.priority && (
-            <span
-              aria-label={`優先度 ${PRIORITY_LABELS[cand.priority]}`}
-              title={`優先度: ${PRIORITY_LABELS[cand.priority]}`}
-              className={cn(
-                "absolute -top-0.5 -right-0.5 inline-flex size-3 items-center justify-center rounded-full border-2 border-background bg-current",
-                PRIORITY_THEME[cand.priority].dotClass,
-              )}
-            />
-          )}
-        </div>
+        <Avatar className="mt-0.5 size-8 shrink-0">
+          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+            {cand.name[0] ?? "?"}
+          </AvatarFallback>
+        </Avatar>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {/* 1 行目: 氏名 + スコア */}
           <div className="flex items-center gap-2">

@@ -84,7 +84,7 @@ npm run check:radius # 角丸ドリフト検出
 | キーボードショートカット | Workspace useEffect + [`ShortcutsHelpDialog.tsx`](components/workspace/ShortcutsHelpDialog.tsx) | `↑↓` 候補切替 / `j k` 同上 / `/` 検索 / `1-6` ステージ / `Esc` 解除 / `?` ヘルプ。設定ダイアログからもアクセス可 |
 | 未保存インジケータ + 自動保存 (800ms debounce) | [`components/primitives/InlineTextField.tsx`](components/primitives/InlineTextField.tsx) | Pane3 のすべての InlineTextField (氏名・フリガナ・接触経路・連絡先など) |
 | 評価 4 軸のクイック編集 | [`components/workspace/CandidateDashboardPane.tsx`](components/workspace/CandidateDashboardPane.tsx) `AxisScoreRow` editable | Pane3「現時点評価 (4軸)」カード、星クリックで 1-5 設定、× でリセット |
-| 優先度マーカー + Pane3 編集 (Notion 同期準備) | [`components/primitives/PrioritySelectField.tsx`](components/primitives/PrioritySelectField.tsx) + [`lib/labels.ts`](lib/labels.ts) `PRIORITY_THEME` | Pane3 営業条件カードで切替、Pane2 Avatar 右上にドット、ソートキーにも追加 |
+| 優先度 + 選択基準ガイド (Notion 同期準備) | [`components/primitives/PrioritySelectField.tsx`](components/primitives/PrioritySelectField.tsx) + [`lib/labels.ts`](lib/labels.ts) `PRIORITY_DESCRIPTIONS` | Pane3 営業条件カードで [高][中][低] 切替、フォロー密度ベースの基準目安を表示、ソートキーにも追加 (Pane2 のドットマーカーは 2026-05-26 撤回: 視認性低いため) |
 | 次回アクションメモ + バック人脈 | Pane3 各カード InlineTextField | Notion DB の「次回アクション」「バック人脈」列と同期予定 |
 
 ### InlineTextField の挙動 (controlled、Base UI Input + ref forward)

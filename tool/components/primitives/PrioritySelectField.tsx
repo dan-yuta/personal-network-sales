@@ -15,7 +15,11 @@
 
 import { cn } from "@/lib/utils";
 import { type PriorityKey, PRIORITY_KEYS } from "@/lib/schema";
-import { PRIORITY_LABELS, PRIORITY_THEME } from "@/lib/labels";
+import {
+  PRIORITY_DESCRIPTIONS,
+  PRIORITY_LABELS,
+  PRIORITY_THEME,
+} from "@/lib/labels";
 
 export type PrioritySelectFieldProps = {
   /** 現在値。"" は未設定 */
@@ -31,40 +35,50 @@ export function PrioritySelectField({
   onSave,
   ariaLabel,
 }: PrioritySelectFieldProps) {
+  // ボタン群 + 選択中の基準説明文 (1 行) を縦に並べる。
+  // 選択中の優先度の意味だけを下に出すことで、未選択時はヘルプが消えて
+  // 静かになり、選択した瞬間に「これは月 1〜2 回フォロー、で合っている?」と
+  // 自己確認できる動線にする。
   return (
-    <div
-      role="radiogroup"
-      aria-label={ariaLabel}
-      className="inline-flex items-center gap-1"
-    >
-      {PRIORITY_KEYS.map((key) => {
-        const active = value === key;
-        const theme = PRIORITY_THEME[key];
-        return (
-          <button
-            key={key}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => onSave(active ? "" : key)}
-            title={
-              active
-                ? `${PRIORITY_LABELS[key]} を解除`
-                : `${PRIORITY_LABELS[key]} に設定`
-            }
-            className={cn(
-              "inline-flex h-7 min-w-[2.5rem] items-center justify-center rounded-md border px-2.5 text-xs font-medium",
-              "transition-colors outline-none",
-              "focus-visible:ring-2 focus-visible:ring-ring/50",
-              active
-                ? theme.activeClass
-                : "border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            {PRIORITY_LABELS[key]}
-          </button>
-        );
-      })}
+    <div className="flex flex-col gap-1">
+      <div
+        role="radiogroup"
+        aria-label={ariaLabel}
+        className="inline-flex items-center gap-1"
+      >
+        {PRIORITY_KEYS.map((key) => {
+          const active = value === key;
+          const theme = PRIORITY_THEME[key];
+          return (
+            <button
+              key={key}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onSave(active ? "" : key)}
+              title={`${PRIORITY_LABELS[key]}: ${PRIORITY_DESCRIPTIONS[key]}`}
+              className={cn(
+                "inline-flex h-7 min-w-[2.5rem] items-center justify-center rounded-md border px-2.5 text-xs font-medium",
+                "transition-colors outline-none",
+                "focus-visible:ring-2 focus-visible:ring-ring/50",
+                active
+                  ? theme.activeClass
+                  : "border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              {PRIORITY_LABELS[key]}
+            </button>
+          );
+        })}
+      </div>
+      {/* 選択中の優先度の基準説明 (未選択時は非表示)。
+          フォロー密度の目安として「直近 2 週で動かす」「月 1〜2 回」「月 1 以下」
+          のシンプルなルールを示す。 */}
+      {value !== "" && (
+        <p className="text-[11px] text-muted-foreground" aria-live="polite">
+          {PRIORITY_LABELS[value]}: {PRIORITY_DESCRIPTIONS[value]}
+        </p>
+      )}
     </div>
   );
 }

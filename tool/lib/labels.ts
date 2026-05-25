@@ -51,6 +51,17 @@ export const PRIORITY_LABELS: Record<PriorityKey, string> = {
   low: "低",
 };
 
+/**
+ * 優先度の選択基準。Pane3 で「何を基準で選べばよいか」を可視化するため、
+ * 各ボタンの title 属性 + Pane3 ヘルプテキストに使う。
+ * フォロー密度ベースの目安 (営業実務で運用しやすい単純なルール) に統一。
+ */
+export const PRIORITY_DESCRIPTIONS: Record<PriorityKey, string> = {
+  high: "直近 2 週間以内に動かす",
+  medium: "月に 1〜2 回フォロー",
+  low: "月 1 回以下、長期視点で維持",
+};
+
 /** 優先度ごとの配色 (Pane2 マーカー / Pane3 セレクトで共通) */
 export const PRIORITY_THEME: Record<
   PriorityKey,
