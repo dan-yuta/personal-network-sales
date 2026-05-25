@@ -22,6 +22,7 @@ import {
 import { getMockLogs } from "@/lib/data/mockLogs";
 import { dateNDaysAgo } from "@/lib/computed/dateOffsets";
 import { Pane4Toggle } from "@/components/workspace/Pane4Toggle";
+import { InlineDateField } from "@/components/primitives";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -253,13 +254,13 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
                   接触ログ追加は最頻アクションで「先週の打ち合わせを翌週入力」
                   シナリオが多い。カレンダーから選ぶより 1 クリックの方が速い。 */}
               <QuickDateButtons value={date} onChange={setDate} />
-              {/* 任意日付選択用の DatePicker (それ以前の日付や未来日に使う) */}
-              <input
-                type="date"
+              {/* 任意日付選択用のカレンダー (Pane3 と統一: Base UI Popover +
+                  Calendar)。ネイティブ input[type=date] は OS ごとに見た目が
+                  バラつくため、Pane3 で使っている InlineDateField に揃える。 */}
+              <InlineDateField
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                aria-label="日付 (任意の日付を選択)"
-                className="rounded border border-input bg-background px-2 py-1 text-sm"
+                onSave={setDate}
+                ariaLabel="日付 (カレンダーから選択)"
               />
             </div>
           </div>
