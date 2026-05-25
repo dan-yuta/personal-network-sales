@@ -452,6 +452,7 @@ export function CandidateListPane({
                     onArchiveRequest={(id, name) =>
                       setArchiveTarget({ id, name })
                     }
+                    searchActive={searchQuery.trim().length > 0}
                   />
                 ))}
                 {archivedGroup && (
@@ -528,6 +529,7 @@ function StageGroup({
   onSelectCandidate,
   onAddRequest,
   onArchiveRequest,
+  searchActive,
 }: {
   stage: StageKey;
   label: string;
@@ -536,6 +538,10 @@ function StageGroup({
   onSelectCandidate: (id: string) => void;
   onAddRequest: () => void;
   onArchiveRequest: (id: string, name: string) => void;
+  /** 検索クエリが入力されているか。空ステージの「(ここへドラッグで追加)」を
+   *  抑制するために使う (検索中はドラッグ元の候補者が見えていない可能性が
+   *  高く、ドラッグ追加の文言が文脈外でノイズになる)。 */
+  searchActive: boolean;
 }) {
   // 空ステージでもドロップを受け取れるようにする（最後の 1 名を別ステージへ
   // 動かした後の戻し先を保つため、ステージは常時表示）。
@@ -618,7 +624,12 @@ function StageGroup({
               ) : (
                 <>
                   <Inbox className="size-3.5" aria-hidden="true" />
-                  <span>候補者がいません (ここへドラッグで追加)</span>
+                  {/* 検索中はドラッグ元の候補者が他ステージで見えていない
+                      可能性があるため、ドラッグ追加の文言を抑制。 */}
+                  <span>
+                    候補者がいません
+                    {!searchActive && " (ここへドラッグで追加)"}
+                  </span>
                 </>
               )}
             </li>

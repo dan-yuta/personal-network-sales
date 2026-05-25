@@ -40,7 +40,15 @@ export function InlineTextField({
   className,
 }: InlineTextFieldProps) {
   return (
+    // `key={value}` で外部 value 変化時に Input を remount する。Base UI の
+    // InputPrimitive は uncontrolled で defaultValue がレンダ間で変わると
+    // "A component is changing the default value state of an uncontrolled
+    //  FieldControl after being initialized" 警告を出すため、key 切替で
+    // 「同一インスタンスの defaultValue 変更」を回避する。
+    // 入力中 (blur 前) は親 state は変わらず value プロップも安定するので、
+    // タイプ中に remount が走ってカーソルが失われることはない。
     <Input
+      key={value}
       type={inputType}
       defaultValue={value}
       placeholder={placeholder ?? "未設定"}
