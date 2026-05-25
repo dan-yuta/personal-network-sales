@@ -736,37 +736,24 @@ function ArchivedRowItem({
   );
 }
 
-function ScoreBadge({
-  avg,
-  selected,
-}: {
-  avg: number | null;
-  selected: boolean;
-}) {
+// アーカイブ済み行用のスコアバッジ。SortableCandidateRow 側の ScoreBadge と
+// 同じ色付けポリシー (selected による色変えはしない)。
+function ScoreBadge({ avg }: { avg: number | null; selected: boolean }) {
   if (avg === null) {
     return (
       <span
-        className={cn(
-          "shrink-0 text-xs",
-          selected ? "text-accent-foreground/80" : "text-muted-foreground",
-        )}
+        className="shrink-0 text-xs text-muted-foreground"
         aria-label="未評価"
       >
         —
       </span>
     );
   }
-  // selected (= Pane3 で開いている候補者) の場合は accent-foreground 一本にする
-  // (背景が変わるので色付けすると逆に視認性が落ちる)。それ以外は共通の
-  // しきい値 (≥4.5 緑 / <3.0 赤 / 中間デフォルト) で色分け。
-  const scoreColor = selected
-    ? "text-accent-foreground"
-    : getScoreColorClass(avg);
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-0.5 text-xs tabular-nums",
-        scoreColor,
+        getScoreColorClass(avg),
       )}
       aria-label={`平均スコア ${avg.toFixed(1)} / 5`}
     >

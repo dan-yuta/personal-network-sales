@@ -191,41 +191,30 @@ export function SortableCandidateRow({
 }
 
 /**
- * 平均スコアのバッジ表示。
- *   - 4.5 以上: emerald (緑) — 注力候補が一目でわかる
- *   - 3.0 未満: rose (赤) — 関係性/レスポンスが弱い候補
- *   - 中間 (3.0〜4.4): デフォルト色
- *   - selected (= Pane 3 で開いている候補者) は背景変化との衝突を避けて
- *     accent-foreground 一本
+ * 平均スコアのバッジ表示。`getScoreColorClass` で 4.5+ 緑 / <3.0 赤 /
+ * 中間デフォルト / 未評価グレーに統一。
+ *
+ * 旧実装は selected 行で `text-accent-foreground` (= ほぼ黒) を強制していたが、
+ * 「2.8 のはずの赤が選択中だけ黒に化ける」非一貫を生んでいたため撤回。
+ * accent 背景 (薄緑〜薄グレー) は十分明るく、rose-600 / emerald-600 の
+ * コントラストは保たれる。
  */
-function ScoreBadge({
-  avg,
-  selected,
-}: {
-  avg: number | null;
-  selected: boolean;
-}) {
+function ScoreBadge({ avg }: { avg: number | null; selected: boolean }) {
   if (avg === null) {
     return (
       <span
-        className={cn(
-          "shrink-0 text-xs",
-          selected ? "text-accent-foreground/80" : "text-muted-foreground",
-        )}
+        className="shrink-0 text-xs text-muted-foreground"
         aria-label="未評価"
       >
         —
       </span>
     );
   }
-  const scoreColor = selected
-    ? "text-accent-foreground"
-    : getScoreColorClass(avg);
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-0.5 text-xs tabular-nums",
-        scoreColor,
+        getScoreColorClass(avg),
       )}
       aria-label={`平均スコア ${avg.toFixed(1)} / 5`}
     >
