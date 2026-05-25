@@ -11,7 +11,7 @@
  * UI と動作感だけ提示する。本格実装は Phase 2-3 で行う。
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Clock, PlusCircle, Sparkles, type LucideIcon } from "lucide-react";
 
 import { type Candidate } from "@/lib/schema";
@@ -20,6 +20,7 @@ import {
   CONTACT_METHOD_THEME_DEFAULT,
 } from "@/lib/labels";
 import { getMockLogs } from "@/lib/data/mockLogs";
+import { dateNDaysAgo } from "@/lib/computed/dateOffsets";
 import { Pane4Toggle } from "@/components/workspace/Pane4Toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -145,8 +146,88 @@ function TabButton({
 // dataset は lib/data/mockLogs.ts に切り出し済み (Pane2/Pane3 でも参照するため)。
 // ここでは getMockLogs ヘルパー経由で取り出す。
 
+const CONTACT_METHOD_OPTIONS = [
+  "電話",
+  "メール",
+  "LINE",
+  "訪問",
+  "オンライン会議",
+  "SNS",
+  "その他",
+] as const;
+type ContactMethod = (typeof CONTACT_METHOD_OPTIONS)[number];
+
+/**
+ * クイック日付ボタン群。「先週の打ち合わせを翌週入力する」が運用上多いため、
+ * カレンダーから日を選ぶより 1 クリックで日付確定できる動線を最優先で並べる。
+ * input[type=date] (右隣) は任意日選択のフォールバックとして残す。
+ */
+function QuickDateButtons({
+  value,
+  onChange,
+  now,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  /** テスト用に「今日」を外から渡せるようにする (本番では未指定で OK) */
+  now?: Date;
+}) {
+  // 今日/昨日/一昨日 は now を変えるたびに再計算する必要があるが、now は
+  // 通常 props で固定なので 1 度だけ計算すれば十分。
+  const presets = useMemo(
+    () =>
+      [
+        { label: "今日", value: dateNDaysAgo(0, now) },
+        { label: "昨日", value: dateNDaysAgo(1, now) },
+        { label: "一昨日", value: dateNDaysAgo(2, now) },
+      ] as const,
+    [now],
+  );
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {presets.map((p) => {
+        const active = value === p.value;
+        return (
+          <button
+            key={p.label}
+            type="button"
+            onClick={() => onChange(p.value)}
+            aria-pressed={active}
+            className={cn(
+              "rounded border px-2 py-0.5 text-xs font-medium transition-colors",
+              "outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+              active
+                ? "border-primary bg-primary/15 text-primary"
+                : "border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            {p.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function ContactLogTab({ candidate }: { candidate: Candidate }) {
   const logs = getMockLogs(candidate.id);
+
+  // 新規ログ追加フォームの状態。candidate 切替で初期化したいので
+  // key={candidate.id} で再マウントされる前提 (Pane3 切替は CandidateDetailPane
+  // ごと remount しない設計のため、ここでは個別に reset する)。
+  // 「先週の打ち合わせを思い出して翌週入力する」が現実的な運用シナリオなので、
+  // デフォルトは「今日」、ただし変更されたら保存後リセットで「今日」に戻す。
+  const todayIso = dateNDaysAgo(0);
+  const [date, setDate] = useState<string>(todayIso);
+  const [method, setMethod] = useState<ContactMethod>("電話");
+  const [content, setContent] = useState<string>("");
+
+  const resetForm = () => {
+    setDate(dateNDaysAgo(0));
+    setMethod("電話");
+    setContent("");
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -163,31 +244,39 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
           新規ログを追加
         </h3>
         <div className="flex flex-col gap-2 text-sm">
-          <label className="flex items-center gap-2">
-            <span className="w-16 shrink-0 text-xs text-muted-foreground">
+          <div className="flex items-start gap-2">
+            <span className="mt-1 w-16 shrink-0 text-xs text-muted-foreground">
               日付
             </span>
-            <input
-              type="date"
-              defaultValue={new Date().toISOString().slice(0, 10)}
-              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
-            />
-          </label>
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              {/* クイック日付ボタン: 今日 / 昨日 / 一昨日。
+                  接触ログ追加は最頻アクションで「先週の打ち合わせを翌週入力」
+                  シナリオが多い。カレンダーから選ぶより 1 クリックの方が速い。 */}
+              <QuickDateButtons value={date} onChange={setDate} />
+              {/* 任意日付選択用の DatePicker (それ以前の日付や未来日に使う) */}
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                aria-label="日付 (任意の日付を選択)"
+                className="rounded border border-input bg-background px-2 py-1 text-sm"
+              />
+            </div>
+          </div>
           <label className="flex items-center gap-2">
             <span className="w-16 shrink-0 text-xs text-muted-foreground">
               手段
             </span>
             <select
-              defaultValue="電話"
+              value={method}
+              onChange={(e) => setMethod(e.target.value as ContactMethod)}
               className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
             >
-              <option>電話</option>
-              <option>メール</option>
-              <option>LINE</option>
-              <option>訪問</option>
-              <option>オンライン会議</option>
-              <option>SNS</option>
-              <option>その他</option>
+              {CONTACT_METHOD_OPTIONS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
             </select>
           </label>
           <label className="flex items-start gap-2">
@@ -195,27 +284,46 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
               内容
             </span>
             <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               rows={2}
               placeholder="例: 商品説明、興味あり"
               className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
             />
           </label>
           <div className="mt-1 flex justify-end gap-2">
-            <Button type="button" variant="outline" size="sm">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={resetForm}
+            >
               キャンセル
             </Button>
             <Button
               type="button"
               size="sm"
-              onClick={() =>
+              disabled={!date || !content.trim()}
+              onClick={() => {
                 alert(
-                  "現在モック動作のため、入力内容は記録されません。\nNotion 接続は Phase 3 (来月以降) で実装予定。",
-                )
-              }
+                  `現在モック動作のため、入力内容は記録されません。\n(${date} / ${method} / ${content.trim().slice(0, 30)}…)\n\nNotion 接続は Phase 3 (来月以降) で実装予定。`,
+                );
+                resetForm();
+              }}
             >
               保存
             </Button>
           </div>
+          {/* 「今日」がデフォルトでも、ユーザーが他の日付を選んだら保存ボタンの
+              すぐ近くで現在選択中の日付を可視化する (今日以外のときだけ表示)。 */}
+          {date !== todayIso && (
+            <p
+              className="text-right text-[10px] text-muted-foreground"
+              aria-live="polite"
+            >
+              {date} で保存します
+            </p>
+          )}
         </div>
       </section>
 
