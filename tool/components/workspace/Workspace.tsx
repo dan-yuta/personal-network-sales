@@ -97,6 +97,12 @@ export function Workspace({
   const [pane4ManuallyClosed, setPane4ManuallyClosed] = useState(false);
   // Pane 3「候補者情報」カード（Collapsible）の開閉。候補者切替で閉じ、新規追加で開く。
   const [applicationInfoOpen, setApplicationInfoOpen] = useState(false);
+  // Pane 3「現時点評価」「営業条件」カードの開閉。100 人運用では「営業条件だけ
+  // 見たい」「評価だけ見たい」のように、ユーザーごとに見たい情報が異なる。
+  // 候補者切替では状態を維持する (個人の癖を保持)。
+  const [evaluationOpen, setEvaluationOpen] = useState(true);
+  const [recruitingConditionsOpen, setRecruitingConditionsOpen] =
+    useState(true);
   // Pane 2 候補者リストのソートキー。SortKey 型は lib/schema.ts に集約。
   //   - deadline: 次回アクション日が近い順 (デフォルト、営業ツールのテンポに合う)
   //   - score: 平均スコア降順 (注力候補から見たいとき)
@@ -596,6 +602,10 @@ export function Workspace({
             setProfile={setProfile}
             applicationInfoOpen={applicationInfoOpen}
             onApplicationInfoOpenChange={setApplicationInfoOpen}
+            evaluationOpen={evaluationOpen}
+            onEvaluationOpenChange={setEvaluationOpen}
+            recruitingConditionsOpen={recruitingConditionsOpen}
+            onRecruitingConditionsOpenChange={setRecruitingConditionsOpen}
             selectedCandidateId={selectedCandidateId}
             onChangeStage={(next) =>
               moveCandidate(selectedCandidateId, next, 0)

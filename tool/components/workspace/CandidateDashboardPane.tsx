@@ -189,59 +189,78 @@ export function AxisScoreRow({
 function RecruitingConditionsCard({
   profile,
   setProfile,
+  open,
+  onOpenChange,
 }: {
   profile: Profile;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const updateField = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     setProfile((p) => ({ ...p, [key]: value }));
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle emphasis="prominent" className="flex items-center gap-2">
-          <Target
-            aria-hidden="true"
-            className="size-4 text-primary"
-          />
-          {PANE3_SECTION.recruitingConditions}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <dl className="flex flex-col gap-2.5 text-sm">
-          <InlineFieldRow label="想定取引規模">
-            <div className="flex items-center gap-1.5">
-              <div className="w-20">
-                <InlineTextField
-                  value={profile.desiredSalaryMin}
-                  onSave={(v) => updateField("desiredSalaryMin", v)}
-                  ariaLabel="想定取引規模（下限）"
-                  placeholder="—"
-                />
-              </div>
-              <span className="shrink-0 text-xs text-muted-foreground">〜</span>
-              <div className="w-20">
-                <InlineTextField
-                  value={profile.desiredSalaryMax}
-                  onSave={(v) => updateField("desiredSalaryMax", v)}
-                  ariaLabel="想定取引規模（上限）"
-                  placeholder="—"
-                />
-              </div>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                万円
-              </span>
-            </div>
-          </InlineFieldRow>
-          <InlineFieldRow label="次回アクション日">
-            <InlineDateField
-              value={profile.availableStartDate}
-              onSave={(v) => updateField("availableStartDate", v)}
-              ariaLabel="次回アクション日"
+      <Collapsible open={open} onOpenChange={onOpenChange}>
+        <CollapsibleTrigger
+          nativeButton={false}
+          render={
+            <CardHeader className="group/trigger cursor-pointer rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+          }
+        >
+          <CardTitle emphasis="prominent" className="flex items-center gap-2">
+            <Target aria-hidden="true" className="size-4 text-primary" />
+            {PANE3_SECTION.recruitingConditions}
+          </CardTitle>
+          <CardAction>
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 text-muted-foreground transition-[color,transform] group-hover/trigger:text-foreground in-data-[panel-open]:rotate-180"
             />
-          </InlineFieldRow>
-        </dl>
-      </CardContent>
+            <span className="sr-only">{`${PANE3_SECTION.recruitingConditions}を開く`}</span>
+          </CardAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            <dl className="flex flex-col gap-2.5 text-sm">
+              <InlineFieldRow label="想定取引規模">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-20">
+                    <InlineTextField
+                      value={profile.desiredSalaryMin}
+                      onSave={(v) => updateField("desiredSalaryMin", v)}
+                      ariaLabel="想定取引規模（下限）"
+                      placeholder="—"
+                    />
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    〜
+                  </span>
+                  <div className="w-20">
+                    <InlineTextField
+                      value={profile.desiredSalaryMax}
+                      onSave={(v) => updateField("desiredSalaryMax", v)}
+                      ariaLabel="想定取引規模（上限）"
+                      placeholder="—"
+                    />
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    万円
+                  </span>
+                </div>
+              </InlineFieldRow>
+              <InlineFieldRow label="次回アクション日">
+                <InlineDateField
+                  value={profile.availableStartDate}
+                  onSave={(v) => updateField("availableStartDate", v)}
+                  ariaLabel="次回アクション日"
+                />
+              </InlineFieldRow>
+            </dl>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
@@ -474,47 +493,71 @@ function ApplicationInfoCard({
 
 // ===== Card: 現時点評価（4軸スコア + 平均、AxisScoreRow を活用） =====
 
-function EvaluationCard({ scorecards }: { scorecards: Scorecard[] }) {
+function EvaluationCard({
+  scorecards,
+  open,
+  onOpenChange,
+}: {
+  scorecards: Scorecard[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const latest = getLatestDoneScorecard(scorecards);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle emphasis="prominent" className="flex items-center gap-2">
-          <Star
-            aria-hidden="true"
-            className="size-4 fill-current text-primary"
-          />
-          現時点評価 (4軸)
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!latest ? (
-          // 未評価 (scorecards 空 or done なし) でもカード自体は出して
-          // 「データ入力が必要」を明示する。null return だとカードが消えて
-          // 「ロード中? バグ?」とユーザーに混乱を与える (UX レビュー指摘)。
-          <p className="text-sm text-muted-foreground">
-            まだ評価がありません。Pane4 接触ログを追加するか、Notion 接続後に
-            自動評価される予定です。
-          </p>
-        ) : (
-          <dl className="flex flex-col gap-2.5">
-            {AXIS_ORDER.map((axisKey) => (
-              <AxisScoreRow
-                key={axisKey}
-                label={EVALUATION_AXIS[axisKey]}
-                value={latest.axisScores[axisKey]}
-              />
-            ))}
-            <Separator />
-            <AxisScoreRow
-              label="平均スコア"
-              value={getScorecardsAverageScore(scorecards)}
-              bold
+      <Collapsible open={open} onOpenChange={onOpenChange}>
+        <CollapsibleTrigger
+          nativeButton={false}
+          render={
+            <CardHeader className="group/trigger cursor-pointer rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+          }
+        >
+          <CardTitle emphasis="prominent" className="flex items-center gap-2">
+            <Star
+              aria-hidden="true"
+              className="size-4 fill-current text-primary"
             />
-          </dl>
-        )}
-      </CardContent>
+            現時点評価 (4軸)
+          </CardTitle>
+          <CardAction>
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 text-muted-foreground transition-[color,transform] group-hover/trigger:text-foreground in-data-[panel-open]:rotate-180"
+            />
+            <span className="sr-only">現時点評価を開く</span>
+          </CardAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            {!latest ? (
+              // 未評価 (scorecards 空 or done なし) でもカード自体は出して
+              // 「データ入力が必要」を明示する。null return だとカードが消えて
+              // 「ロード中? バグ?」とユーザーに混乱を与える (UX レビュー指摘)。
+              <p className="text-sm text-muted-foreground">
+                まだ評価がありません。Pane4 接触ログを追加するか、Notion 接続後に
+                自動評価される予定です。
+              </p>
+            ) : (
+              <dl className="flex flex-col gap-2.5">
+                {AXIS_ORDER.map((axisKey) => (
+                  <AxisScoreRow
+                    key={axisKey}
+                    label={EVALUATION_AXIS[axisKey]}
+                    value={latest.axisScores[axisKey]}
+                  />
+                ))}
+                <Separator />
+                <AxisScoreRow
+                  label="平均スコア"
+                  value={getScorecardsAverageScore(scorecards)}
+                  bold
+                />
+              </dl>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
@@ -651,6 +694,10 @@ export function CandidateDashboardPane({
   setProfile,
   applicationInfoOpen,
   onApplicationInfoOpenChange,
+  evaluationOpen,
+  onEvaluationOpenChange,
+  recruitingConditionsOpen,
+  onRecruitingConditionsOpenChange,
   selectedCandidateId,
   onChangeStage,
   hiddenByFilter,
@@ -662,6 +709,12 @@ export function CandidateDashboardPane({
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   applicationInfoOpen: boolean;
   onApplicationInfoOpenChange: (open: boolean) => void;
+  /** Pane3 「現時点評価」カードの開閉 (Workspace 側で状態保持) */
+  evaluationOpen: boolean;
+  onEvaluationOpenChange: (open: boolean) => void;
+  /** Pane3 「営業条件」カードの開閉 (Workspace 側で状態保持) */
+  recruitingConditionsOpen: boolean;
+  onRecruitingConditionsOpenChange: (open: boolean) => void;
   selectedCandidateId: string;
   /** ステージバッジドロップダウンからのステージ変更要求 */
   onChangeStage: (next: StageKey) => void;
@@ -717,7 +770,11 @@ export function CandidateDashboardPane({
             candidateKey={selectedCandidateId}
           />
 
-          <EvaluationCard scorecards={scorecards} />
+          <EvaluationCard
+            scorecards={scorecards}
+            open={evaluationOpen}
+            onOpenChange={onEvaluationOpenChange}
+          />
 
           {/* key={selectedCandidateId} で候補者切替時に remount。
               これがないと InlineTextField (uncontrolled) の defaultValue
@@ -726,6 +783,8 @@ export function CandidateDashboardPane({
             key={selectedCandidateId}
             profile={profile}
             setProfile={setProfile}
+            open={recruitingConditionsOpen}
+            onOpenChange={onRecruitingConditionsOpenChange}
           />
         </div>
       </ScrollArea>
