@@ -630,6 +630,8 @@ export function CandidateDashboardPane({
   onApplicationInfoOpenChange,
   selectedCandidateId,
   onChangeStage,
+  hiddenByFilter,
+  onClearFiltersForSelected,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
@@ -640,6 +642,10 @@ export function CandidateDashboardPane({
   selectedCandidateId: string;
   /** ステージバッジドロップダウンからのステージ変更要求 */
   onChangeStage: (next: StageKey) => void;
+  /** 現在表示中の候補者が Pane2 の検索/絞り込みで非表示になっているか */
+  hiddenByFilter: boolean;
+  /** 絞り込みを解除して選択候補者を Pane2 に再表示する */
+  onClearFiltersForSelected: () => void;
 }) {
   return (
     <section className="min-w-0 flex-1 bg-canvas">
@@ -651,6 +657,27 @@ export function CandidateDashboardPane({
           key={selectedCandidateId}
           className="mx-auto flex max-w-3xl animate-in fade-in flex-col gap-4 px-8 py-8 duration-200 motion-reduce:animate-none"
         >
+          {/* 表示中の候補者が Pane2 の絞り込みで非表示になっているとき、
+              「リストにいない人を編集している」認知不整合を防ぐためにバナーを出す。
+              100 人運用では「検索後に該当者が消えたのに Pane3 だけ残る」事故が
+              頻発しがちなので、ワンクリックで絞り込み解除できる導線を併設。 */}
+          {hiddenByFilter && (
+            <div
+              role="status"
+              className="flex items-center justify-between gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+            >
+              <span className="min-w-0">
+                この候補者は現在の絞り込み / 検索結果に含まれていません
+              </span>
+              <button
+                type="button"
+                onClick={onClearFiltersForSelected}
+                className="shrink-0 rounded px-2 py-1 font-medium text-amber-900 underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
+              >
+                絞り込みを解除
+              </button>
+            </div>
+          )}
           <CandidateHeader
             profile={profile}
             scorecards={scorecards}

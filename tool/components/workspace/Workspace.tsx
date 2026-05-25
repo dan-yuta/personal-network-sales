@@ -38,7 +38,13 @@
  *   - openspec/changes/add-4pane-workspace-template/design.md D51〜D56 / D65
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useDeferredValue,
+} from "react";
 
 import {
   type Profile,
@@ -53,6 +59,7 @@ import {
 } from "@/lib/schema";
 import { createMinimalProfile } from "@/lib/data/factories";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
+import { normalizeForSearch } from "@/lib/computed/searchNormalize";
 import { ARCHIVED_GROUP_LABEL, STAGE_LABELS } from "@/lib/labels";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { GlobalHeader } from "@/components/workspace/GlobalHeader";
@@ -97,6 +104,9 @@ export function Workspace({
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
   // Pane 2 候補者の名前/接触経路/メモ でのフリーテキスト検索。空文字なら全表示。
   const [searchQuery, setSearchQuery] = useState<string>("");
+  // useDeferredValue で 100 件 ×4 ペインの再計算をタイピングから 1 tick 後ろにずらす。
+  // input 自体は最新値で表示し続けるので体感の遅延ゼロ、リストだけが追随する。
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   // 検索対象範囲。100 人規模では「全部マッチ」だと意図しないヒットが
   // 邪魔をするので、ユーザーが対象を絞れるようにする。
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
@@ -133,7 +143,19 @@ export function Workspace({
   );
 
   // Pane 2 の候補者行クリックでアクティブ候補者を切り替える。
+  //
+  // 重要: Pane3 の InlineTextField は uncontrolled (defaultValue + onBlur 保存) なので、
+  // 編集中のまま candidate を切り替えると Pane3 が `key={selectedCandidateId}` で
+  // remount し、blur イベントが発火する前に input が消滅 → タイプ中の文字が失われる。
+  // 100 人規模で「ABCさん編集中に XYZさんへ切替」が頻発する運用シナリオでデータロス
+  // 事故になるため、切替前に明示的に活性要素を blur して保存経路を通す。
   const selectCandidate = useCallback((id: string) => {
+    if (
+      typeof document !== "undefined" &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
     setSelectedCandidateId(id);
     setApplicationInfoOpen(false);
     setPane4ManuallyClosed(false);
@@ -343,34 +365,33 @@ export function Workspace({
     };
 
     // フリーテキスト検索フィルタ: searchScope で対象範囲を切替。
-    // 部分一致 (case insensitive)。空クエリなら素通り。
-    // フリガナで「タナカ」検索 → 田中さんがヒット、漢字を打てなくてもOK。
+    // 部分一致。空クエリなら素通り。
     //   - all:    名前 (kanji + furigana) + 接触経路 + メモ (キャリア + 動機)
     //   - name:   名前のみ (kanji + furigana)
     //   - source: 接触経路のみ
     //   - memo:   キャリア + 動機メモ
-    const q = searchQuery.trim().toLowerCase();
+    //
+    // 正規化: normalizeForSearch で NFKC + lowercase + カタカナ→ひらがな。
+    // 「タナカ」「たなか」「ＴＡＮＡＫＡ」「tanaka」を全て同一視する。
+    // 空白区切りの複数キーワードは AND 検索 (全 token が含まれる行のみヒット)。
+    const tokens = normalizeForSearch(deferredSearchQuery)
+      .split(/\s+/)
+      .filter((t) => t.length > 0);
     const matchSearch = (c: Candidate) => {
-      if (!q) return true;
+      if (tokens.length === 0) return true;
       const p = c.profile;
-      const nameHit =
-        p.name.toLowerCase().includes(q) ||
-        p.furigana.toLowerCase().includes(q);
-      const sourceHit = p.source.toLowerCase().includes(q);
-      const memoHit =
-        p.careerText.toLowerCase().includes(q) ||
-        p.motivationFull.toLowerCase().includes(q);
-      switch (searchScope) {
-        case "name":
-          return nameHit;
-        case "source":
-          return sourceHit;
-        case "memo":
-          return memoHit;
-        case "all":
-        default:
-          return nameHit || sourceHit || memoHit;
-      }
+      const nameField = normalizeForSearch(`${p.name} ${p.furigana}`);
+      const sourceField = normalizeForSearch(p.source);
+      const memoField = normalizeForSearch(`${p.careerText} ${p.motivationFull}`);
+      const haystack =
+        searchScope === "name"
+          ? nameField
+          : searchScope === "source"
+            ? sourceField
+            : searchScope === "memo"
+              ? memoField
+              : `${nameField} ${sourceField} ${memoField}`;
+      return tokens.every((t) => haystack.includes(t));
     };
 
     const stageGroups: Group[] = visibleStages.map((stage) => ({
@@ -408,7 +429,20 @@ export function Workspace({
       ...stageGroups,
       { kind: "archived" as const, label: ARCHIVED_GROUP_LABEL, items: archivedItems },
     ];
-  }, [candidates, selectedStage, sortKey, searchQuery, searchScope]);
+  }, [candidates, selectedStage, sortKey, deferredSearchQuery, searchScope]);
+
+  // フィルタ後の可視 ID 集合と総ヒット件数。
+  //   - 可視 ID 集合: 「選択中候補者がフィルタから外れているか」判定に使う
+  //   - 総ヒット件数: Pane2 の「該当 0 件」空状態の判定に使う
+  const visibleCandidateIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of candidateGroups) {
+      for (const item of g.items) set.add(item.id);
+    }
+    return set;
+  }, [candidateGroups]);
+  const totalVisibleCount = visibleCandidateIds.size;
+  const selectedCandidateVisible = visibleCandidateIds.has(selectedCandidateId);
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
@@ -518,6 +552,7 @@ export function Workspace({
             onSearchQueryChange={setSearchQuery}
             searchScope={searchScope}
             onSearchScopeChange={setSearchScope}
+            totalVisibleCount={totalVisibleCount}
           />
           <CandidateDashboardPane
             profile={profile}
@@ -530,6 +565,11 @@ export function Workspace({
             onChangeStage={(next) =>
               moveCandidate(selectedCandidateId, next, 0)
             }
+            hiddenByFilter={!selectedCandidateVisible}
+            onClearFiltersForSelected={() => {
+              setSelectedStage(null);
+              setSearchQuery("");
+            }}
           />
           <CandidateDetailPane
             candidate={activeCandidate}

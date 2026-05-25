@@ -125,6 +125,9 @@ type CandidateListPaneProps = {
   searchScope: SearchScope;
   /** 検索対象範囲変更ハンドラ */
   onSearchScopeChange: (scope: SearchScope) => void;
+  /** 検索 + ステージ絞り込み適用後に表示される候補者の総数 (アーカイブ含む)。
+   *  0 件のとき「該当する候補者が見つかりません」空状態を出すために使う。 */
+  totalVisibleCount: number;
 };
 
 export function CandidateListPane({
@@ -143,6 +146,7 @@ export function CandidateListPane({
   onSearchQueryChange,
   searchScope,
   onSearchScopeChange,
+  totalVisibleCount,
 }: CandidateListPaneProps) {
   const [addDialogStage, setAddDialogStage] = useState<{
     stage: StageKey;
@@ -399,35 +403,69 @@ export function CandidateListPane({
           onDragCancel={() => setActiveDragId(null)}
         >
           <div className="flex flex-col gap-5 px-3 py-4">
-            {stageGroups.map((group) => (
-              <StageGroup
-                key={`stage:${group.stage}`}
-                stage={group.stage}
-                label={group.label}
-                items={group.items}
-                selectedCandidateId={selectedCandidateId}
-                onSelectCandidate={onSelectCandidate}
-                onAddRequest={() =>
-                  setAddDialogStage({
-                    stage: group.stage,
-                    label: group.label,
-                  })
-                }
-                onArchiveRequest={(id, name) =>
-                  setArchiveTarget({ id, name })
-                }
-              />
-            ))}
-            {archivedGroup && (
-              <ArchivedGroup
-                label={archivedGroup.label}
-                items={archivedGroup.items}
-                open={archivedOpen}
-                onOpenChange={setArchivedOpen}
-                selectedCandidateId={selectedCandidateId}
-                onSelectCandidate={onSelectCandidate}
-                onRestore={onRestoreCandidate}
-              />
+            {/* 検索 + ステージ絞り込み適用後に 1 件もヒットしないとき、
+                各ステージのドロップ用 placeholder だけが並んで「全員消えた!?」と
+                誤認させるため、専用空状態で「該当なし」を明示する。
+                ステージ絞り込みのみで全 0 はあまり起きない (空ステージは普通に表示)
+                ので、searchQuery がある場合のみ検索由来として扱う。 */}
+            {totalVisibleCount === 0 && searchQuery.trim().length > 0 ? (
+              <div
+                className="flex flex-col items-center gap-2 px-4 py-12 text-center text-xs text-muted-foreground"
+                role="status"
+                aria-live="polite"
+              >
+                <Search aria-hidden="true" className="size-6 opacity-40" />
+                <p>
+                  「
+                  <span className="font-semibold text-foreground">
+                    {searchQuery.trim()}
+                  </span>
+                  」に該当する候補者がいません
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onSearchQueryChange("")}
+                  className="h-7 gap-1 px-2 text-xs"
+                >
+                  <X aria-hidden="true" className="size-3.5" />
+                  検索をクリア
+                </Button>
+              </div>
+            ) : (
+              <>
+                {stageGroups.map((group) => (
+                  <StageGroup
+                    key={`stage:${group.stage}`}
+                    stage={group.stage}
+                    label={group.label}
+                    items={group.items}
+                    selectedCandidateId={selectedCandidateId}
+                    onSelectCandidate={onSelectCandidate}
+                    onAddRequest={() =>
+                      setAddDialogStage({
+                        stage: group.stage,
+                        label: group.label,
+                      })
+                    }
+                    onArchiveRequest={(id, name) =>
+                      setArchiveTarget({ id, name })
+                    }
+                  />
+                ))}
+                {archivedGroup && (
+                  <ArchivedGroup
+                    label={archivedGroup.label}
+                    items={archivedGroup.items}
+                    open={archivedOpen}
+                    onOpenChange={setArchivedOpen}
+                    selectedCandidateId={selectedCandidateId}
+                    onSelectCandidate={onSelectCandidate}
+                    onRestore={onRestoreCandidate}
+                  />
+                )}
+              </>
             )}
           </div>
           <DragOverlay>
