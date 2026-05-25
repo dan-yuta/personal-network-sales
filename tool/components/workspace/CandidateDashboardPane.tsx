@@ -261,22 +261,11 @@ function RecruitingConditionsCard({
                 </div>
               </InlineFieldRow>
               <InlineFieldRow label="優先度">
-                <div className="flex flex-col gap-1">
-                  <PrioritySelectField
-                    value={profile.priority}
-                    onSave={(v) => updateField("priority", v)}
-                    ariaLabel="優先度"
-                  />
-                  {/* 未選択時はフォロー密度の判断基準を 3 段並べる。
-                      選択後は PrioritySelectField 内で「選択中の説明」だけが
-                      表示され、ヘルプ文言が重複しないように分岐。 */}
-                  {profile.priority === "" && (
-                    <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      目安: 高=直近 2 週で動かす / 中=月 1〜2 回 / 低=月 1
-                      回以下
-                    </p>
-                  )}
-                </div>
+                <PrioritySelectField
+                  value={profile.priority}
+                  onSave={(v) => updateField("priority", v)}
+                  ariaLabel="優先度"
+                />
               </InlineFieldRow>
               <InlineFieldRow label="次回アクション日">
                 <InlineDateField

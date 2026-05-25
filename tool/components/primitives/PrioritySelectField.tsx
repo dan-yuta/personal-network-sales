@@ -35,12 +35,13 @@ export function PrioritySelectField({
   onSave,
   ariaLabel,
 }: PrioritySelectFieldProps) {
-  // ボタン群 + 選択中の基準説明文 (1 行) を縦に並べる。
-  // 選択中の優先度の意味だけを下に出すことで、未選択時はヘルプが消えて
-  // 静かになり、選択した瞬間に「これは月 1〜2 回フォロー、で合っている?」と
-  // 自己確認できる動線にする。
+  // ボタン群 (左) と 3 段の基準表 (右、ボーダーで仕切る) を横並びで配置する。
+  // 基準表は常時表示、選択中の行を太字 + foreground 色でハイライトすることで
+  // 「現在の選択がどの基準に該当するか」が一目で分かる。
+  // 幅が狭いときは flex-wrap で基準表が下に折り返す (Pane3 の限られた幅にも
+  // 対応可能)。
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div
         role="radiogroup"
         aria-label={ariaLabel}
@@ -71,14 +72,31 @@ export function PrioritySelectField({
           );
         })}
       </div>
-      {/* 選択中の優先度の基準説明 (未選択時は非表示)。
-          フォロー密度の目安として「直近 2 週で動かす」「月 1〜2 回」「月 1 以下」
-          のシンプルなルールを示す。 */}
-      {value !== "" && (
-        <p className="text-[11px] text-muted-foreground" aria-live="polite">
-          {PRIORITY_LABELS[value]}: {PRIORITY_DESCRIPTIONS[value]}
-        </p>
-      )}
+      <div
+        aria-label="優先度の選択目安"
+        className="border-l border-border pl-3 text-[11px] leading-tight text-muted-foreground"
+      >
+        <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
+          {PRIORITY_KEYS.map((key) => {
+            const active = value === key;
+            return (
+              <div key={key} className="contents">
+                <dt
+                  className={cn(
+                    "font-medium tabular-nums",
+                    active && "text-foreground",
+                  )}
+                >
+                  {PRIORITY_LABELS[key]}:
+                </dt>
+                <dd className={cn(active && "font-medium text-foreground")}>
+                  {PRIORITY_DESCRIPTIONS[key]}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      </div>
     </div>
   );
 }
