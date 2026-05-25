@@ -68,6 +68,7 @@ import { PositionPane } from "@/components/workspace/PositionPane";
 import { CandidateListPane } from "@/components/workspace/CandidateListPane";
 import { CandidateDashboardPane } from "@/components/workspace/CandidateDashboardPane";
 import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane";
+import { ToasterProvider, useToast } from "@/components/workspace/Toaster";
 
 // ========== UI 内部型 ==========
 //
@@ -81,11 +82,26 @@ type WorkspaceProps = {
   workspace: { name: string; icon: string };
 };
 
-export function Workspace({
+/**
+ * Workspace 公開エントリ。ToasterProvider で包んでから WorkspaceContent を描画。
+ * useToast() は Provider の内側でしか使えないため、Provider 配下の別関数として
+ * 中身を切り出す必要がある (Workspace 自身が Provider と useToast を兼ねると
+ * `useContext` が null になる)。
+ */
+export function Workspace(props: WorkspaceProps) {
+  return (
+    <ToasterProvider>
+      <WorkspaceContent {...props} />
+    </ToasterProvider>
+  );
+}
+
+function WorkspaceContent({
   initialDepartments,
   initialCandidates,
   workspace,
 }: WorkspaceProps) {
+  const { push: pushToast } = useToast();
   const [departments, setDepartments] =
     useState<Department[]>(initialDepartments);
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
@@ -188,6 +204,7 @@ export function Workspace({
 
   // 候補者をアーカイブ（論理削除）する。データは残し `archived: true` を立てる。
   // アクティブ候補者をアーカイブした場合は、非 archived の先頭候補者にフォールバック。
+  // Undo (= restoreCandidate) 用にトースト発火。
   //
   // 設計メモ: setCandidates の reducer 関数内で setSelectedCandidateId を呼ぶ
   // のは「副作用なしの純関数」原則からは外れるが、純粋に id を計算するだけで
@@ -195,28 +212,71 @@ export function Workspace({
   // の二重呼び出しでも安全。「archive 後の最新 candidates から fallback を取る」
   // ロジックを setCandidates の外に置くと、古い candidates クロージャを参照する
   // バグが入るため、ネスト形を意識的に維持する。
-  const archiveCandidate = useCallback((id: string) => {
-    setCandidates((prev) => {
-      const next = prev.map((c) =>
-        c.id === id ? { ...c, archived: true } : c,
-      );
-      setSelectedCandidateId((prevId) => {
-        if (prevId !== id) return prevId;
-        const fallback = next.find((c) => !c.archived);
-        return fallback ? fallback.id : "";
+  const archiveCandidate = useCallback(
+    (id: string) => {
+      // Undo のため、現在の archived 状態を撮影する (元々アーカイブ済の人を
+      // 再 archive する操作は no-op なので、操作前に archived フラグだけ
+      // 覚えておけば「元に戻す」で正しい状態に戻せる)。
+      const target = candidates.find((c) => c.id === id);
+      const previousArchived = target?.archived ?? false;
+      const name = target?.profile.name || "候補者";
+
+      setCandidates((prev) => {
+        const next = prev.map((c) =>
+          c.id === id ? { ...c, archived: true } : c,
+        );
+        setSelectedCandidateId((prevId) => {
+          if (prevId !== id) return prevId;
+          const fallback = next.find((c) => !c.archived);
+          return fallback ? fallback.id : "";
+        });
+        return next;
       });
-      return next;
-    });
-    setPane4ManuallyClosed(false);
-  }, []);
+      setPane4ManuallyClosed(false);
+
+      // 既にアーカイブ済の場合はトースト出さない (UI 上は通常起こらないが防御)
+      if (!previousArchived) {
+        pushToast({
+          message: `${name} をアーカイブしました`,
+          undo: () => {
+            setCandidates((prev) =>
+              prev.map((c) =>
+                c.id === id ? { ...c, archived: false } : c,
+              ),
+            );
+            setSelectedCandidateId(id);
+          },
+        });
+      }
+    },
+    [candidates, pushToast],
+  );
 
   // アーカイブ済み候補者を元のステージに復元する。`stage` は archived 中も保持
-  // しているので、そのステージへ戻すだけでよい。
-  const restoreCandidate = useCallback((id: string) => {
-    setCandidates((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, archived: false } : c)),
-    );
-  }, []);
+  // しているので、そのステージへ戻すだけでよい。Undo で再アーカイブ。
+  const restoreCandidate = useCallback(
+    (id: string) => {
+      const target = candidates.find((c) => c.id === id);
+      const previousArchived = target?.archived ?? false;
+      const name = target?.profile.name || "候補者";
+
+      setCandidates((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, archived: false } : c)),
+      );
+
+      if (previousArchived) {
+        pushToast({
+          message: `${name} を復元しました`,
+          undo: () => {
+            setCandidates((prev) =>
+              prev.map((c) => (c.id === id ? { ...c, archived: true } : c)),
+            );
+          },
+        });
+      }
+    },
+    [candidates, pushToast],
+  );
 
   // 候補者を別ステージへ移動 / 同ステージ内で並び替え。
   //
@@ -226,16 +286,33 @@ export function Workspace({
   //
   // 同ステージ内ドラッグ・別ステージへのドラッグの両方をこの 1 関数で扱う。
   // archived 候補者は対象外（DnD はアクティブな候補者のみ可能）。
+  //
+  // ステージが変わったときだけ Undo トーストを出す (同ステージ内の並び替えは
+  // 軽い操作で「戻す」ことへの心理的需要が低い + 連続並び替えで通知が
+  // 邪魔になる)。Undo は元の (stage, indexInStage) を撮影して戻す。
   const moveCandidate = useCallback(
     (id: string, toStage: StageKey, toIndex: number) => {
+      const subject = candidates.find((c) => c.id === id);
+      if (!subject || subject.archived) {
+        setCandidates((prev) => prev); // no-op (型整合のため)
+        return;
+      }
+      const fromStage = subject.stage;
+      // 元のステージ内インデックスを計算 (Undo で同じ位置に戻すため)
+      let fromIndex = 0;
+      for (const c of candidates) {
+        if (c.id === id) break;
+        if (!c.archived && c.stage === fromStage) fromIndex++;
+      }
+
       setCandidates((prev) => {
         const subjectIndex = prev.findIndex((c) => c.id === id);
         if (subjectIndex < 0) return prev;
-        const subject = prev[subjectIndex];
-        if (subject.archived) return prev;
+        const sub = prev[subjectIndex];
+        if (sub.archived) return prev;
 
         const without = prev.filter((_, i) => i !== subjectIndex);
-        const updated: Candidate = { ...subject, stage: toStage };
+        const updated: Candidate = { ...sub, stage: toStage };
 
         let count = 0;
         let absInsertAt = without.length;
@@ -255,8 +332,47 @@ export function Workspace({
           ...without.slice(absInsertAt),
         ];
       });
+
+      // ステージ跨ぎのときだけトースト
+      if (fromStage !== toStage) {
+        const fromLabel = STAGE_LABELS[fromStage];
+        const toLabel = STAGE_LABELS[toStage];
+        const name = subject.profile.name || "候補者";
+        pushToast({
+          message: `${name} を「${fromLabel}」→「${toLabel}」に移動`,
+          undo: () => {
+            // 同じ moveCandidate ロジックを直接実行 (再帰呼び出しは
+            // 「Undo のための Undo トースト」を出してしまうので避け、
+            // setCandidates だけ直接呼ぶ)
+            setCandidates((prev) => {
+              const subjectIndex = prev.findIndex((c) => c.id === id);
+              if (subjectIndex < 0) return prev;
+              const sub = prev[subjectIndex];
+              const without = prev.filter((_, i) => i !== subjectIndex);
+              const reverted: Candidate = { ...sub, stage: fromStage };
+              let count = 0;
+              let absInsertAt = without.length;
+              for (let i = 0; i < without.length; i++) {
+                const c = without[i];
+                if (!c.archived && c.stage === fromStage) {
+                  if (count === fromIndex) {
+                    absInsertAt = i;
+                    break;
+                  }
+                  count++;
+                }
+              }
+              return [
+                ...without.slice(0, absInsertAt),
+                reverted,
+                ...without.slice(absInsertAt),
+              ];
+            });
+          },
+        });
+      }
     },
-    [],
+    [candidates, pushToast],
   );
 
   const addDepartment = useCallback((name: string) => {
@@ -266,9 +382,30 @@ export function Workspace({
     ]);
   }, []);
 
-  const deleteDepartment = useCallback((deptId: string) => {
-    setDepartments((prev) => prev.filter((d) => d.id !== deptId));
-  }, []);
+  const deleteDepartment = useCallback(
+    (deptId: string) => {
+      // Undo 用に削除前の (dept, index) を撮影
+      const idx = departments.findIndex((d) => d.id === deptId);
+      if (idx < 0) return;
+      const removed = departments[idx];
+      setDepartments((prev) => prev.filter((d) => d.id !== deptId));
+      pushToast({
+        message: `カテゴリ「${removed.name}」を削除しました`,
+        undo: () => {
+          setDepartments((prev) => {
+            // 同 id が既に復元されていれば no-op (連打防御)
+            if (prev.some((d) => d.id === deptId)) return prev;
+            const next = [...prev];
+            // 元の位置に挿入 (位置が prev.length 超過なら末尾)
+            const insertAt = Math.min(idx, next.length);
+            next.splice(insertAt, 0, removed);
+            return next;
+          });
+        },
+      });
+    },
+    [departments, pushToast],
+  );
 
   const addPosition = useCallback((deptId: string, posName: string) => {
     setDepartments((prev) =>
@@ -286,15 +423,40 @@ export function Workspace({
     );
   }, []);
 
-  const deletePosition = useCallback((deptId: string, posId: string) => {
-    setDepartments((prev) =>
-      prev.map((d) =>
-        d.id === deptId
-          ? { ...d, positions: d.positions.filter((p) => p.id !== posId) }
-          : d,
-      ),
-    );
-  }, []);
+  const deletePosition = useCallback(
+    (deptId: string, posId: string) => {
+      // Undo 用に削除前の (position, indexInDept) を撮影
+      const dept = departments.find((d) => d.id === deptId);
+      if (!dept) return;
+      const posIdx = dept.positions.findIndex((p) => p.id === posId);
+      if (posIdx < 0) return;
+      const removed = dept.positions[posIdx];
+
+      setDepartments((prev) =>
+        prev.map((d) =>
+          d.id === deptId
+            ? { ...d, positions: d.positions.filter((p) => p.id !== posId) }
+            : d,
+        ),
+      );
+      pushToast({
+        message: `ステージ「${removed.name}」を削除しました`,
+        undo: () => {
+          setDepartments((prev) =>
+            prev.map((d) => {
+              if (d.id !== deptId) return d;
+              if (d.positions.some((p) => p.id === posId)) return d; // 連打防御
+              const nextPositions = [...d.positions];
+              const insertAt = Math.min(posIdx, nextPositions.length);
+              nextPositions.splice(insertAt, 0, removed);
+              return { ...d, positions: nextPositions };
+            }),
+          );
+        },
+      });
+    },
+    [departments, pushToast],
+  );
 
   // Pane 4 の開閉トグル。
   const togglePane4 = useCallback(() => setPane4ManuallyClosed((v) => !v), []);
