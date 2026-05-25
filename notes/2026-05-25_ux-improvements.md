@@ -348,9 +348,38 @@ mockLogs.test.ts も「c1〜c14 を全件持つ」厳密比較から「主要 ke
 |---|---|---|
 | `69ad8b4` 〜 `26c87e9` (5/25) | 17 | UX 改善 7 機能 (A〜G) + Pane4 calendar + Pane2 折りたたみ + 設定→ヘルプ + 評価編集 + Notion 同期準備 + サンプル 30 人化 |
 | `7ae0524` 〜 `bcd72d7` (5/26) | 2 | 優先度マーカー撤回 + 選択基準を表形式表示 |
+| `b4eddb8` (深夜レビュー) | 1 | high 3 件 (IME blur Firefox / Esc 副作用 / Toast リーク) + low 2 件 |
+| `4fdb180` (朝の追加修正) | 1 | IME blur Chrome 自動 commit (50ms threshold) + 検索 × 二重表示 |
+| `20dc524` (仕様確定) | 1 | Pane2 D&D + 折りたたみは案 A (畳んだステージはドロップ不可) で docs 明記 |
 
-合計 **19 コミット** (実装変更分のみ、docs 更新コミット `81eb17d` は除く)、
-テスト 101 件すべて緑のまま、新規ライブラリ依存ゼロ。
+合計 **22 コミット** (実装変更 + 仕様確定、docs 更新コミット除く)、
+テスト 102 件すべて緑、新規ライブラリ依存ゼロ。
+
+---
+
+## 追加メモ (2026-05-26 朝) — Chrome の IME 自動 commit 問題
+
+**症状**: Pane3「営業メモ」で IME 変換中の状態のまま Pane2 で別候補者をクリック
+→ 未確定の文字列 (例「ああああああ」) が onSave で保存される。深夜の B
+エージェントが `composingRef` ガードを入れたが Chrome では効かなかった。
+
+**原因**: Chrome は `document.activeElement.blur()` を呼ばれると、blur 直前に
+`compositionend` を **同期発火** して IME を強制確定する。そのため:
+
+1. ユーザー「あ」打つ → `composingRef.current = true`
+2. `selectCandidate` が `blur()` を呼ぶ
+3. Chrome が `compositionend` を同期発火 → `composingRef.current = false` に
+4. blur イベント → ガードを通過 → 未確定文字を保存
+
+**対処**: `lastCompositionEndAtRef` で compositionend の発火時刻を記録、
+`onBlur` で「直前 50ms 以内に compositionend が発火していたら保存しない」
+判定を追加。Chrome の自動 commit (< 1ms) は確実にカット、ユーザーの
+「変換確定 (Enter) → Tab で blur」(典型 >100ms) は通る境界。
+
+**学び**: IME 関連は **ブラウザごとに挙動が違う**。Firefox は blur 時に
+compositionend を発火しないケースあり、Chrome は逆に同期発火する。両方を
+ガードする二段ロジックが必要。Phase 3 でテキストエリア系プリミティブを増やす
+ときは同じパターンを継承すること。
 
 ---
 

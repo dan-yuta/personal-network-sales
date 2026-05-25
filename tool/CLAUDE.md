@@ -87,15 +87,18 @@ npm run check:radius # 角丸ドリフト検出
 | 優先度 + 選択基準ガイド (Notion 同期準備) | [`components/primitives/PrioritySelectField.tsx`](components/primitives/PrioritySelectField.tsx) + [`lib/labels.ts`](lib/labels.ts) `PRIORITY_DESCRIPTIONS` | Pane3 営業条件カードで [高][中][低] 切替、フォロー密度ベースの基準目安を表示、ソートキーにも追加 (Pane2 のドットマーカーは 2026-05-26 撤回: 視認性低いため) |
 | 次回アクションメモ + バック人脈 | Pane3 各カード InlineTextField | Notion DB の「次回アクション」「バック人脈」列と同期予定 |
 
-### InlineTextField の挙動 (controlled、Base UI Input + ref forward)
+### InlineTextField / InlineTextareaField の挙動 (controlled、Base UI Input + ref forward)
 
 - controlled (`value` + `onChange`、key={value} は撤回済み)
 - 編集中で `draft !== value` の間は input 右端に rose ドットを表示
 - 最後の打鍵から 800ms 経過で `onSave(current)` を発火、フォーカスは維持
-- IME 変換中 (compositionstart) は autosave 抑制、確定後再開
 - Enter / Tab / blur で即時 save、Esc で取り消し
 - Pane3 編集中に Pane2 で別候補者選択しても 5/25 で対処済の blur 経由保存が
   動くため、編集ロスは発生しない
+
+**IME 中 blur の二段ガード** (2026-05-26 確定):
+1. `composingRef` ガード: compositionstart 〜 compositionend 中の blur は保存しない (Firefox 等の挙動対応)
+2. `lastCompositionEndAt` 時間差ガード (50ms): Chrome は document.activeElement.blur() を呼ぶと **blur 直前に compositionend を自動発火** して IME を強制確定する。これで composingRef だけだとガードを通過してしまうため、「compositionend → 直後 50ms 以内の blur」は IME 自動 commit と見なして保存をブロック。ユーザーの「変換確定 (Enter) → Tab で blur」(典型 >100ms) は通る境界。
 
 ### キーボードショートカットの実装規約
 
