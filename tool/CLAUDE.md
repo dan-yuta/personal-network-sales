@@ -68,7 +68,42 @@ npm run check:radius # 角丸ドリフト検出
 - `CLAUDE.md` と `.claude/skills/*` は配布される（受講生環境の AI が読む）
 - 配布手順は親リポジトリの `managing-ads-gitea` スキルに従う
 
+## UX 機能リファレンス (本リポジトリ独自)
+
+100 人運用での日常使いやすさのために以下を実装済み。場所と「いつ動くか」だけ
+押さえておけば再現可能。
+
+| 機能 | 場所 | いつ動くか |
+|---|---|---|
+| 最終接触からの相対表記 (12日前 / 3週間前 / 1ヶ月前) | [`lib/computed/lastContact.ts`](lib/computed/lastContact.ts) | Pane2 行 (3 行目) と Pane3 ヘッダーで常時表示 |
+| 接触ログ追加のクイック日付ボタン (今日/昨日/一昨日) | [`components/workspace/CandidateDetailPane.tsx`](components/workspace/CandidateDetailPane.tsx) `QuickDateButtons` | Pane4 接触ログタブの新規追加フォーム |
+| Pane3 カードの折りたたみ | [`components/workspace/CandidateDashboardPane.tsx`](components/workspace/CandidateDashboardPane.tsx) | EvaluationCard / RecruitingConditionsCard、開閉 state は Workspace で保持 (候補者切替で維持) |
+| 検索ヒット黄色ハイライト | [`components/workspace/HighlightedText.tsx`](components/workspace/HighlightedText.tsx) + [`lib/computed/searchHighlight.ts`](lib/computed/searchHighlight.ts) | Pane2 候補者行の name / source |
+| アクション Undo (軽量 Toast) | [`components/workspace/Toaster.tsx`](components/workspace/Toaster.tsx) | archiveCandidate / restoreCandidate / moveCandidate (ステージ跨ぎのみ) / deletePosition / deleteDepartment |
+| キーボードショートカット | Workspace useEffect + [`ShortcutsHelpDialog.tsx`](components/workspace/ShortcutsHelpDialog.tsx) | `↑↓` 候補切替 / `j k` 同上 / `/` 検索 / `1-6` ステージ / `Esc` 解除 / `?` ヘルプ |
+| 未保存インジケータ + 自動保存 (800ms debounce) | [`components/primitives/InlineTextField.tsx`](components/primitives/InlineTextField.tsx) | Pane3 のすべての InlineTextField (氏名・フリガナ・接触経路・連絡先など) |
+
+### InlineTextField の挙動 (controlled、Base UI Input + ref forward)
+
+- controlled (`value` + `onChange`、key={value} は撤回済み)
+- 編集中で `draft !== value` の間は input 右端に rose ドットを表示
+- 最後の打鍵から 800ms 経過で `onSave(current)` を発火、フォーカスは維持
+- IME 変換中 (compositionstart) は autosave 抑制、確定後再開
+- Enter / Tab / blur で即時 save、Esc で取り消し
+- Pane3 編集中に Pane2 で別候補者選択しても 5/25 で対処済の blur 経由保存が
+  動くため、編集ロスは発生しない
+
+### キーボードショートカットの実装規約
+
+- `Workspace.tsx` の useEffect で `window.keydown` を listen
+- 入力欄 (INPUT/TEXTAREA/SELECT/`role=combobox|dialog|menu`) では Esc 以外
+  すべて素通り
+- IME 変換中 (`isComposing` / `keyCode === 229`) は全 shortcut スキップ
+- 修飾キー付き (Cmd/Ctrl/Alt) はブラウザのタブ切替なので素通り (例外: ? = Shift+/)
+- 候補者切替 (↑↓) は `candidateGroups` の flat list を使い末尾でクランプ
+
 ## やらないこと
 
 - DB 接続・認証（次フェーズ）
 - `react-beautiful-dnd`（廃止ライブラリ）への置き換え
+- Toast ライブラリ追加 (sonner/radix-toast 等)。自前 [`Toaster.tsx`](components/workspace/Toaster.tsx) で足りる範囲は依存追加しない
