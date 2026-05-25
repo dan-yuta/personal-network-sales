@@ -48,6 +48,7 @@ import {
 } from "react";
 
 import {
+  type AxisKey,
   type Profile,
   type StageKey,
   type Department,
@@ -58,7 +59,10 @@ import {
   STAGE_ORDER,
   isStageKey,
 } from "@/lib/schema";
-import { createMinimalProfile } from "@/lib/data/factories";
+import {
+  createMinimalProfile,
+  createMinimalScorecard,
+} from "@/lib/data/factories";
 import { getLastContactDate } from "@/lib/data/mockLogs";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
 import { normalizeForSearch } from "@/lib/computed/searchNormalize";
@@ -299,6 +303,62 @@ function WorkspaceContent({
       }
     },
     [candidates, pushToast],
+  );
+
+  // 4 軸スコアの 1 つを更新する。Pane3「現時点評価」カードでユーザーが
+  // 星アイコンをクリックしたとき呼ばれる。
+  //
+  // 仕様 (UI/UX 観点で「重い操作」を作らないことを優先):
+  //   - 既存の **最新 done scorecard** があれば、その axisScores を上書き
+  //     (履歴は残さない、現時点評価の即時更新)
+  //   - done scorecard が無ければ、最小 scorecard を新規追加して
+  //     クリックした軸だけ値を設定 (factory 経由)
+  //   - value === null は「リセット」(未評価に戻す)。scorecard そのものは
+  //     消さない (= 評価開始マーカーは残す)
+  //
+  // Pane2 ScoreBadge の平均値は派生計算 (getCandidateAverageScore) なので、
+  // この更新だけで全箇所が自動追従する。
+  const setAxisScore = useCallback(
+    (candidateId: string, axisKey: AxisKey, value: number | null) => {
+      setCandidates((prev) =>
+        prev.map((c) => {
+          if (c.id !== candidateId) return c;
+
+          // 末尾から「done」scorecard を探す (getLatestDoneScorecard と同じ
+          // ロジック、ただしインデックスが欲しいのでここで再実装)
+          let latestDoneIdx = -1;
+          for (let i = c.scorecards.length - 1; i >= 0; i--) {
+            const sc = c.scorecards[i];
+            // deriveStageStatus と同等: decision が truthy なら done
+            if (sc.decision && sc.decision.trim() !== "") {
+              latestDoneIdx = i;
+              break;
+            }
+          }
+
+          if (latestDoneIdx >= 0) {
+            // 既存 scorecard の軸スコアを上書き
+            const target = c.scorecards[latestDoneIdx];
+            const updated = {
+              ...target,
+              axisScores: { ...target.axisScores, [axisKey]: value },
+            };
+            const nextScorecards = [...c.scorecards];
+            nextScorecards[latestDoneIdx] = updated;
+            return { ...c, scorecards: nextScorecards };
+          }
+
+          // 新規 scorecard を追加 (リセット時は無意味なので no-op)
+          if (value === null) return c;
+          const newScorecard = createMinimalScorecard(c.stage, {
+            key: axisKey,
+            value,
+          });
+          return { ...c, scorecards: [...c.scorecards, newScorecard] };
+        }),
+      );
+    },
+    [],
   );
 
   // 候補者を別ステージへ移動 / 同ステージ内で並び替え。
@@ -849,6 +909,9 @@ function WorkspaceContent({
             onApplicationInfoOpenChange={setApplicationInfoOpen}
             evaluationOpen={evaluationOpen}
             onEvaluationOpenChange={setEvaluationOpen}
+            onSetAxisScore={(axisKey, value) =>
+              setAxisScore(selectedCandidateId, axisKey, value)
+            }
             recruitingConditionsOpen={recruitingConditionsOpen}
             onRecruitingConditionsOpenChange={setRecruitingConditionsOpen}
             selectedCandidateId={selectedCandidateId}

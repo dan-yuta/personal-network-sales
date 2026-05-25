@@ -27,6 +27,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import {
+  type AxisKey,
   type Profile,
   type Scorecard,
   type StageKey,
@@ -497,10 +498,14 @@ function EvaluationCard({
   scorecards,
   open,
   onOpenChange,
+  onSetAxisScore,
 }: {
   scorecards: Scorecard[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** 4 軸スコアのうち 1 つを更新するハンドラ。
+   *  星アイコンクリックで 1-5 設定、× クリックで null (未評価) リセット。 */
+  onSetAxisScore: (axisKey: AxisKey, value: number | null) => void;
 }) {
   const latest = getLatestDoneScorecard(scorecards);
 
@@ -530,31 +535,31 @@ function EvaluationCard({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent>
-            {!latest ? (
-              // 未評価 (scorecards 空 or done なし) でもカード自体は出して
-              // 「データ入力が必要」を明示する。null return だとカードが消えて
-              // 「ロード中? バグ?」とユーザーに混乱を与える (UX レビュー指摘)。
-              <p className="text-sm text-muted-foreground">
-                まだ評価がありません。Pane4 接触ログを追加するか、Notion 接続後に
-                自動評価される予定です。
-              </p>
-            ) : (
-              <dl className="flex flex-col gap-2.5">
-                {AXIS_ORDER.map((axisKey) => (
-                  <AxisScoreRow
-                    key={axisKey}
-                    label={EVALUATION_AXIS[axisKey]}
-                    value={latest.axisScores[axisKey]}
-                  />
-                ))}
-                <Separator />
+            {/* 未評価 (scorecards 空 or done なし) でも各軸の AxisScoreRow を
+                editable で出す。クリック編集を始めるとその瞬間に最小 scorecard が
+                生成され、平均スコアが Pane2 ScoreBadge にも反映される。
+                旧バージョンの「未評価です」placeholder は撤回 (UI/UX 観点で
+                「初回入力できる場所」を明示する方が運用しやすい)。 */}
+            <dl className="flex flex-col gap-2.5">
+              {AXIS_ORDER.map((axisKey) => (
                 <AxisScoreRow
-                  label="平均スコア"
-                  value={getScorecardsAverageScore(scorecards)}
-                  bold
+                  key={axisKey}
+                  label={EVALUATION_AXIS[axisKey]}
+                  value={latest?.axisScores[axisKey] ?? null}
+                  editable
+                  onChange={(v) => onSetAxisScore(axisKey, v)}
+                  onReset={() => onSetAxisScore(axisKey, null)}
                 />
-              </dl>
-            )}
+              ))}
+              <Separator />
+              <AxisScoreRow
+                label="平均スコア"
+                value={
+                  latest ? getScorecardsAverageScore(scorecards) : null
+                }
+                bold
+              />
+            </dl>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
@@ -696,6 +701,7 @@ export function CandidateDashboardPane({
   onApplicationInfoOpenChange,
   evaluationOpen,
   onEvaluationOpenChange,
+  onSetAxisScore,
   recruitingConditionsOpen,
   onRecruitingConditionsOpenChange,
   selectedCandidateId,
@@ -712,6 +718,8 @@ export function CandidateDashboardPane({
   /** Pane3 「現時点評価」カードの開閉 (Workspace 側で状態保持) */
   evaluationOpen: boolean;
   onEvaluationOpenChange: (open: boolean) => void;
+  /** 4 軸スコア更新ハンドラ (星クリックで 1-5、× で null リセット) */
+  onSetAxisScore: (axisKey: AxisKey, value: number | null) => void;
   /** Pane3 「営業条件」カードの開閉 (Workspace 側で状態保持) */
   recruitingConditionsOpen: boolean;
   onRecruitingConditionsOpenChange: (open: boolean) => void;
@@ -774,6 +782,7 @@ export function CandidateDashboardPane({
             scorecards={scorecards}
             open={evaluationOpen}
             onOpenChange={onEvaluationOpenChange}
+            onSetAxisScore={onSetAxisScore}
           />
 
           {/* key={selectedCandidateId} で候補者切替時に remount。
