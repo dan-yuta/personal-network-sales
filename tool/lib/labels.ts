@@ -5,7 +5,7 @@
  * 後フェーズで評価観点・ステージを Tagged Union 化したデータ駆動に切り替える予定。
  */
 
-import { type AxisKey, type StageKey } from "@/lib/schema";
+import { type AxisKey, type PriorityKey, type StageKey } from "@/lib/schema";
 
 // ===== 評価観点（4 軸固定） =====
 
@@ -41,6 +41,39 @@ export const STAGE_LABELS: Record<StageKey, string> = {
 // Pane 2 末尾の「アーカイブ済み」グループの見出しラベル。
 // archived === true の候補者を束ねる仮想グループで、ステージとは直交した概念。
 export const ARCHIVED_GROUP_LABEL = "アーカイブ済み";
+
+// ===== 優先度ラベルとテーマ =====
+
+/** 優先度キー → 日本語表示ラベル */
+export const PRIORITY_LABELS: Record<PriorityKey, string> = {
+  high: "高",
+  medium: "中",
+  low: "低",
+};
+
+/** 優先度ごとの配色 (Pane2 マーカー / Pane3 セレクトで共通) */
+export const PRIORITY_THEME: Record<
+  PriorityKey,
+  {
+    /** マーカーや active 背景: bg + text + border */
+    activeClass: string;
+    /** Pane2 ドット用 (text-color のみ、bg-current で塗る) */
+    dotClass: string;
+  }
+> = {
+  high: {
+    activeClass: "border-rose-300 bg-rose-100 text-rose-700",
+    dotClass: "text-rose-500",
+  },
+  medium: {
+    activeClass: "border-amber-300 bg-amber-100 text-amber-700",
+    dotClass: "text-amber-500",
+  },
+  low: {
+    activeClass: "border-slate-300 bg-slate-100 text-slate-600",
+    dotClass: "text-slate-400",
+  },
+};
 
 // ===== ステージ別テーマカラー =====
 

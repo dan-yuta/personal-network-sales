@@ -13,6 +13,9 @@
       "desiredSalaryMin": "80",
       "desiredSalaryMax": "150",
       "availableStartDate": "2026-05-25",
+      "nextActionMemo": "展示会(6月)同行打診の電話",
+      "priority": "medium",
+      "backNetwork": "○○同期会の幹事",
       "careerText": "○○商事 営業部長(15年)。50名規模の営業組織を統括。\n社内システムの内製化に強い関心。直近 Salesforce 導入を検討中。\n紹介ネットワーク: ○○同期会の幹事候補。",
       "motivationFull": "ご無沙汰しております。本日(5/25)中に再連絡予定 — 展示会(6月)の同行案内を切り出す。\n直近の関心: 営業組織のデジタル化、SaaSツール選定。\n優先度: 中。決裁権はあるがレスポンス遅め。"
     },
@@ -49,6 +52,9 @@
       "desiredSalaryMin": "200",
       "desiredSalaryMax": "500",
       "availableStartDate": "2026-05-28",
+      "nextActionMemo": "現場責任者(佐藤さん)同席で訪問",
+      "priority": "high",
+      "backNetwork": "△△会幹事の山田さん",
       "careerText": "△△医療法人会 事務局長(8年)。\nクリニック10院をグループ運営、計300名規模。\nバック人脈: △△会幹事(山田さん)。\n紹介元: 山田さん経由で 2025/3月 初接触。",
       "motivationFull": "役員会(5/22)で導入検討と返答。\n次回(5/28)は現場責任者の佐藤さん同席で訪問予定。\n決裁ライン: 理事長→事務局長→現場責任者。\n優先度: 高。商談額が大きく、紹介の連鎖も期待できる。"
     },
@@ -85,6 +91,9 @@
       "desiredSalaryMin": "60",
       "desiredSalaryMax": "120",
       "availableStartDate": "2026-05-30",
+      "nextActionMemo": "提案書ドラフトの返答確認",
+      "priority": "medium",
+      "backNetwork": "山田さん",
       "careerText": "□□NPO法人 代表理事(6年)。\n地域包括ケアの DX に関心あり。会員300名・年間予算8000万円規模。\n紹介元: 山田さん経由(2026/4月初接触)。",
       "motivationFull": "提案資料を送付済み。来週(5/30)返答予定。\n論点: 予算規模に合うサブスクプラン、データ移行サポートの有無。\n優先度: 中。意思決定スピード早い、即決の可能性あり。"
     },
@@ -121,6 +130,9 @@
       "desiredSalaryMin": "100",
       "desiredSalaryMax": "300",
       "availableStartDate": "2026-06-15",
+      "nextActionMemo": "ランチMTG: 加藤さん紹介状況確認",
+      "priority": "high",
+      "backNetwork": "(リファラル元、紹介ネットワークの核)",
       "careerText": "××商店 経営者(10年)。アパレル小売を都内3店舗で展開。\nリファラル元として最重要人物。鈴木さん・佐藤さんを紹介済み。\n複数の経営者ネットワークあり、追加紹介の可能性大。",
       "motivationFull": "契約済 (2026/3月)。月1回のランチMTGを継続中。\n直近: 派生紹介依頼を3名分実施。鈴木・佐藤の他、加藤さんも紹介見込み。\n優先度: 最高。継続関係 + 紹介の連鎖の核。"
     },
@@ -157,6 +169,9 @@
       "desiredSalaryMin": "40",
       "desiredSalaryMax": "80",
       "availableStartDate": "2026-05-28",
+      "nextActionMemo": "オンライン会議で具体提案",
+      "priority": "low",
+      "backNetwork": "◇◇コミュニティ運営",
       "careerText": "個人事業主(コンサルティング、4年)。\n地方在住。中小企業向け業務改善を主領域。\n間柄: ◇◇コミュニティ経由(2026/4月接触)。",
       "motivationFull": "オンライン会議(5/6)で初回挨拶済み。\n次回(5/28)は具体提案フェーズへ。クライアント企業への提案ツールとして検討。\n優先度: 低〜中。ご本人ユースは小さいが、紹介ポテンシャルあり。"
     },
@@ -193,6 +208,9 @@
       "desiredSalaryMin": "150",
       "desiredSalaryMax": "400",
       "availableStartDate": "2026-05-26",
+      "nextActionMemo": "オンライン MTG: 営業組織拡大の具体提案",
+      "priority": "high",
+      "backNetwork": "(直接、ビジネス交流会経由)",
       "careerText": "株式会社●●テック CEO(創業4年)。\nSaaS スタートアップ(B2B 向け請求書管理)。社員25名。\n直近シリーズB調達完了で営業組織を急拡大中。",
       "motivationFull": "5/20交流会後 LINE で当日中に再連絡。レスポンス早い。\nCEO 直決裁、即断即決の社風。\n5/26 オンラインミーティング設定済み。\n優先度: 高。スタートアップ特有のスピード感あり。"
     },
@@ -229,6 +247,9 @@
       "desiredSalaryMin": "120",
       "desiredSalaryMax": "250",
       "availableStartDate": "2026-06-02",
+      "nextActionMemo": "提案書持参で 2 回目面談",
+      "priority": "high",
+      "backNetwork": "山田さん",
       "careerText": "渡辺税理士事務所 代表税理士(独立5年)。\nスタートアップ・小規模事業者の顧問60社。\n顧問先への提案ツールとしても興味あり(横展開ポテンシャル)。\n紹介元: 山田さん経由(2026/5月初接触)。",
       "motivationFull": "5/15 初回面談 90分。具体的な活用シーンを5つほどヒアリング。\n6/2 提案書持参で2回目面談予定。\n決裁: 代表本人(即決可能)。\n優先度: 高。顧問先60社への横展開で紹介の連鎖も期待。"
     },
@@ -265,6 +286,9 @@
       "desiredSalaryMin": "60",
       "desiredSalaryMax": "120",
       "availableStartDate": "2026-05-27",
+      "nextActionMemo": "経営会議同席で社内検討状況確認",
+      "priority": "medium",
+      "backNetwork": "◇◇製造業オーナー会",
       "careerText": "伊藤精密工業 代表取締役(2代目、社歴18年)。\n自動車部品の精密加工、社員45名・年商12億。\nIT 投資には保守的だが、最近事業承継準備で見直し開始。",
       "motivationFull": "4/28 オーナー会で初接触。ITには慎重な姿勢。\n5/12 工場見学で2回目接触。現場感を重視するタイプ。\n5/27 経営会議に同席して社内検討状況を確認予定。\n優先度: 中。意思決定遅め、長期目線が必要。"
     },
@@ -301,6 +325,9 @@
       "desiredSalaryMin": "80",
       "desiredSalaryMax": "180",
       "availableStartDate": "2026-06-20",
+      "nextActionMemo": "運用開始 (6/20) の導入支援準備",
+      "priority": "high",
+      "backNetwork": "山田さん",
       "careerText": "学校法人加藤学園 理事(専門学校2校運営、社歴12年)。\n保育士・調理師の養成、生徒数計800名。\n営業活動より入学相談業務の効率化を重視。",
       "motivationFull": "契約済 (2026/5月)。月額12万円プランで導入。\n運用開始: 6/20。導入支援は段木が直接担当。\nオンボーディング後、姉妹校(高知校)への横展開も視野。\n優先度: 高。継続関係維持と派生紹介の両面で重要。"
     },
@@ -337,6 +364,9 @@
       "desiredSalaryMin": "30",
       "desiredSalaryMax": "60",
       "availableStartDate": "2026-06-05",
+      "nextActionMemo": "ランチ MTG で具体提案 + LINE 公式アカウント活用案",
+      "priority": "medium",
+      "backNetwork": "(直接、△△交流会経由)",
       "careerText": "株式会社きむら食堂 代表(独立3年)。\nカフェ・居酒屋を都内2店舗。月商600万円。\n2号店出店検討中、店舗運営の見える化に関心。",
       "motivationFull": "5/18 交流会で初接触。フランクな雰囲気で話しやすい。\nLINE 公式アカウントの活用法も合わせて相談される。\n6/5 ランチ MTG で具体提案予定。\n優先度: 中。商談額は小さいが、飲食業界での紹介力あり。"
     },
@@ -373,6 +403,9 @@
       "desiredSalaryMin": "100",
       "desiredSalaryMax": "200",
       "availableStartDate": "2026-11-01",
+      "nextActionMemo": "上位プラン更新タイミングで再提案",
+      "priority": "medium",
+      "backNetwork": "(前職時代の繋がり)",
       "careerText": "株式会社●●システムズ 取締役(社員80名・受託開発)。\n社内 SFA 導入の比較検討の中で、競合プロダクトに最終決定。\n関係性自体は良好で、別案件で再アプローチの余地あり。",
       "motivationFull": "失注 (2026/5月)。理由: 大手SFAとの機能比較で見送り。\n中島さん本人は弊社プロダクトを高く評価。\n半年後の上位プラン更新タイミングで再提案合意。\n優先度: 中。関係性は維持、半年後再アプローチ。"
     },
@@ -409,6 +442,9 @@
       "desiredSalaryMin": "40",
       "desiredSalaryMax": "80",
       "availableStartDate": "2027-01-15",
+      "nextActionMemo": "来年度予算編成後 (2027/1月) に再アプローチ",
+      "priority": "low",
+      "backNetwork": "▲▲女性経営者会",
       "careerText": "林ファイナンシャル株式会社 代表(独立保険代理店、社歴4年)。\n中小企業オーナー向けの法人保険提案を主軸。社員5名。\n小規模なため予算捻出が難しいが、関心は高い。",
       "motivationFull": "失注 (2026/5月)。理由: 予算面で見送り、来年度予算編成後に再検討合意。\n来期予算が見えてきたら再アプローチ予定。\n優先度: 低。商談額は小さいが、保険業界での紹介力あり。"
     },
@@ -445,6 +481,9 @@
       "desiredSalaryMin": "150",
       "desiredSalaryMax": "300",
       "availableStartDate": "2026-09-01",
+      "nextActionMemo": "親会社中期計画決定後 (8月) に再開、月1の情報交換は継続",
+      "priority": "medium",
+      "backNetwork": "山田さん",
       "careerText": "松本建設株式会社 営業部長(社員120名・建設業)。\n親会社○○ホールディングス傘下、IT投資は親会社方針による統一決定。\n本人は前向きだが、親会社が来期中期計画策定中で動けず。",
       "motivationFull": "保留 (2026/5月)。理由: 親会社の中期計画決定待ち(8月予定)。\n決定後、グループ各社の IT投資方針が定まる。\n本人は導入意欲あり、繋ぎとして月1の情報交換は継続。\n優先度: 中〜高。動き出したら大型案件 (グループ全体への横展開可能性)。"
     },
@@ -481,6 +520,9 @@
       "desiredSalaryMin": "50",
       "desiredSalaryMax": "100",
       "availableStartDate": "2026-12-01",
+      "nextActionMemo": "出店後 (年末頃) 再アプローチ、月1の近況報告は継続",
+      "priority": "low",
+      "backNetwork": "(Webセミナー経由、直接接触)",
       "careerText": "株式会社F-Commerce 代表(EC運営、社員15名)。\nファッション雑貨の D2C ブランド、月商3000万円。\n直近、楽天モールへの再出店準備で社内リソースが集中。",
       "motivationFull": "保留 (2026/5月)。理由: 楽天モール出店準備で半年は社内リソース確保が難しい。\n年末以降、再検討の合意。それまでは月1回近況報告レベル。\n優先度: 低〜中。出店後は再アプローチ可能。"
     },

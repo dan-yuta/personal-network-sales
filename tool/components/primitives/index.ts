@@ -26,6 +26,9 @@ export type {
 export { InlineSelectField } from "./InlineSelectField";
 export type { InlineSelectFieldProps } from "./InlineSelectField";
 
+export { PrioritySelectField } from "./PrioritySelectField";
+export type { PrioritySelectFieldProps } from "./PrioritySelectField";
+
 export { InlineTextareaField } from "./InlineTextareaField";
 export type { InlineTextareaFieldProps } from "./InlineTextareaField";
 

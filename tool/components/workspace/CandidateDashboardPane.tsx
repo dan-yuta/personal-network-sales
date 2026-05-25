@@ -71,6 +71,7 @@ import {
   InlineDateField,
   InlineTextareaField,
   InlineFieldRow,
+  PrioritySelectField,
   ScoreLabel,
   SectionLabel,
 } from "@/components/primitives";
@@ -259,11 +260,28 @@ function RecruitingConditionsCard({
                   </span>
                 </div>
               </InlineFieldRow>
+              <InlineFieldRow label="優先度">
+                <PrioritySelectField
+                  value={profile.priority}
+                  onSave={(v) => updateField("priority", v)}
+                  ariaLabel="優先度"
+                />
+              </InlineFieldRow>
               <InlineFieldRow label="次回アクション日">
                 <InlineDateField
                   value={profile.availableStartDate}
                   onSave={(v) => updateField("availableStartDate", v)}
                   ariaLabel="次回アクション日"
+                />
+              </InlineFieldRow>
+              <InlineFieldRow label="次回の用件">
+                {/* 「次回アクション日」とセットで「何をするか」を 1 行メモ。
+                    日付だけだと「5/27 に何をするんだっけ」が分からなくなる。 */}
+                <InlineTextField
+                  value={profile.nextActionMemo}
+                  onSave={(v) => updateField("nextActionMemo", v)}
+                  ariaLabel="次回の用件"
+                  placeholder="例: 電話で見積確認"
                 />
               </InlineFieldRow>
             </dl>
@@ -366,6 +384,16 @@ function ApplicationInfoCardContent({
               value={profile.source}
               onSave={(v) => updateField("source", v)}
               ariaLabel="接触経路"
+            />
+          </InlineFieldRow>
+          <InlineFieldRow label="バック人脈">
+            {/* 紹介の後ろ盾の名前 (提出図解 Section 0 で説明済み概念)。
+                例: 「△△会幹事の山田さん」「○○同期会の幹事」 */}
+            <InlineTextField
+              value={profile.backNetwork}
+              onSave={(v) => updateField("backNetwork", v)}
+              ariaLabel="バック人脈"
+              placeholder="例: △△会幹事の山田さん"
             />
           </InlineFieldRow>
           <InlineFieldRow label="営業担当">
