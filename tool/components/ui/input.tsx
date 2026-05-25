@@ -3,9 +3,18 @@ import { Input as InputPrimitive } from "@base-ui/react/input"
 
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+// React 19 では関数コンポーネントが ref を通常の prop として受け取れる
+// (ref-as-prop)。InlineTextField から `/` キー focus や autosave 用の blur を
+// 呼ぶために、ref を InputPrimitive に forward しておく。
+function Input({
+  className,
+  type,
+  ref,
+  ...props
+}: React.ComponentProps<"input">) {
   return (
     <InputPrimitive
+      ref={ref}
       type={type}
       data-slot="input"
       className={cn(
