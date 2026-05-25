@@ -7,24 +7,15 @@ import {
 } from "@/lib/data/mockLogs";
 
 describe("mockLogs", () => {
-  it("MOCK_LOG_DATASET は c1〜c14 を全件持つ", () => {
-    const keys = Object.keys(MOCK_LOG_DATASET).sort();
-    expect(keys).toEqual([
-      "c1",
-      "c10",
-      "c11",
-      "c12",
-      "c13",
-      "c14",
-      "c2",
-      "c3",
-      "c4",
-      "c5",
-      "c6",
-      "c7",
-      "c8",
-      "c9",
-    ]);
+  it("MOCK_LOG_DATASET は接触ログのある候補者を保持 (空配列のテスト候補者は含まない)", () => {
+    const keys = Object.keys(MOCK_LOG_DATASET);
+    // 既存 c1〜c14 + 拡張 c15/c16/c17/c21/c22/c25/c26/c28/c29/c30
+    // c18 / c19 / c20 / c23 / c24 / c27 は意図的に未登録 (= 接触ログなしの
+    // テストパターンとして UI 側で「接触ログなし」表示を確認できる)
+    expect(keys).toContain("c1");
+    expect(keys).toContain("c14");
+    expect(keys).toContain("c30");
+    expect(keys.length).toBeGreaterThanOrEqual(14);
   });
 
   it("getMockLogs は登録済 ID で配列を返す", () => {

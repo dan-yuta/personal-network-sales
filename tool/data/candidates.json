@@ -544,5 +544,533 @@
       }
     ],
     "stage": "held"
+  },
+  {
+    "id": "c15",
+    "profile": {
+      "name": "Smith John",
+      "furigana": "スミス ジョン",
+      "birthday": "1979-06-12",
+      "source": "国際カンファレンス(東京)で名刺交換",
+      "email": "j.smith@globaltech-example.com",
+      "phone": "+1-415-555-0182",
+      "address": "東京都港区赤坂 6-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "300",
+      "desiredSalaryMax": "800",
+      "availableStartDate": "2026-06-03",
+      "nextActionMemo": "英語提案資料を準備して再ミーティング",
+      "priority": "high",
+      "backNetwork": "GlobalTech 日本支社の上司",
+      "careerText": "GlobalTech Inc. APAC Director (社歴 6 年)。\nクラウドインフラ事業、年商 30 億 USD 規模。\n日本オフィス拡大に伴い、日本人向け営業ツール導入を検討中。",
+      "motivationFull": "5/22 名刺交換、5/29 オンラインで初回打ち合わせ予定。\n言語は英語。日本の商習慣を理解しているがツールは英語版希望。\n優先度: 高。LTV が大きく、本国 (米国) への横展開も視野。"
+    },
+    "scorecards": [
+      {
+        "stage": "first",
+        "label": "現時点評価",
+        "date": "2026-05-22",
+        "format": "オンライン",
+        "interviewer": "段木",
+        "decision": "ヒアリング継続中",
+        "axisScores": {
+          "achievements": 5,
+          "thinkingAbility": 5,
+          "communication": 4,
+          "cultureFit": 3
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "first"
+  },
+  {
+    "id": "c16",
+    "profile": {
+      "name": "山本 健太郎",
+      "furigana": "ヤマモト ケンタロウ",
+      "birthday": "1971-03-28",
+      "source": "前職セミナー登壇後の質疑応答",
+      "email": "yamamoto.kentaro@example.co.jp",
+      "phone": "090-1616-1616",
+      "address": "東京都文京区本郷 3-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "200",
+      "desiredSalaryMax": "500",
+      "availableStartDate": "2026-06-10",
+      "nextActionMemo": "セミナー資料の追加データ送付",
+      "priority": "medium",
+      "backNetwork": "前職時代の研修講師仲間",
+      "careerText": "山本コンサルティング 代表(独立 8 年)。\n中堅企業向けの DX 推進支援。クライアント 40 社。\nセミナー集客力あり、年間 30 回登壇。",
+      "motivationFull": "5/18 登壇セミナー後、立ち話で興味を示してくれた。\n6/10 個別商談予定。クライアントへの紹介ポテンシャルも大。\n優先度: 中。"
+    },
+    "scorecards": [
+      {
+        "stage": "screening",
+        "label": "現時点評価",
+        "date": "2026-05-18",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "初期評価",
+        "axisScores": {
+          "achievements": 4,
+          "thinkingAbility": 4,
+          "communication": 4,
+          "cultureFit": 4
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "screening"
+  },
+  {
+    "id": "c17",
+    "profile": {
+      "name": "エマ・ワトソン",
+      "furigana": "エマ ワトソン",
+      "birthday": "1984-04-15",
+      "source": "外資系経営者交流会で初接触",
+      "email": "emma.w@example-asia.com",
+      "phone": "+44-20-7946-0958",
+      "address": "東京都渋谷区代官山 1-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "150",
+      "desiredSalaryMax": "350",
+      "availableStartDate": "2026-05-29",
+      "nextActionMemo": "契約書ドラフト送付・ロンドンとの時差調整",
+      "priority": "high",
+      "backNetwork": "外資系経営者交流会の幹事",
+      "careerText": "Asian Bridge Consulting Tokyo Branch Manager (在日 5 年)。\nロンドン本社・日本支社の橋渡し役。社員 12 名。\n本社のグローバル ツール導入方針と整合させたい意向。",
+      "motivationFull": "ロンドン本社との比較検討中。日本ローカライズの強みを訴求。\n5/29 最終提案、6/5 契約書送付予定。\n優先度: 高。アジア各国への横展開可能性も。"
+    },
+    "scorecards": [
+      {
+        "stage": "second",
+        "label": "現時点評価",
+        "date": "2026-05-20",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "クロージング段階",
+        "axisScores": {
+          "achievements": 4,
+          "thinkingAbility": 5,
+          "communication": 5,
+          "cultureFit": 4
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "second"
+  },
+  {
+    "id": "c18",
+    "profile": {
+      "name": "田中 雅",
+      "furigana": "",
+      "birthday": "",
+      "source": "知人紹介(詳細未確認)",
+      "email": "",
+      "phone": "090-1818-1818",
+      "address": "",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "nextActionMemo": "詳細プロフィールのヒアリング",
+      "priority": "",
+      "backNetwork": "",
+      "careerText": "(プロフィール詳細未取得)",
+      "motivationFull": "5/24 知人経由で連絡先のみ取得。詳細未確認。\n来週ヒアリングのアポイント設定予定。"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c19",
+    "profile": {
+      "name": "Chen Wei",
+      "furigana": "チェン ウェイ",
+      "birthday": "1990-09-08",
+      "source": "技術勉強会(渋谷)で名刺交換",
+      "email": "chen.wei@example-tech.cn",
+      "phone": "",
+      "address": "",
+      "recruiter": "段木",
+      "desiredSalaryMin": "50",
+      "desiredSalaryMax": "120",
+      "availableStartDate": "2026-06-12",
+      "nextActionMemo": "中国語提案資料の準備",
+      "priority": "low",
+      "backNetwork": "",
+      "careerText": "在日華僑 IT エンジニア、フリーランス 3 年。\n日中両言語対応、中国本土クライアントとの橋渡し業務。\n小規模だが、中国市場へのチャネル開拓ポテンシャルあり。",
+      "motivationFull": "5/20 勉強会後 LinkedIn でつながった。日本語可、英語も可。\n中国本土への展開支援が興味あり、双方向で連携検討。\n優先度: 低だが将来性ある。"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c20",
+    "profile": {
+      "name": "黒田 紗良",
+      "furigana": "クロダ サラ",
+      "birthday": "1992-12-25",
+      "source": "Instagram 経由 (DM 営業)",
+      "email": "kuroda.sara@example.com",
+      "phone": "080-2020-2020",
+      "address": "東京都新宿区高田馬場 4-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "20",
+      "desiredSalaryMax": "50",
+      "availableStartDate": "2026-06-08",
+      "nextActionMemo": "オンライン面談で予算感の擦り合わせ",
+      "priority": "low",
+      "backNetwork": "",
+      "careerText": "個人インフルエンサー (フォロワー 8 万人、ファッション分野)。\n物販始めたばかり、商品管理ツールに関心あり。",
+      "motivationFull": "Instagram の DM から問い合わせ。予算感はかなり低め。\n本人ニーズより、フォロワーへの紹介ポテンシャルが価値。\n優先度: 低。"
+    },
+    "scorecards": [],
+    "stage": "first"
+  },
+  {
+    "id": "c21",
+    "profile": {
+      "name": "O'Brien Patrick",
+      "furigana": "オブライエン パトリック",
+      "birthday": "1976-11-30",
+      "source": "アイリッシュコミュニティ(東京)",
+      "email": "p.obrien@example-eu.ie",
+      "phone": "+353-1-555-0100",
+      "address": "東京都品川区天王洲 2-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "100",
+      "desiredSalaryMax": "250",
+      "availableStartDate": "2026-08-15",
+      "nextActionMemo": "本国予算承認後 (8月) に再開",
+      "priority": "medium",
+      "backNetwork": "アイリッシュ商工会議所代表",
+      "careerText": "Celtic Solutions 東京駐在員 (社歴 4 年)。\nアイルランド本社の決裁待ちで、夏まで動けず。\n好感触だが意思決定が遅め。",
+      "motivationFull": "保留 (2026/5月)。本国の Q3 予算承認待ち (8 月予定)。\n月 1 で近況交換、再開時に即動ける関係性を維持。\n優先度: 中。"
+    },
+    "scorecards": [
+      {
+        "stage": "held",
+        "label": "保留時評価",
+        "date": "2026-05-08",
+        "format": "オンライン",
+        "interviewer": "段木",
+        "decision": "保留 (本国予算待ち)",
+        "axisScores": {
+          "achievements": 4,
+          "thinkingAbility": 4,
+          "communication": 5,
+          "cultureFit": 3
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "held"
+  },
+  {
+    "id": "c22",
+    "profile": {
+      "name": "鈴木 ゆかり",
+      "furigana": "スズキ ユカリ",
+      "birthday": "1980-07-19",
+      "source": "山田さんからの紹介(3回目)",
+      "email": "suzuki.yukari@example.com",
+      "phone": "090-2222-3333",
+      "address": "千葉県浦安市舞浜 1-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "120",
+      "desiredSalaryMax": "240",
+      "availableStartDate": "2026-06-25",
+      "nextActionMemo": "運用開始 (6/25) 前の最終擦り合わせ",
+      "priority": "high",
+      "backNetwork": "山田さん (同一人物経由 3 件目)",
+      "careerText": "鈴木調剤薬局 代表薬剤師(独立 7 年)。3 店舗運営、社員 12 名。\n薬局 DX に強い関心、ChatGPT 導入実績もあり。",
+      "motivationFull": "契約済 (2026/5月)。山田さん経由の 3 件目契約、信頼ベース固い。\n6/25 運用開始。導入支援は段木が継続。\n優先度: 高。"
+    },
+    "scorecards": [
+      {
+        "stage": "final",
+        "label": "現時点評価",
+        "date": "2026-05-20",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "契約済",
+        "axisScores": {
+          "achievements": 5,
+          "thinkingAbility": 4,
+          "communication": 5,
+          "cultureFit": 5
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "final"
+  },
+  {
+    "id": "c23",
+    "profile": {
+      "name": "田村",
+      "furigana": "",
+      "birthday": "",
+      "source": "",
+      "email": "",
+      "phone": "",
+      "address": "",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "nextActionMemo": "",
+      "priority": "",
+      "backNetwork": "",
+      "careerText": "",
+      "motivationFull": "(名刺管理から取り込んだ未確認候補。情報なし。)"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c24",
+    "profile": {
+      "name": "Garcia Maria",
+      "furigana": "ガルシア マリア",
+      "birthday": "1988-02-14",
+      "source": "ラテンビジネス交流会(東京)",
+      "email": "maria.garcia@example-latam.com",
+      "phone": "+34-91-555-2024",
+      "address": "東京都目黒区祐天寺 2-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "60",
+      "desiredSalaryMax": "150",
+      "availableStartDate": "2026-06-18",
+      "nextActionMemo": "スペイン語 vs 英語どちらで進めるか確認",
+      "priority": "medium",
+      "backNetwork": "スペイン大使館商務部",
+      "careerText": "Latin Trade Japan 代表(スペイン出身、在日 7 年)。\n日本-中南米間の貿易仲介、年商 4 億円。\n社内ツールの多言語対応に強い関心。",
+      "motivationFull": "5/22 交流会で初接触。日本語も話せるが、中南米クライアントとの\n共有用にスペイン語 UI も希望。\n優先度: 中。"
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c25",
+    "profile": {
+      "name": "中島 卓",
+      "furigana": "ナカジマ タク",
+      "birthday": "1983-05-06",
+      "source": "勉強会(製造業 DX)",
+      "email": "nakajima.taku@example.co.jp",
+      "phone": "090-2525-2525",
+      "address": "神奈川県川崎市幸区 3-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "80",
+      "desiredSalaryMax": "180",
+      "availableStartDate": "2026-06-15",
+      "nextActionMemo": "工場見学+具体提案",
+      "priority": "",
+      "backNetwork": "",
+      "careerText": "中島精工 専務取締役(2 代目)。自動車部品加工、社員 30 名。\n父親が現役会長、IT 投資は会長承認が必要。",
+      "motivationFull": "5/15 勉強会後の懇親会で意気投合。本人前向き。\n6/15 工場見学アポ。決裁は会長次第。\n優先度: 未設定 (情報待ち)。"
+    },
+    "scorecards": [
+      {
+        "stage": "second",
+        "label": "現時点評価",
+        "date": "2026-05-20",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "商談継続中",
+        "axisScores": {
+          "achievements": 3,
+          "thinkingAbility": 4,
+          "communication": 3,
+          "cultureFit": 4
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "second"
+  },
+  {
+    "id": "c26",
+    "profile": {
+      "name": "Park Min-jun",
+      "furigana": "パク ミンジュン",
+      "birthday": "1991-08-20",
+      "source": "韓国系コミュニティ(新大久保)",
+      "email": "park.minjun@example-kr.co.kr",
+      "phone": "070-2626-2626",
+      "address": "東京都新宿区大久保 2-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "70",
+      "desiredSalaryMax": "180",
+      "availableStartDate": "2026-06-05",
+      "nextActionMemo": "韓国本社の意思決定者を交えたオンライン会議",
+      "priority": "high",
+      "backNetwork": "韓国系コミュニティ運営",
+      "careerText": "K-Beauty Japan 営業部長(韓国本社の日本法人、社歴 3 年)。\n化粧品 D2C、月商 2 億円。日韓両国スタッフ計 35 名。\n本社との意思疎通ツールに関心。",
+      "motivationFull": "5/18 コミュニティ会合で意気投合、5/26 オンラインで初商談。\n日本語堪能、韓国語UIも欲しいとのこと。\n優先度: 高。本社採用なら韓国市場展開可能。"
+    },
+    "scorecards": [
+      {
+        "stage": "first",
+        "label": "現時点評価",
+        "date": "2026-05-26",
+        "format": "オンライン",
+        "interviewer": "段木",
+        "decision": "ヒアリング継続中",
+        "axisScores": {
+          "achievements": 4,
+          "thinkingAbility": 4,
+          "communication": 5,
+          "cultureFit": 4
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "first"
+  },
+  {
+    "id": "c27",
+    "profile": {
+      "name": "沢田",
+      "furigana": "",
+      "birthday": "",
+      "source": "交流会(名前のみメモ)",
+      "email": "",
+      "phone": "",
+      "address": "",
+      "recruiter": "段木",
+      "desiredSalaryMin": "",
+      "desiredSalaryMax": "",
+      "availableStartDate": "",
+      "nextActionMemo": "",
+      "priority": "",
+      "backNetwork": "",
+      "careerText": "",
+      "motivationFull": ""
+    },
+    "scorecards": [],
+    "stage": "screening"
+  },
+  {
+    "id": "c28",
+    "profile": {
+      "name": "渡部 翔",
+      "furigana": "ワタナベ ショウ",
+      "birthday": "1985-10-03",
+      "source": "Web 広告流入(過去キャンペーン)",
+      "email": "watanabe.sho@example.com",
+      "phone": "090-2828-2828",
+      "address": "東京都江東区豊洲 3-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "30",
+      "desiredSalaryMax": "60",
+      "availableStartDate": "2027-03-01",
+      "nextActionMemo": "1 年後の予算策定タイミングで再アプローチ",
+      "priority": "low",
+      "backNetwork": "",
+      "careerText": "渡部税理士事務所 代表(独立 5 年)。\n中小企業 20 社の顧問。提案は前向きに聞いてくれた。",
+      "motivationFull": "失注 (2026/5月)。理由: 別の SaaS と契約済み、解約タイミング遅め。\n1 年後の予算策定タイミングで再提案合意。\n優先度: 低だが関係性は維持。"
+    },
+    "scorecards": [
+      {
+        "stage": "lost",
+        "label": "失注時評価",
+        "date": "2026-05-09",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "失注 (他社契約済み)",
+        "axisScores": {
+          "achievements": 3,
+          "thinkingAbility": 3,
+          "communication": 4,
+          "cultureFit": 3
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "lost"
+  },
+  {
+    "id": "c29",
+    "profile": {
+      "name": "Tanaka Akiko",
+      "furigana": "タナカ アキコ",
+      "birthday": "1977-01-22",
+      "source": "海外日本人経営者会(オンライン)",
+      "email": "akiko.tanaka@example-au.com.au",
+      "phone": "+61-2-9876-5432",
+      "address": "Sydney, Australia",
+      "recruiter": "段木",
+      "desiredSalaryMin": "200",
+      "desiredSalaryMax": "500",
+      "availableStartDate": "2026-09-15",
+      "nextActionMemo": "豪州オフィス開設後の本格商談",
+      "priority": "medium",
+      "backNetwork": "海外日本人経営者会の運営委員",
+      "careerText": "Tanaka Sushi Group オーナー (シドニー在住、社歴 18 年)。\n豪州内 5 店舗の和食レストラン経営。日本国内 1 店舗開設準備中。",
+      "motivationFull": "保留 (2026/5月)。理由: 国内 1 号店オープン (9月) まで動けず。\nオープン後、グループ全体での導入検討予定。\n優先度: 中。豪州展開も視野。"
+    },
+    "scorecards": [
+      {
+        "stage": "held",
+        "label": "保留時評価",
+        "date": "2026-05-12",
+        "format": "オンライン",
+        "interviewer": "段木",
+        "decision": "保留 (オープン待ち)",
+        "axisScores": {
+          "achievements": 5,
+          "thinkingAbility": 4,
+          "communication": 4,
+          "cultureFit": 4
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "held"
+  },
+  {
+    "id": "c30",
+    "profile": {
+      "name": "高田 美咲",
+      "furigana": "タカダ ミサキ",
+      "birthday": "1973-12-11",
+      "source": "山田さんからの紹介(4回目)",
+      "email": "takada.misaki@example.com",
+      "phone": "090-3030-3030",
+      "address": "東京都千代田区番町 5-X-X",
+      "recruiter": "段木",
+      "desiredSalaryMin": "180",
+      "desiredSalaryMax": "400",
+      "availableStartDate": "2026-07-10",
+      "nextActionMemo": "契約条件最終擦り合わせ + 紹介ネットワーク図共有",
+      "priority": "high",
+      "backNetwork": "山田さん (4 件目)",
+      "careerText": "高田産業 代表取締役(2 代目、社歴 22 年)。\n商業ビル管理、年商 18 億円。社員 80 名。\n業界内に強い紹介ネットワークあり、業界誌寄稿多数。",
+      "motivationFull": "山田さん経由の 4 件目候補。5/21 初回面談、強い関心。\n6/30 契約予定。業界内 5 社への横展開も視野。\n優先度: 高。"
+    },
+    "scorecards": [
+      {
+        "stage": "second",
+        "label": "現時点評価",
+        "date": "2026-05-21",
+        "format": "総合",
+        "interviewer": "段木",
+        "decision": "クロージング段階",
+        "axisScores": {
+          "achievements": 5,
+          "thinkingAbility": 5,
+          "communication": 4,
+          "cultureFit": 5
+        },
+        "attachments": []
+      }
+    ],
+    "stage": "second"
   }
 ]
