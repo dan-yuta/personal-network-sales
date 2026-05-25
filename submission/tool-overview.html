@@ -659,6 +659,25 @@
     </div>
   </div>
 
+  <!-- 実画面スクリーンショット (Phase 1 ローカル動作の証跡) -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 mb-3">
+      <i data-lucide="camera" class="w-4 h-4 text-ads-accent"></i>
+      <p class="text-sm font-bold text-slate-800">実画面 (Phase 1 ローカル動作)</p>
+    </div>
+    <div class="rounded-xl overflow-hidden border border-ads-border shadow-md bg-ads-surface">
+      <img src="assets/screenshots/01-overview.png"
+           alt="人脈営業ツールの実画面スクリーンショット。鈴木太郎を選択した状態で、左から Pane1 ステージタブ、Pane2 営業候補リスト、Pane3 候補者ダッシュボード (現時点評価 + 営業条件)、Pane4 接触ログタブが横並びで表示されている。"
+           class="w-full h-auto block"
+           loading="lazy">
+    </div>
+    <p class="text-xs text-ads-muted mt-2 leading-relaxed">
+      実際の画面 (鈴木 太郎 さんを選択中)。<strong class="text-slate-700">Pane3</strong> の「現時点評価 (4軸)」と「営業条件」が開いた状態で、星クリックで評価を直接編集できる。
+      右端の <strong class="text-slate-700">Pane4</strong> 接触ログタブには直近 3 件の履歴がタイムライン表示されている。
+      30 名のサンプル候補者には日本人・海外名 (英語/カタカナ表記) ・データ欠損パターンを混在させて、運用上のさまざまなケースに対応している。
+    </p>
+  </div>
+
   <!-- 操作動線 -->
   <div class="flex flex-wrap items-center justify-center gap-2 mb-8 text-xs">
     <div class="bg-amber-100 text-amber-900 font-bold rounded-full px-3 py-1.5 flex items-center gap-1.5">
@@ -1374,6 +1393,132 @@
       </p>
       <p class="text-sm text-ads-muted leading-relaxed">
         Notion / Anthropic API のセットアップが終わる前から、接触ログ・連絡文タブを「サンプルデータで動く状態」に。発表時のデモも API なしで完結。後で本物の API に切り替え可能。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION H: 苦戦したポイント                                  -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-rose-500/10 flex-shrink-0">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">H. 苦戦したポイント</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    上で書いた「工夫」は、実は最初から決まっていたものではありません。<strong class="text-slate-900">何度も考え直して、ようやくたどり着いた答え</strong>のほうが多いです。ここでは、特に時間をかけた 2 つの場面を正直に書いておきます。
+  </p>
+
+  <!-- 苦戦① -->
+  <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-6 mb-6">
+    <div class="flex items-start gap-4 mb-4">
+      <div class="text-3xl font-black text-rose-500 leading-none flex-shrink-0">①</div>
+      <div class="flex-1">
+        <h3 class="text-lg font-bold text-slate-900 mb-1">「採用管理」→「人脈営業」への発想転換</h3>
+        <p class="text-sm text-ads-muted">配布されたひな形は採用管理ドメイン。営業ツールに変えるとき、最初は「ラベルだけ書き換えれば良い」と考えていました。</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="bg-white border border-ads-border rounded-lg p-4">
+        <div class="text-xs font-bold text-red-600 mb-2 flex items-center gap-1.5">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          最初に考えていたこと (=外れた発想)
+        </div>
+        <ul class="space-y-1.5 text-sm text-ads-muted">
+          <li class="flex items-start gap-1.5">
+            <span class="text-red-500 mt-0.5">•</span>
+            <span>「応募者」を「営業候補」に置換すれば終わり</span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-red-500 mt-0.5">•</span>
+            <span>「面接ステージ」を「営業フェーズ」に名前変更</span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-red-500 mt-0.5">•</span>
+            <span>「採点 4 軸」をそのまま流用</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-white border border-ads-border rounded-lg p-4">
+        <div class="text-xs font-bold text-emerald-700 mb-2 flex items-center gap-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          実際に必要だった発想転換
+        </div>
+        <ul class="space-y-1.5 text-sm text-ads-muted">
+          <li class="flex items-start gap-1.5">
+            <span class="text-emerald-600 mt-0.5">•</span>
+            <span>採用は<strong class="text-slate-800">「1人を見極める」</strong>、営業は<strong class="text-slate-800">「同時に何十人と関係を維持する」</strong></span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-emerald-600 mt-0.5">•</span>
+            <span>採用は「面接が終われば完結」、人脈営業は<strong class="text-slate-800">契約後も派生紹介で続く</strong></span>
+          </li>
+          <li class="flex items-start gap-1.5">
+            <span class="text-emerald-600 mt-0.5">•</span>
+            <span>4 軸スコアの意味も全く別物 (実績→関係性の強さ など)</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bg-rose-100/40 border-l-4 border-rose-400 px-4 py-3 rounded-r-lg">
+      <p class="text-sm text-slate-700 leading-relaxed">
+        <strong class="text-rose-700">気づき</strong>: 採用ツールにあった「Pane4 = ステージごとの面接記録」を、そのまま流用すると<strong class="text-slate-800">営業の動線に合わない</strong>。「過去 (接触ログ)」と「未来 (連絡文の下書き)」を 1 か所で同居させる発想は、ここから生まれました。<strong class="text-rose-700">ひな形をそのまま使えるという思い込みを 1 度壊す</strong>のに時間がかかりました。
+      </p>
+    </div>
+  </div>
+
+  <!-- 苦戦② -->
+  <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-6">
+    <div class="flex items-start gap-4 mb-4">
+      <div class="text-3xl font-black text-rose-500 leading-none flex-shrink-0">②</div>
+      <div class="flex-1">
+        <h3 class="text-lg font-bold text-slate-900 mb-1">連絡文作成「11 シーン」にたどり着く過程</h3>
+        <p class="text-sm text-ads-muted">最初は「初回 / フォロー / お礼」の 3〜4 シーンで足りると思っていました。実際は AI と何度も対話して 11 シーンまで広がりました。</p>
+      </div>
+    </div>
+
+    <div class="space-y-3 mb-4">
+      <div class="flex gap-3 items-start">
+        <div class="flex-shrink-0 w-7 h-7 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center">1</div>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">最初の案: 3 シーン</div>
+          <div class="text-xs text-ads-muted">初回声かけ / フォローアップ / お礼。これで「最低限」と思っていた。</div>
+        </div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <div class="flex-shrink-0 w-7 h-7 rounded-full bg-amber-200 text-amber-800 text-xs font-bold flex items-center justify-center">2</div>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">grill-me で AI に詰められた</div>
+          <div class="text-xs text-ads-muted">「商談中の中でも、<strong class="text-slate-700">提案・条件すり合わせ・クロージング</strong>は全然違う論点ですよね？」「<strong class="text-slate-700">紹介依頼</strong>と<strong class="text-slate-700">派生紹介の依頼</strong>は別の関係性が前提では？」と問い詰められて、自分が「同じシーン」だと思っていたものが実は別だと気づいた。</div>
+        </div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <div class="flex-shrink-0 w-7 h-7 rounded-full bg-orange-200 text-orange-800 text-xs font-bold flex items-center justify-center">3</div>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">8 シーンに拡張、でもまだ抜けがあった</div>
+          <div class="text-xs text-ads-muted">「失注・保留」の人にどう再アプローチするか、「初回声かけ」も<strong class="text-slate-700">既存知人 vs 新規</strong>で口調が全然違う、と次々に細分化が必要だと判明。</div>
+        </div>
+      </div>
+      <div class="flex gap-3 items-start">
+        <div class="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-center">4</div>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">11 シーンに収束</div>
+          <div class="text-xs text-ads-muted">最終的に「初回 (既存) / 初回 (新規) / 紹介依頼 / フォロー / 提案 / 商談 / クロージング / 契約 / お礼 / 派生紹介 / 再アプローチ」の 11 種類で「営業の <strong class="text-slate-700">あらゆる場面</strong>」がカバーできる、と納得できた。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-rose-100/40 border-l-4 border-rose-400 px-4 py-3 rounded-r-lg">
+      <p class="text-sm text-slate-700 leading-relaxed">
+        <strong class="text-rose-700">気づき</strong>: 「自分が普段ぼんやり区別していた営業の場面」を、AI に詰められて初めて<strong class="text-slate-800">言語化できた</strong>。<strong class="text-rose-700">11 シーンは AI に「教えてもらった」のではなく、AI が問いを投げてくれて自分の中から「引き出された」もの</strong>です。これは grill-me スキルの本領発揮で、自分一人では絶対にたどり着けなかった解像度でした。
       </p>
     </div>
   </div>
