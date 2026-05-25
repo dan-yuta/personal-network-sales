@@ -124,7 +124,10 @@ export function AxisScoreRow({
         {label}
       </span>
       <span className="flex items-center gap-2">
-        <span className="flex items-center gap-0.5">
+        {/* editable のときはタップターゲット (button) を WCAG 推奨 28x28px 程度
+            確保するため、星アイコン自体を size-5 (20px)、ボタンの padding で
+            外周を取る。読み取り専用 (= 平均スコア行) は従来通り size-4。 */}
+        <span className={cn("flex items-center", editable ? "gap-1" : "gap-0.5")}>
           {[1, 2, 3, 4, 5].map((n) => {
             const isFull = n <= floor;
             const isHalf = hasHalf && n === floor + 1;
@@ -133,7 +136,7 @@ export function AxisScoreRow({
             const starEl = (
               <StarComp
                 className={cn(
-                  "size-3",
+                  editable ? "size-5" : "size-4",
                   filled
                     ? "fill-primary text-primary"
                     : "fill-muted-foreground/20 text-muted-foreground/30",
@@ -147,7 +150,12 @@ export function AxisScoreRow({
                   key={n}
                   type="button"
                   onClick={() => onChange(n)}
-                  className="rounded-sm transition-opacity outline-none hover:opacity-70 focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className={cn(
+                    "inline-flex size-7 items-center justify-center rounded-sm",
+                    "transition-transform outline-none",
+                    "hover:scale-110 hover:bg-primary/5",
+                    "focus-visible:ring-2 focus-visible:ring-ring/50",
+                  )}
                   aria-label={`${label} を ${n} に設定`}
                 >
                   {starEl}
@@ -174,10 +182,10 @@ export function AxisScoreRow({
           <button
             type="button"
             onClick={onReset}
-            className="ml-1 inline-flex size-5 items-center justify-center rounded text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="ml-1 inline-flex size-7 items-center justify-center rounded text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             aria-label={`${label} の評価をリセット`}
           >
-            <X className="size-3" />
+            <X className="size-3.5" />
           </button>
         )}
       </span>
