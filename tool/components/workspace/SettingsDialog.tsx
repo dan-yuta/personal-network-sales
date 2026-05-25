@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Keyboard, Plus, Trash2 } from "lucide-react";
 
 import { type Department } from "@/lib/schema";
 import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog";
@@ -28,12 +28,16 @@ type SettingsDialogContentProps = {
   departments: Department[];
   onAddDepartment: (name: string) => void;
   onDeleteDepartment: (deptId: string) => void;
+  /** 「キーボードショートカット」ボタン押下時の動作。
+   *  Workspace 側で設定ダイアログを閉じてヘルプダイアログを開く想定。 */
+  onOpenShortcutsHelp: () => void;
 };
 
 export function SettingsDialogContent({
   departments,
   onAddDepartment,
   onDeleteDepartment,
+  onOpenShortcutsHelp,
 }: SettingsDialogContentProps) {
   const [newDeptName, setNewDeptName] = useState("");
   const [deleteDeptTarget, setDeleteDeptTarget] = useState<{
@@ -121,6 +125,24 @@ export function SettingsDialogContent({
               ワークスペース名
             </FieldLabel>
             <Input id="settings-workspace-name" defaultValue="人脈営業ツール" />
+          </Field>
+
+          <Separator />
+
+          {/* キーボードショートカットへの動線。設定ダイアログを閉じてから
+              ShortcutsHelpDialog を開く (ダイアログのネストを避ける)。 */}
+          <Field>
+            <FieldLabel>ヘルプ</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onOpenShortcutsHelp}
+              className="justify-start"
+            >
+              <Keyboard data-icon="inline-start" />
+              キーボードショートカット一覧を見る
+            </Button>
           </Field>
         </FieldGroup>
 

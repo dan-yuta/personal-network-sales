@@ -812,6 +812,7 @@ function WorkspaceContent({
           departments={departments}
           onAddDepartment={addDepartment}
           onDeleteDepartment={deleteDepartment}
+          onOpenShortcutsHelp={() => setShortcutsHelpOpen(true)}
         />
         {/* SidebarInset 自体が <main> を出すので、内側は <div> で組み、
             Pane 2 / Pane 3 / Pane 4 を横並びにする。 */}

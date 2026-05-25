@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Settings } from "lucide-react";
 
 import { type Department } from "@/lib/schema";
@@ -26,6 +27,10 @@ type GlobalHeaderProps = {
   departments: Department[];
   onAddDepartment: (name: string) => void;
   onDeleteDepartment: (deptId: string) => void;
+  /** 設定ダイアログ内「キーボードショートカット一覧を見る」ボタン押下時に
+   *  呼ばれる。Workspace 側で ShortcutsHelpDialog を open する想定。
+   *  本コンポーネント内では設定ダイアログを同時に閉じる (ネスト回避)。 */
+  onOpenShortcutsHelp: () => void;
 };
 
 export function GlobalHeader({
@@ -35,7 +40,12 @@ export function GlobalHeader({
   departments,
   onAddDepartment,
   onDeleteDepartment,
+  onOpenShortcutsHelp,
 }: GlobalHeaderProps) {
+  // 設定ダイアログを controlled にして、「ショートカットへ遷移」時に閉じる
+  // ロジックをここで完結させる。
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-background px-3">
       <Breadcrumb
@@ -59,7 +69,7 @@ export function GlobalHeader({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <Dialog>
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <Tooltip>
           <TooltipTrigger
             render={
@@ -83,6 +93,12 @@ export function GlobalHeader({
           departments={departments}
           onAddDepartment={onAddDepartment}
           onDeleteDepartment={onDeleteDepartment}
+          onOpenShortcutsHelp={() => {
+            // 設定ダイアログを閉じてからヘルプダイアログを開く
+            // (ダイアログのネストを避け、フォーカストラップの混乱を防止)。
+            setSettingsOpen(false);
+            onOpenShortcutsHelp();
+          }}
         />
       </Dialog>
     </header>
