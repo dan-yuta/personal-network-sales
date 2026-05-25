@@ -77,7 +77,7 @@ npm run check:radius # 角丸ドリフト検出
 |---|---|---|
 | 最終接触からの相対表記 (12日前 / 3週間前 / 1ヶ月前) | [`lib/computed/lastContact.ts`](lib/computed/lastContact.ts) | Pane2 行 (3 行目) と Pane3 ヘッダーで常時表示 |
 | 接触ログ追加のクイック日付ボタン (今日/昨日/一昨日) | [`components/workspace/CandidateDetailPane.tsx`](components/workspace/CandidateDetailPane.tsx) `QuickDateButtons` | Pane4 接触ログタブの新規追加フォーム |
-| Pane2 ステージグループの折りたたみ | [`components/workspace/CandidateListPane.tsx`](components/workspace/CandidateListPane.tsx) `StageGroup` | 全 6 ステージ、開閉 state は Workspace の `stageOpenMap` で保持 |
+| Pane2 ステージグループの折りたたみ | [`components/workspace/CandidateListPane.tsx`](components/workspace/CandidateListPane.tsx) `StageGroup` | 全 6 ステージ、開閉 state は Workspace の `stageOpenMap` で保持。**仕様**: 畳まれたステージは Base UI Collapsible が DOM から remove するため D&D のドロップターゲットにならない (ユーザーが手動で開いてからドロップする運用) |
 | Pane3 カードの折りたたみ | [`components/workspace/CandidateDashboardPane.tsx`](components/workspace/CandidateDashboardPane.tsx) | EvaluationCard / RecruitingConditionsCard、開閉 state は Workspace で保持 (候補者切替で維持) |
 | 検索ヒット黄色ハイライト | [`components/workspace/HighlightedText.tsx`](components/workspace/HighlightedText.tsx) + [`lib/computed/searchHighlight.ts`](lib/computed/searchHighlight.ts) | Pane2 候補者行の name / source |
 | アクション Undo (軽量 Toast) | [`components/workspace/Toaster.tsx`](components/workspace/Toaster.tsx) | archiveCandidate / restoreCandidate / moveCandidate (ステージ跨ぎのみ) / deletePosition / deleteDepartment |
