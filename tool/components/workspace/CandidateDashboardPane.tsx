@@ -579,7 +579,7 @@ function CandidateHeader({
                 {STAGE_ORDER.map((s) => (
                   <DropdownMenuItem
                     key={s}
-                    onSelect={() => onChangeStage(s)}
+                    onClick={() => onChangeStage(s)}
                     className={cn(
                       s === stage && "font-semibold text-primary",
                     )}

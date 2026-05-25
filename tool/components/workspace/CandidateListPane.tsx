@@ -299,7 +299,7 @@ export function CandidateListPane({
                 {SORT_KEYS.map((key) => (
                   <DropdownMenuItem
                     key={key}
-                    onSelect={() => onSortKeyChange(key)}
+                    onClick={() => onSortKeyChange(key)}
                     className={cn(sortKey === key && "font-semibold text-primary")}
                   >
                     {/* 常時 size-3 の inline-flex を出して幅を揃え、選択中行と
@@ -343,7 +343,7 @@ export function CandidateListPane({
                 {SEARCH_SCOPES.map((scope) => (
                   <DropdownMenuItem
                     key={scope}
-                    onSelect={() => onSearchScopeChange(scope)}
+                    onClick={() => onSearchScopeChange(scope)}
                     className={cn(
                       searchScope === scope && "font-semibold text-primary",
                     )}
@@ -590,7 +590,7 @@ function StageGroup({
                 actions={
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => onArchiveRequest(cand.id, cand.name)}
+                    onClick={() => onArchiveRequest(cand.id, cand.name)}
                   >
                     <Archive />
                     アーカイブ
@@ -725,7 +725,7 @@ function ArchivedRowItem({
         />
         <DropdownMenuContent side="right" align="start">
           <DropdownMenuGroup>
-            <DropdownMenuItem onSelect={() => onRestore(cand.id)}>
+            <DropdownMenuItem onClick={() => onRestore(cand.id)}>
               <ArchiveRestore />
               復元
             </DropdownMenuItem>

@@ -174,7 +174,7 @@ export function PositionPane({
                             <DropdownMenuGroup>
                               <DropdownMenuItem
                                 variant="destructive"
-                                onSelect={() =>
+                                onClick={() =>
                                   setDeleteTarget({
                                     deptId: dept.id,
                                     posId: pos.id,
