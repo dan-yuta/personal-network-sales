@@ -127,6 +127,11 @@ export function InlineTextField({
         }}
         onBlur={(e) => {
           clearAutosaveTimer();
+          // IME 変換中に blur されたケース (例: Pane2 で別候補者切替の
+          // document.activeElement.blur() が走った場合) は、未確定の文字列を
+          // そのまま保存しない。Chrome 等は blur 時に compositionend を発火するが、
+          // Firefox は発火しない場合があり「未確定文字列が保存される」事故になる。
+          if (composingRef.current) return;
           if (e.target.value !== value) onSave(e.target.value);
         }}
         onKeyDown={(e) => {

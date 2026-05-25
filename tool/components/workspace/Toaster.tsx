@@ -57,6 +57,9 @@ type ToastEntry = {
   duration: number;
 };
 
+/** 同時表示の最大件数。超過したら最も古いトーストから dismiss する。 */
+const MAX_STACK = 5;
+
 type Action =
   | { type: "push"; toast: ToastEntry }
   | { type: "dismiss"; id: string }
@@ -65,9 +68,9 @@ type Action =
 function reducer(state: ToastEntry[], action: Action): ToastEntry[] {
   switch (action.type) {
     case "push": {
-      // 同時表示最大 5 件、上限超過なら最も古いものを drop
+      // 同時表示上限を超えたら最も古いものを drop
       const next = [...state, action.toast];
-      if (next.length > 5) next.shift();
+      if (next.length > MAX_STACK) next.shift();
       return next;
     }
     case "dismiss":
@@ -131,6 +134,20 @@ export function ToasterProvider({ children }: { children: ReactNode }) {
           dispatch({ type: "dismiss", id });
         }, duration);
         timersRef.current.set(id, timer);
+      }
+      // スタック上限超過時に reducer 側で shift される古いトーストの
+      // timer をクリアしてメモリリーク (Map に残るエントリ) を防ぐ。
+      // reducer は純関数なので副作用を持たせない: ここで先頭の id を控えて
+      // 1 件超過分だけ clearTimeout + delete する。
+      if (timersRef.current.size > MAX_STACK) {
+        // Map は挿入順を保持するので、最初の entry が「最も古い」= 次に shift
+        // されるトースト。
+        const oldestId = timersRef.current.keys().next().value;
+        if (oldestId !== undefined) {
+          const oldestTimer = timersRef.current.get(oldestId);
+          if (oldestTimer) clearTimeout(oldestTimer);
+          timersRef.current.delete(oldestId);
+        }
       }
       return id;
     },

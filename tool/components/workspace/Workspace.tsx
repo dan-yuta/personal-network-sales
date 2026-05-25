@@ -377,7 +377,7 @@ function WorkspaceContent({
     (id: string, toStage: StageKey, toIndex: number) => {
       const subject = candidates.find((c) => c.id === id);
       if (!subject || subject.archived) {
-        setCandidates((prev) => prev); // no-op (型整合のため)
+        // archive 済みは DnD 対象外 / 不明 id も no-op
         return;
       }
       const fromStage = subject.stage;
@@ -459,9 +459,10 @@ function WorkspaceContent({
   );
 
   const addDepartment = useCallback((name: string) => {
+    // crypto.randomUUID で同一ミリ秒衝突 (連続追加) を避ける。
     setDepartments((prev) => [
       ...prev,
-      { id: `d-${Date.now()}`, name, positions: [] },
+      { id: `d-${crypto.randomUUID()}`, name, positions: [] },
     ]);
   }, []);
 
@@ -491,6 +492,7 @@ function WorkspaceContent({
   );
 
   const addPosition = useCallback((deptId: string, posName: string) => {
+    // crypto.randomUUID で同一ミリ秒衝突を避ける (addCandidate / addDepartment と統一)
     setDepartments((prev) =>
       prev.map((d) =>
         d.id === deptId
@@ -498,7 +500,7 @@ function WorkspaceContent({
               ...d,
               positions: [
                 ...d.positions,
-                { id: `p-${Date.now()}`, name: posName, count: 0 },
+                { id: `p-${crypto.randomUUID()}`, name: posName, count: 0 },
               ],
             }
           : d,
@@ -777,19 +779,38 @@ function WorkspaceContent({
       if (e.isComposing || e.keyCode === 229) return;
 
       const target = e.target as HTMLElement | null;
+      // ダイアログ / メニュー / ポップオーバー (Calendar 等) 内にフォーカスがある
+      // 状態を別判定する。Esc は本来「ダイアログ系を閉じる」操作のため、ここでは
+      // 素通りさせ、絞り込み解除のような副作用を出さない。
+      // Base UI の Popup 系は role 属性が必ず付くわけではない (Menu/Popover) ので、
+      // shadcn/ui の data-slot 属性 (dialog-content / dropdown-menu-content /
+      // popover-content) で識別する。listbox / combobox は role で検出。
+      const inDialogOrMenu =
+        !!target &&
+        (!!target.closest('[role="dialog"]') ||
+          !!target.closest('[role="menu"]') ||
+          !!target.closest('[role="listbox"]') ||
+          !!target.closest('[data-slot="dialog-content"]') ||
+          !!target.closest('[data-slot="dropdown-menu-content"]') ||
+          !!target.closest('[data-slot="dropdown-menu-sub-content"]') ||
+          !!target.closest('[data-slot="popover-content"]'));
       const inEditable =
         !!target &&
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
           target.tagName === "SELECT" ||
           target.isContentEditable ||
-          // Base UI の Combobox / Dialog は role 属性で識別
+          // Base UI の Combobox は role 属性で識別
           !!target.closest('[role="combobox"]') ||
-          !!target.closest('[role="dialog"]') ||
-          !!target.closest('[role="menu"]'));
+          inDialogOrMenu);
 
       // Escape は入力欄からも効くようにする (検索欄に居ても全解除できる)
+      // ただし「ダイアログ / メニューを閉じる」操作とは衝突させない: dialog/menu
+      // 内の Esc は Base UI 側のクローズに任せ、絞り込み解除など余計な副作用を
+      // 起こさない (連打や複合操作で「閉じたつもりが検索もクリア」を防ぐ)。
+      // shortcuts ヘルプを開いた状態の Esc も同様に素通り。
       if (e.key === "Escape") {
+        if (inDialogOrMenu || shortcutsHelpOpen) return;
         setSelectedStage(null);
         setSearchQuery("");
         // input にフォーカスがあれば外す (UX: 「終わった」感を出す)
@@ -857,7 +878,7 @@ function WorkspaceContent({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [candidateGroups, selectedCandidateId, selectCandidate]);
+  }, [candidateGroups, selectedCandidateId, selectCandidate, shortcutsHelpOpen]);
 
   return (
     // shadcn/ui の SidebarProvider が外側を取り、Pane 1 (`<Sidebar>`) を全高で固定

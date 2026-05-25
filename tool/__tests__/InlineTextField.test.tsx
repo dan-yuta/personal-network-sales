@@ -149,6 +149,23 @@ describe("InlineTextField", () => {
     expect(onSave).toHaveBeenCalledWith("田");
   });
 
+  it("IME 変換中の blur では未確定文字列を保存しない", () => {
+    // 候補者切替時の document.activeElement.blur() などで IME 変換中に
+    // blur されるケース。Firefox 等は blur 時に compositionend を発火しない
+    // ことがあり、未確定の文字列が onSave に渡るのを防ぐ必要がある。
+    const onSave = vi.fn();
+    render(
+      <InlineTextField value="田中" onSave={onSave} ariaLabel="名前" />,
+    );
+    const input = screen.getByLabelText("名前") as HTMLInputElement;
+
+    fireEvent.compositionStart(input);
+    fireEvent.change(input, { target: { value: "た" } });
+    // compositionend を発火させず直接 blur (Firefox の挙動を模擬)
+    fireEvent.blur(input);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it("外部 value 変更で draft も同期して dirty が解消", () => {
     const { rerender } = render(
       <InlineTextField value="田中" onSave={() => {}} ariaLabel="名前" />,
