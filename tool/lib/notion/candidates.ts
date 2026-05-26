@@ -49,7 +49,7 @@ export async function getCandidate(id: string): Promise<NotionCandidate> {
 
 /**
  * 候補者の特定プロパティを更新 (インライン編集用)。
- * 楽観更新前提なので、UI 側でロールバックできるように Promise を返す。
+ * 楽観的更新前提なので、UI 側でロールバックできるように Promise を返す。
  *
  * TODO: 実装
  *   const notion = getNotionClient();

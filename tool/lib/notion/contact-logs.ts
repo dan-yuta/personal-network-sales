@@ -37,7 +37,7 @@ export async function listContactLogsForCandidate(
 /**
  * 接触ログを新規追加し、関連する営業候補リストの「最終連絡日」を自動更新。
  *
- * 楽観更新の流れ (docs/02_UI設計書.md):
+ * 楽観的更新の流れ (docs/02_UI設計書.md):
  *   1. UI 側で即座に履歴リストへ追加 (useOptimistic)
  *   2. この Server Action 呼び出し (バックグラウンド)
  *   3. 成功: revalidate / 失敗: クライアント側でロールバック + トースト
