@@ -110,7 +110,7 @@ personal-network-sales/          ← リポジトリルート
 ## 現在地（2026-05-26 時点）
 
 ```
-第7回ワーク発表 (5月末) 準備フェーズ — 画面完成度を仕上げ中
+第7回ワーク発表 (5月末) — 提出完了 (2026-05-26)
 ├─ 第3回グループセッション準備 (5/13)              ✓ 完了
 │   └─ 図解 + Surge.sh 公開: https://network-sales-overview.surge.sh/
 ├─ 第6回講義受講後の機能追加 (5/24)
@@ -137,16 +137,16 @@ personal-network-sales/          ← リポジトリルート
 │   └─ Notion 連携準備 (priority / nextActionMemo / backNetwork) ✓
 ├─ サンプルデータ拡張 (5/25)                       ✓
 │   └─ 候補者 14人 → 30人 (海外名・空欄・接触ログなし含む)
-└─ 第7回提出 (残タスク)
-    ├─ 画面スクリーンショット撮影                 (進行中)
-    ├─ 苦戦したポイントの整理 → HTML 追加         (進行中)
-    ├─ submission/tool-overview.html 仕上げ      (進行中)
-    └─ Surge.sh 再デプロイ + 提出フォーム送信    (未)
+└─ 第7回提出 (2026-05-26 完了)                    ✓ 完了
+    ├─ 画面スクリーンショット撮影 (01-overview.png) ✓
+    ├─ 苦戦したポイントの整理 → Section H 追加 (3 点) ✓
+    ├─ submission/tool-overview.html 仕上げ        ✓ slim 化 + 校正 + 用語修正
+    └─ Surge.sh 再デプロイ + GitHub push           ✓ 091ad16 まで反映
 ```
 
 | 起動環境 | URL | 状態 |
 |----------|-----|------|
-| **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | グループセッション共有用 (5/13 時点の 38KB 版、5月末提出までに 89KB 拡張版で再デプロイ予定) |
+| **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | 2026-05-26 提出版で公開済み (slim 版 ~58KB / Section A〜H + まとめ + Glossary) |
 | 実装モジュール `tool/` | http://localhost:3001 | 「人脈営業ワークスペース」+ 30人サンプル候補者 (6 ステージ分布) |
 
 > Notion / Anthropic API 接続は **来月 (4ヶ月目講義) スコープ**で実装予定。今月のゴールは「画面の見た目を仕上げる」まで。

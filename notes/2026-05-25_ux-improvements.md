@@ -184,6 +184,8 @@
 
 ## 未着手 / 次セッションのタスク
 
+> **→ 2026-05-26 セッションですべて完了** (commit `b7d2137` 最終版仕上げ + `091ad16` 用語修正、Surge 公開 + GitHub push 完了)
+
 提出までの残工程:
 1. **画面スクリーンショット撮影** (段木さん作業) — `submission/assets/screenshots/` に保存
 2. **submission/tool-overview.html 更新** — スクショ埋め込み + 苦戦ポイントセクション (Section H) 追加
