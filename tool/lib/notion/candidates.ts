@@ -3,6 +3,16 @@ import type { PageObjectResponse } from "@notionhq/client";
 import { getNotionClient, NOTION_DB_IDS } from "./client";
 import { notionCandidateSchema, type NotionCandidate } from "./schema";
 import {
+  checkboxVal,
+  dateStart,
+  emailVal,
+  numberVal,
+  personName,
+  plainText,
+  selectName,
+  urlVal,
+} from "./props";
+import {
   type AxisScores,
   type Candidate,
   type PriorityKey,
@@ -55,64 +65,6 @@ const PRIORITY_KEY_TO_JA: Record<PriorityKey, "高" | "中" | "低"> = {
   low: "低",
 };
 
-// ===== Notion プロパティ読み取りヘルパー =====
-// Notion API のプロパティ値は type による discriminated union。type を確認して
-// 安全に値を取り出す。対象プロパティが無い DB（本番DBにデモ列が無い等）でも
-// null/false を返すので、両 DB セットで同じ parser が動く。
-
-type Props = PageObjectResponse["properties"];
-
-function plainText(props: Props, name: string): string | null {
-  const p = props[name];
-  if (!p) return null;
-  if (p.type === "rich_text") {
-    return p.rich_text.map((t) => t.plain_text).join("") || null;
-  }
-  if (p.type === "title") {
-    return p.title.map((t) => t.plain_text).join("") || null;
-  }
-  return null;
-}
-function selectName(props: Props, name: string): string | null {
-  const p = props[name];
-  if (!p) return null;
-  if (p.type === "select") return p.select?.name ?? null;
-  if (p.type === "status") return p.status?.name ?? null;
-  return null;
-}
-function dateStart(props: Props, name: string): string | null {
-  const p = props[name];
-  if (p?.type === "date") return p.date?.start ?? null;
-  return null;
-}
-function numberVal(props: Props, name: string): number | null {
-  const p = props[name];
-  if (p?.type === "number") return p.number ?? null;
-  return null;
-}
-function checkboxVal(props: Props, name: string): boolean {
-  const p = props[name];
-  return p?.type === "checkbox" ? p.checkbox : false;
-}
-function emailVal(props: Props, name: string): string | null {
-  const p = props[name];
-  if (p?.type === "email") return p.email ?? null;
-  return null;
-}
-function urlVal(props: Props, name: string): string | null {
-  const p = props[name];
-  if (p?.type === "url") return p.url ?? null;
-  return null;
-}
-function personName(props: Props, name: string): string | null {
-  const p = props[name];
-  if (p?.type === "people") {
-    const first = p.people[0];
-    if (first && "name" in first) return first.name ?? null;
-  }
-  return null;
-}
-
 /** Notion ページ → 正規化 NotionCandidate（zod 検証込み）。 */
 function parseCandidatePage(page: PageObjectResponse): NotionCandidate {
   const props = page.properties;
@@ -160,8 +112,10 @@ export function toCandidate(nc: NotionCandidate): Candidate {
     phone: nc.contact ?? "",
     address: nc.address ?? "",
     recruiter: nc.recruiter ?? "",
-    desiredSalaryMin: nc.desiredSalaryMin != null ? String(nc.desiredSalaryMin) : "",
-    desiredSalaryMax: nc.desiredSalaryMax != null ? String(nc.desiredSalaryMax) : "",
+    desiredSalaryMin:
+      nc.desiredSalaryMin != null ? String(nc.desiredSalaryMin) : "",
+    desiredSalaryMax:
+      nc.desiredSalaryMax != null ? String(nc.desiredSalaryMax) : "",
     availableStartDate: nc.nextActionDate ?? "",
     nextActionMemo: nc.nextAction ?? "",
     priority: nc.priority ? PRIORITY_JA_TO_KEY[nc.priority] : "",
@@ -223,7 +177,9 @@ export async function listCandidates(): Promise<Candidate[]> {
 // pages.update の properties は SDK の型に厳密に合わせる。
 
 type UpdateProps = NonNullable<
-  Parameters<ReturnType<typeof getNotionClient>["pages"]["update"]>[0]["properties"]
+  Parameters<
+    ReturnType<typeof getNotionClient>["pages"]["update"]
+  >[0]["properties"]
 >;
 
 function rt(value: string): { rich_text: { text: { content: string } }[] } {
@@ -291,9 +247,11 @@ export async function updateCandidateProfile(
   if (patch.name !== undefined)
     properties["顧客名"] = { title: [{ text: { content: patch.name } }] };
   if (patch.furigana !== undefined) properties["フリガナ"] = rt(patch.furigana);
-  if (patch.birthday !== undefined) properties["生年月日"] = dateProp(patch.birthday);
+  if (patch.birthday !== undefined)
+    properties["生年月日"] = dateProp(patch.birthday);
   if (patch.source !== undefined) properties["接触経路"] = rt(patch.source);
-  if (patch.email !== undefined) properties["Email"] = { email: patch.email || null };
+  if (patch.email !== undefined)
+    properties["Email"] = { email: patch.email || null };
   if (patch.phone !== undefined) properties["連絡先"] = rt(patch.phone);
   if (patch.address !== undefined) properties["住所"] = rt(patch.address);
   if (patch.desiredSalaryMin !== undefined)
@@ -306,9 +264,12 @@ export async function updateCandidateProfile(
     properties["次回アクション"] = rt(patch.nextActionMemo);
   if (patch.priority !== undefined)
     properties["優先度"] = {
-      select: patch.priority ? { name: PRIORITY_KEY_TO_JA[patch.priority] } : null,
+      select: patch.priority
+        ? { name: PRIORITY_KEY_TO_JA[patch.priority] }
+        : null,
     };
-  if (patch.backNetwork !== undefined) properties["バック人脈"] = rt(patch.backNetwork);
+  if (patch.backNetwork !== undefined)
+    properties["バック人脈"] = rt(patch.backNetwork);
   if (patch.careerText !== undefined) properties["備考"] = rt(patch.careerText);
   if (patch.motivationFull !== undefined)
     properties["進捗詳細"] = rt(patch.motivationFull);
