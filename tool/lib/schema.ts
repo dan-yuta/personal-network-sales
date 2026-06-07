@@ -124,13 +124,17 @@ export const AXIS_ORDER = axisKeySchema.options;
 // ===== 選考フロー =====
 
 /**
- * 営業ステージのキー。`STAGE_ORDER` と一致する 6 段階。
- * メイン4 (screening / first / second / final) + サブ2 (lost / held)。
+ * 営業ステージのキー。`STAGE_ORDER` と一致する 7 段階。
+ * メイン5 (screening / first / referral / second / final) + サブ2 (lost / held)。
+ * referral (紹介進行中) は紹介者経由で具体的な紹介が動いている段階で、
+ * アプローチ中と商談中の間に位置する。Notion「営業候補リスト」DB の
+ * 進捗状況 select (7択) と完全一致させている。
  * サブステージは「失注」「保留」で、メインの流れから外れた候補者を扱う。
  */
 export const stageKeySchema = z.enum([
   "screening",
   "first",
+  "referral",
   "second",
   "final",
   "lost",

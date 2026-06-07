@@ -25,13 +25,14 @@ export const EVALUATION_AXIS: Record<AxisKey, string> = {
 // 列としてのステージ名なので Record で固定）。
 //
 // 営業候補リスト向けの表示ラベル。
-// zod スキーマで stageKey は 6 種類 (メイン4 + サブ2) として定義されており、
+// zod スキーマで stageKey は 7 種類 (メイン5 + サブ2) として定義されており、
 // それぞれの日本語表示ラベルをここでマッピングする。
-// メイン: 未連絡 → アプローチ中 → 商談中 → 契約 の標準フロー。
+// メイン: 未連絡 → アプローチ中 → 紹介進行中 → 商談中 → 契約 の標準フロー。
 // サブ: 失注 (成約しなかった) / 保留 (いったん中断、再開可能性あり)。
 export const STAGE_LABELS: Record<StageKey, string> = {
   screening: "未連絡",
   first: "アプローチ中",
+  referral: "紹介進行中",
   second: "商談中",
   final: "契約",
   lost: "失注",
@@ -118,6 +119,15 @@ export const STAGE_THEME: Record<
     text: "text-amber-800",
     leftBar: "border-l-amber-500",
     dot: "text-amber-500",
+  },
+  // referral (紹介進行中) は blue 系。Notion 進捗状況 select の blue と揃え、
+  // アプローチ中 (amber) と商談中 (orange) の暖色フローの中で寒色アクセントとして
+  // 「紹介が動いている」段階を識別しやすくする。
+  referral: {
+    bg: "bg-blue-100",
+    text: "text-blue-800",
+    leftBar: "border-l-blue-500",
+    dot: "text-blue-500",
   },
   // second (商談中) を orange-200 / orange-900 に一段濃く。
   // amber-100 (アプローチ中) との色相差 14度 + 明度差 2.8% の判別困難

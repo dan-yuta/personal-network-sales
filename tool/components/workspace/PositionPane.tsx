@@ -7,6 +7,7 @@ import {
   MessageCircle,
   MoreHorizontal,
   PauseCircle,
+  Share2,
   Trash2,
   UserPlus,
   XCircle,
@@ -42,6 +43,7 @@ import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog"
 // 各ステージの代表アイコン (Lucide)。
 //   - screening (未連絡): UserPlus → これから声をかける人を象徴
 //   - first (アプローチ中): MessageCircle → 接触を取り始めた段階
+//   - referral (紹介進行中): Share2 → 紹介が動いている段階
 //   - second (商談中): Briefcase → 商談・条件すり合わせ
 //   - final (契約): CheckCircle → 成約・完了
 //   - lost (失注): XCircle → 失注・打ち切り
@@ -49,6 +51,7 @@ import { DeleteConfirmDialog } from "@/components/workspace/DeleteConfirmDialog"
 const STAGE_ICON: Record<StageKey, LucideIcon> = {
   screening: UserPlus,
   first: MessageCircle,
+  referral: Share2,
   second: Briefcase,
   final: CheckCircle,
   lost: XCircle,

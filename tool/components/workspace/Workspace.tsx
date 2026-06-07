@@ -132,6 +132,7 @@ function WorkspaceContent({
     () => ({
       screening: true,
       first: true,
+      referral: true,
       second: true,
       final: true,
       lost: true,
@@ -555,12 +556,13 @@ function WorkspaceContent({
 
   // Pane1 ステージタブの件数バッジを candidates から動的派生する。
   // positions.json の count はハードコード値なので、実データとズレないよう
-  // この派生計算で上書きする (archived は除外、6種類すべて集計)。
+  // この派生計算で上書きする (archived は除外、7種類すべて集計)。
   // c.stage の型は StageKey なので includes チェックは不要だが、念のため。
   const stageCountMap = useMemo(() => {
     const map: Record<StageKey, number> = {
       screening: 0,
       first: 0,
+      referral: 0,
       second: 0,
       final: 0,
       lost: 0,
