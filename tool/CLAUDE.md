@@ -3,6 +3,12 @@
 採用管理ドメインの **4ペイン Next.js 16 × shadcn/ui ワークスペース雛形**。
 受講生向けの動かし方・業種変更手順は README を参照。
 
+> **【2026-06-08】第7回宿題で進行中の重要な差分**:
+> - ステージは **7段階**（screening / first / **referral(紹介進行中)** / second / final / lost / held）。
+> - 候補者データは **Notion から取得**（`app/page.tsx` → `lib/notion/candidates.ts` の `listCandidates()`、@notionhq/client **v5 データソースAPI**）。`NOTION_TOKEN` 未設定時のみ `data/candidates.json` フォールバック。
+> - 書込は `app/actions.ts`（`"use server"`）→ `lib/notion/*`（`server-only`）。プロパティ抽出は `lib/notion/props.ts`。
+> - 詳細・デモDB ID は `notes/2026-06-08_session-record.md` が正本。
+
 ## 視覚 SSoT
 
 画面の SSoT（Single Source of Truth = 情報の正本）は `components/workspace/Workspace.tsx`。
