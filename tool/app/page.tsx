@@ -4,6 +4,12 @@ import workspaceData from "@/data/workspace.json";
 import { departmentsSchema, workspaceSchema } from "@/lib/schema";
 import { listCandidates } from "@/lib/notion/candidates";
 
+// 毎リクエストで Notion から最新を取得（静的プリレンダーさせない）。
+// 課題の核心が「別端末でリロードしても同じ最新データ」なので、ビルド時
+// 焼き込み＋キャッシュ無効化のタイミング依存を避け、常に動的取得にする。
+// (各 Server Action 内の revalidatePath は二重の保険として残置。)
+export const dynamic = "force-dynamic";
+
 // Server Component。候補者は Notion（データソース）から取得する。
 // ステージ定義(positions.json)・アプリ設定(workspace.json)はリポジトリの
 // マスタ定義のまま（編集対象ではないのでDBに置かない＝保存先ハイブリッド）。
