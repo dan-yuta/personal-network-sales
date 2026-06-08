@@ -75,6 +75,7 @@ import { CandidateDashboardPane } from "@/components/workspace/CandidateDashboar
 import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane";
 import { ShortcutsHelpDialog } from "@/components/workspace/ShortcutsHelpDialog";
 import { ToasterProvider, useToast } from "@/components/workspace/Toaster";
+import { updateStageAction } from "@/app/actions";
 
 // ========== UI 内部型 ==========
 //
@@ -417,42 +418,64 @@ function WorkspaceContent({
         ];
       });
 
-      // ステージ跨ぎのときだけトースト
+      // ステージ跨ぎのときだけ Notion へ永続化＋トースト。
+      // (同ステージ内の並び替えは配列順=UI のみの状態で、Notion には列が
+      //  ないため保存しない。)
       if (fromStage !== toStage) {
         const fromLabel = STAGE_LABELS[fromStage];
         const toLabel = STAGE_LABELS[toStage];
         const name = subject.profile.name || "候補者";
+
+        // subject を元の (fromStage, fromIndex) に戻す。Undo ボタンと
+        // 保存失敗時のロールバックの両方から呼ぶ (再帰呼び出しは「Undo の
+        // ための Undo トースト」を出してしまうので setCandidates だけ直接呼ぶ)。
+        const revertToOrigin = () => {
+          setCandidates((prev) => {
+            const subjectIndex = prev.findIndex((c) => c.id === id);
+            if (subjectIndex < 0) return prev;
+            const sub = prev[subjectIndex];
+            const without = prev.filter((_, i) => i !== subjectIndex);
+            const reverted: Candidate = { ...sub, stage: fromStage };
+            let count = 0;
+            let absInsertAt = without.length;
+            for (let i = 0; i < without.length; i++) {
+              const c = without[i];
+              if (!c.archived && c.stage === fromStage) {
+                if (count === fromIndex) {
+                  absInsertAt = i;
+                  break;
+                }
+                count++;
+              }
+            }
+            return [
+              ...without.slice(0, absInsertAt),
+              reverted,
+              ...without.slice(absInsertAt),
+            ];
+          });
+        };
+
         pushToast({
           message: `${name} を「${fromLabel}」→「${toLabel}」に移動`,
           undo: () => {
-            // 同じ moveCandidate ロジックを直接実行 (再帰呼び出しは
-            // 「Undo のための Undo トースト」を出してしまうので避け、
-            // setCandidates だけ直接呼ぶ)
-            setCandidates((prev) => {
-              const subjectIndex = prev.findIndex((c) => c.id === id);
-              if (subjectIndex < 0) return prev;
-              const sub = prev[subjectIndex];
-              const without = prev.filter((_, i) => i !== subjectIndex);
-              const reverted: Candidate = { ...sub, stage: fromStage };
-              let count = 0;
-              let absInsertAt = without.length;
-              for (let i = 0; i < without.length; i++) {
-                const c = without[i];
-                if (!c.archived && c.stage === fromStage) {
-                  if (count === fromIndex) {
-                    absInsertAt = i;
-                    break;
-                  }
-                  count++;
-                }
-              }
-              return [
-                ...without.slice(0, absInsertAt),
-                reverted,
-                ...without.slice(absInsertAt),
-              ];
+            // UI を戻すと同時に Notion も元ステージへ戻す
+            // (UI だけ戻すとリロードで Notion 側の toStage が復活してしまう)。
+            revertToOrigin();
+            void updateStageAction(id, fromStage).catch(() => {
+              pushToast({
+                message: `${name} の取り消しを保存できませんでした。再読込で確認してください。`,
+              });
             });
           },
+        });
+
+        // Notion へ永続化 (UI は楽観更新済み)。失敗したら UI を戻して通知。
+        void updateStageAction(id, toStage).catch(() => {
+          revertToOrigin();
+          pushToast({
+            message: `${name} の保存に失敗しました。「${fromLabel}」に戻しました。`,
+          });
         });
       }
     },
