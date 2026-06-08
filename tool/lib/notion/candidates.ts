@@ -13,6 +13,7 @@ import {
   urlVal,
 } from "./props";
 import {
+  candidatesSchema,
   type AxisScores,
   type Candidate,
   type PriorityKey,
@@ -154,6 +155,16 @@ export function toCandidate(nc: NotionCandidate): Candidate {
 
 /** 全営業候補を取得（ページネーション対応）。page.tsx の初期表示に使う。 */
 export async function listCandidates(): Promise<Candidate[]> {
+  // フォールバック: NOTION_TOKEN 未設定なら data/candidates.json のシードで表示する。
+  // 接続前でもアプリが起動でき、提出用スクショ撮影にも使える（永続化は効かない）。
+  if (!process.env.NOTION_TOKEN) {
+    console.warn(
+      "[listCandidates] NOTION_TOKEN 未設定 → data/candidates.json のシードで表示します（編集は永続化されません）",
+    );
+    const seed = (await import("@/data/candidates.json")).default;
+    return candidatesSchema.parse(seed);
+  }
+
   const notion = getNotionClient();
   const out: Candidate[] = [];
   let cursor: string | undefined = undefined;

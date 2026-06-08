@@ -1,24 +1,21 @@
 import { Workspace } from "@/components/workspace/Workspace";
 import positionsData from "@/data/positions.json";
-import candidatesData from "@/data/candidates.json";
 import workspaceData from "@/data/workspace.json";
-import {
-  departmentsSchema,
-  candidatesSchema,
-  workspaceSchema,
-} from "@/lib/schema";
+import { departmentsSchema, workspaceSchema } from "@/lib/schema";
+import { listCandidates } from "@/lib/notion/candidates";
 
-export default function Page() {
+// Server Component。候補者は Notion（データソース）から取得する。
+// ステージ定義(positions.json)・アプリ設定(workspace.json)はリポジトリの
+// マスタ定義のまま（編集対象ではないのでDBに置かない＝保存先ハイブリッド）。
+export default async function Page() {
   const deptResult = departmentsSchema.safeParse(positionsData);
-  const candResult = candidatesSchema.safeParse(candidatesData);
   const wsResult = workspaceSchema.safeParse(workspaceData);
+  const candidates = await listCandidates();
 
-  if (!deptResult.success || !candResult.success || !wsResult.success) {
+  if (!deptResult.success || !wsResult.success) {
     const errors = [
       !deptResult.success &&
         `positions.json: ${deptResult.error.issues[0]?.message}`,
-      !candResult.success &&
-        `candidates.json: ${candResult.error.issues[0]?.message}`,
       !wsResult.success &&
         `workspace.json: ${wsResult.error.issues[0]?.message}`,
     ].filter(Boolean);
@@ -28,7 +25,7 @@ export default function Page() {
   return (
     <Workspace
       initialDepartments={deptResult.data}
-      initialCandidates={candResult.data}
+      initialCandidates={candidates}
       workspace={wsResult.data}
     />
   );

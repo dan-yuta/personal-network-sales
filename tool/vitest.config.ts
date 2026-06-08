@@ -10,6 +10,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      // サーバ専用モジュール内の純ロジックを jsdom 環境でテストするためのスタブ。
+      "server-only": path.resolve(__dirname, "__tests__/server-only-stub.ts"),
     },
   },
 });
