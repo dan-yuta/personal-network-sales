@@ -149,16 +149,38 @@ personal-network-sales/          ← リポジトリルート
 | **公開デプロイ（課題図解）** | **https://network-sales-overview.surge.sh/** | 2026-05-26 提出版で公開済み (slim 版 ~58KB / Section A〜H + まとめ + Glossary) |
 | 実装モジュール `tool/` | http://localhost:3001 | 「人脈営業ワークスペース」+ 30人サンプル候補者 (6 ステージ分布) |
 
-> Notion / Anthropic API 接続は **来月 (4ヶ月目講義) スコープ**で実装予定。今月のゴールは「画面の見た目を仕上げる」まで。
-
 詳細は [docs/06_やることリスト.md](docs/06_やることリスト.md) と [notes/2026-05-24_session-record.md](notes/2026-05-24_session-record.md) を参照。
+
+---
+
+## 4ヶ月目（第7回宿題「画面に記憶を持たせる」）の進捗（2026-06-08）
+
+第7回講義のスコープ＝**Notion を保存先にした永続化 ＋ Vercel 公開**に着手。
+保存先は grill-me で **Notion 確定**（推奨の Neon は不採用。理由は「既存業務が Notion 上にあり流用でき、人が直接 DB を見られる」一方、代償＝AIとの距離。だから定義・マスタはリポジトリに残すハイブリッド）。
+
+```
+読み取りパス実装まで完了（全 tsc + vitest 108 件 通過・push 済）
+├─ ステージ 6→7 段階化（紹介進行中 を追加、実 Notion DB と一致）      ✓
+├─ Notion データ層（dataSources API v5・読み書き）                  ✓
+│   └─ lib/notion/{schema,props,candidates,contact-logs}.ts
+├─ Server Actions（app/actions.ts・revalidatePath）                ✓
+├─ page.tsx を await listCandidates() に（TOKEN 無時 JSON フォールバック） ✓
+├─ デモ Notion DB 構築（MCP・列強化＋接触ログ DB 新規）             ✓
+├─ seed-notion.mjs（冪等・実クリア→ダミー投入）                    ✓
+└─ 次: Integration トークン → 表示検証 → 縦串(stage書込) → Vercel 公開（提出可能チェックポイント）
+```
+
+- DB は 2 セット運用（公開=デモ/ダミー、ローカル=本番）。データソース ID は
+  [docs/03_データ設計書.md](docs/03_データ設計書.md) と
+  [notes/2026-06-08_session-record.md](notes/2026-06-08_session-record.md) 参照。
+- 実装プラン全体: `~/.claude/plans/serialized-juggling-matsumoto.md`
 
 ---
 
 ## 作成情報
 
 - 作成日: 2026-05-10
-- 最終更新: 2026-05-26
+- 最終更新: 2026-06-08
 - 作成者: 段木 裕太
 - 設計手法: `grill-me` スキルによる対話的グリル
 - 提出先: AI-Driven School 受講生ポータル
