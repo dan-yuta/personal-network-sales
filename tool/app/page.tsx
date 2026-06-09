@@ -1,8 +1,10 @@
+import { cookies } from "next/headers";
 import { Workspace } from "@/components/workspace/Workspace";
 import positionsData from "@/data/positions.json";
 import workspaceData from "@/data/workspace.json";
 import { departmentsSchema, workspaceSchema } from "@/lib/schema";
 import { listCandidates } from "@/lib/notion/candidates";
+import { SELECTED_CANDIDATE_COOKIE } from "@/lib/selection";
 
 // 毎リクエストで Notion から最新を取得（静的プリレンダーさせない）。
 // 課題の核心が「別端末でリロードしても同じ最新データ」なので、ビルド時
@@ -18,6 +20,14 @@ export default async function Page() {
   const wsResult = workspaceSchema.safeParse(workspaceData);
   const candidates = await listCandidates();
 
+  // 前回選択していた候補者を Cookie から復元（SSR 時点で初期選択を確定し、
+  // クライアント側の差し替えによるちらつきを防ぐ）。実在しない（別DB由来・
+  // 削除済み）ID は無視して null（=既定選択）にフォールバックする。
+  const cookieStore = await cookies();
+  const storedId = cookieStore.get(SELECTED_CANDIDATE_COOKIE)?.value ?? null;
+  const initialSelectedCandidateId =
+    storedId && candidates.some((c) => c.id === storedId) ? storedId : null;
+
   if (!deptResult.success || !wsResult.success) {
     const errors = [
       !deptResult.success &&
@@ -32,6 +42,7 @@ export default async function Page() {
     <Workspace
       initialDepartments={deptResult.data}
       initialCandidates={candidates}
+      initialSelectedCandidateId={initialSelectedCandidateId}
       workspace={wsResult.data}
     />
   );
