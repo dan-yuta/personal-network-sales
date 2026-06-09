@@ -123,6 +123,31 @@ function getCurrentAxisScores(candidate: Candidate | undefined): AxisScores {
   return empty;
 }
 
+// ===== 初期選択候補者の決定 =====
+
+// 「前回このブラウザで触っていた人」を記憶する localStorage キー。
+// 候補者IDは Notion のページID（UUID）。DBセット（公開デモ/ローカル本番）が
+// 変わると保存済みIDは別DBには存在しないが、復元時に実在チェックで弾く。
+const SELECTED_CANDIDATE_STORAGE_KEY = "pns:selectedCandidateId";
+
+/**
+ * localStorage に履歴が無い初回の既定選択を決める。
+ * 「最近触った人」= 最終連絡日が最新の非アーカイブ候補者。無ければ非アーカイブ先頭、
+ * それも無ければ配列先頭。SSR と CSR で同じ initialCandidates から計算するため
+ * 決定的（ハイドレーション不一致を起こさない）。
+ */
+function pickDefaultCandidateId(cands: Candidate[]): string {
+  if (cands.length === 0) return "";
+  let best: Candidate | null = null;
+  for (const c of cands) {
+    if (c.archived || !c.lastContactDate) continue;
+    if (!best || (best.lastContactDate ?? "") < c.lastContactDate) best = c;
+  }
+  if (best) return best.id;
+  const firstActive = cands.find((c) => !c.archived);
+  return (firstActive ?? cands[0]).id;
+}
+
 /**
  * Workspace 公開エントリ。ToasterProvider で包んでから WorkspaceContent を描画。
  * useToast() は Provider の内側でしか使えないため、Provider 配下の別関数として
@@ -166,7 +191,34 @@ function WorkspaceContent({
     [],
   );
 
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string>("c2");
+  // 初期選択は「最近触った人」を決定的に算出（ハードコードIDは廃止。旧 "c2" は
+  // Notion 由来の UUID には存在せず、常に candidates[0] フォールバック＋絞り込み
+  // バナー誤表示の原因だった）。マウント後に localStorage の前回選択で上書きする。
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string>(() =>
+    pickDefaultCandidateId(initialCandidates),
+  );
+
+  // 前回このブラウザで触っていた人を復元（マウント時に一度だけ）。
+  // 実在しない（別DB由来・削除済み）IDは無視して既定のままにする。
+  useEffect(() => {
+    const stored = window.localStorage.getItem(SELECTED_CANDIDATE_STORAGE_KEY);
+    if (stored && candidatesRef.current.some((c) => c.id === stored)) {
+      setSelectedCandidateId(stored);
+    }
+    // マウント時のみ。candidatesRef で最新を読むため deps は空でよい。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 選択が変わるたびに localStorage へ保存（クリック・キーボード移動・アーカイブ時の
+  // フォールバック等すべての経路を 1 箇所で捕捉する）。
+  useEffect(() => {
+    if (selectedCandidateId) {
+      window.localStorage.setItem(
+        SELECTED_CANDIDATE_STORAGE_KEY,
+        selectedCandidateId,
+      );
+    }
+  }, [selectedCandidateId]);
   // 営業ツール用: Pane1 で選択中のステージ。null = 全候補者を表示。
   // positions.json の position.id が "stage-{StageKey}" の形式なので、それを基に判定する。
   const [selectedStage, setSelectedStage] = useState<StageKey | null>(null);
