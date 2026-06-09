@@ -4,7 +4,11 @@ import positionsData from "@/data/positions.json";
 import workspaceData from "@/data/workspace.json";
 import { departmentsSchema, workspaceSchema } from "@/lib/schema";
 import { listCandidates } from "@/lib/notion/candidates";
-import { SELECTED_CANDIDATE_COOKIE } from "@/lib/selection";
+import {
+  SELECTED_CANDIDATE_COOKIE,
+  PANE2_SCROLL_COOKIE,
+  PANE2_SCROLLAREA_ID,
+} from "@/lib/selection";
 
 // 毎リクエストで Notion から最新を取得（静的プリレンダーさせない）。
 // 課題の核心が「別端末でリロードしても同じ最新データ」なので、ビルド時
@@ -47,18 +51,18 @@ export default async function Page() {
         workspace={wsResult.data}
       />
       {/*
-        Pane2 のスクロール復元（ちらつき防止）。
+        Pane2 のスクロール位置復元（ちらつき防止）。
         本文の後ろに置いた同期インラインスクリプトは、ブラウザが Pane2 を
-        「先頭」で初回描画する前（HTML パース中）に実行される。選択中
-        （Cookie で復元した前回の人）の行 data-selected="true" を探して
-        scrollIntoView するため、最初の描画時点で既に対象者の位置になり、
-        「一瞬先頭 → スクロール」のフラッシュが原理的に起きない。
-        useEffect だと SSR 先頭描画→JS 後スクロールで一瞬先頭が見えてしまう。
+        「先頭」で初回描画する前（HTML パース中）に実行される。
+        - 前回のスクロール位置 Cookie(pns_pane2_scroll) があれば、その scrollTop に
+          復元する → 前回の位置から一切ずれずに復帰（自動移動しない）。
+        - Cookie が無い初回訪問のみ、選択中（data-selected）の行を中央に表示。
+        最初の描画時点で既に正しい位置になるため「一瞬先頭 → 移動」が起きない
+        （useEffect 復元だと SSR 先頭描画→JS 後スクロールで一瞬先頭が見えてしまう）。
       */}
       <script
         dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{var e=document.querySelector('[data-candidate-id][data-selected]');if(e){e.scrollIntoView({block:'center'});}}catch(_){}})();",
+          __html: `(function(){try{var vp=document.querySelector('#${PANE2_SCROLLAREA_ID} [data-slot=scroll-area-viewport]');if(!vp)return;var p=('; '+document.cookie).split('; ${PANE2_SCROLL_COOKIE}=');var v=p.length===2?p.pop().split(';').shift():'';var n=parseInt(v,10);if(v!==''&&!isNaN(n)){vp.scrollTop=n;return;}var e=document.querySelector('[data-candidate-id][data-selected]');if(e){e.scrollIntoView({block:'center'});}}catch(_){}})();`,
         }}
       />
     </>

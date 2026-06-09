@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type RefObject } from "react";
+import { useEffect, useState, useMemo, type RefObject } from "react";
 import {
   Archive,
   ArchiveRestore,
@@ -67,6 +67,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddItemDialog } from "@/components/workspace/AddItemDialog";
 import { STAGE_LABELS, STAGE_THEME } from "@/lib/labels";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
+import { PANE2_SCROLL_COOKIE, PANE2_SCROLLAREA_ID } from "@/lib/selection";
 
 // dnd-kit のスクリーンリーダー向け日本語化。
 const screenReaderInstructions: ScreenReaderInstructions = {
@@ -175,9 +176,30 @@ export function CandidateListPane({
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
-  // 注: 再読み込み時に「選択中（前回の人）の行へスクロールして先頭戻りを防ぐ」処理は、
-  // 初回 HTML 描画より前に走るインラインスクリプト（app/page.tsx）で行う。
-  // useEffect だと SSR の先頭描画→JS 後にスクロール、で一瞬先頭が見えるため。
+  // Pane2 のスクロール位置を Cookie に保存し、再読み込み時に「前回の位置へ
+  // 一切ずれずに復帰」させる。復元自体は初回 HTML 描画より前に走るインライン
+  // スクリプト（app/page.tsx）が行う（useEffect 復元だと一瞬先頭が見えるため）。
+  // ここでは保存（スクロールに追従して Cookie 更新）だけを担当する。
+  useEffect(() => {
+    const vp = document
+      .getElementById(PANE2_SCROLLAREA_ID)
+      ?.querySelector('[data-slot="scroll-area-viewport"]');
+    if (!vp) return;
+    let timer: number | undefined;
+    const save = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        document.cookie = `${PANE2_SCROLL_COOKIE}=${Math.round(
+          vp.scrollTop,
+        )}; path=/; max-age=31536000; SameSite=Lax`;
+      }, 150);
+    };
+    vp.addEventListener("scroll", save, { passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      vp.removeEventListener("scroll", save);
+    };
+  }, []);
 
   // PointerSensor の distance 制約で「クリック」と「ドラッグ」を区別する
   // （6px 以上動かさないとドラッグ起動しない → 行クリック / メニュー操作と衝突しない）。
@@ -422,7 +444,7 @@ export function CandidateListPane({
           </div>
         </div>
       </div>
-      <ScrollArea className="min-h-0 flex-1">
+      <ScrollArea id={PANE2_SCROLLAREA_ID} className="min-h-0 flex-1">
         <DndContext
           // 固定 id を渡して SSR/CSR 間の `aria-describedby` 採番ズレ
           // （DndDescribedBy-N の連番）による hydration mismatch を回避する
