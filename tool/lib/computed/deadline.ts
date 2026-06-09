@@ -19,7 +19,7 @@
  * を回避。
  */
 
-import { parseISODate } from "./profile";
+import { parseISODate, todayPartsJST } from "./profile";
 
 export type DeadlineBadge = {
   /** 表示文字列 (例: "今日" / "あと3日" / "6/10" / "期限超過") */
@@ -41,18 +41,16 @@ export function getDeadlineBadge(date: string): DeadlineBadge | null {
   const target = parseISODate(date);
   if (!target) return null;
 
-  const today = new Date();
-  // ローカル日付ベースで年月日成分のみを UTC 化して diff を取る (DST 安全)。
+  // 「今日」は常に日本時間（Asia/Tokyo）で判定する。SSR（UTC）とクライアント
+  // （JST）で暦日がズレて「明日↔今日」がちらつくのを防ぐ。年月日成分のみを
+  // UTC 化して diff を取る（DST 安全）。
+  const t = todayPartsJST();
   const targetUtc = Date.UTC(
     target.getFullYear(),
     target.getMonth(),
     target.getDate(),
   );
-  const todayUtc = Date.UTC(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
+  const todayUtc = Date.UTC(t.year, t.month - 1, t.day);
   const diffDays = Math.round((targetUtc - todayUtc) / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {

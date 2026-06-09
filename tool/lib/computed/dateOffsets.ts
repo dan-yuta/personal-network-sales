@@ -8,7 +8,7 @@
  * (Date 既定動作: `new Date(2026, 0, 1 - 1)` → 2025-12-31)。
  */
 
-import { formatISODate } from "./profile";
+import { formatISODate, todayPartsJST } from "./profile";
 
 /**
  * 「今日から n 日前」の日付を YYYY-MM-DD で返す。
@@ -24,6 +24,9 @@ import { formatISODate } from "./profile";
  * 構築するため、DST 境界を跨いでも年月日成分のみで計算され安定する。
  */
 export function dateNDaysAgo(n: number, now: Date = new Date()): string {
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - n);
+  // 「今日」は常に日本時間（Asia/Tokyo）基準。SSR=UTC とクライアント=JST で
+  // 既定日付がズレるのを防ぐ（接触ログ追加フォームの初期日付など）。
+  const t = todayPartsJST(now);
+  const d = new Date(t.year, t.month - 1, t.day - n);
   return formatISODate(d);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type RefObject } from "react";
+import { useEffect, useRef, useState, useMemo, type RefObject } from "react";
 import {
   Archive,
   ArchiveRestore,
@@ -175,6 +175,23 @@ export function CandidateListPane({
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
+  // 初回マウント時、選択中（Cookie で復元した前回の人）の行を表示範囲に入れる。
+  // ページ再読み込みで Pane2 が先頭に戻り「前回見ていた人」が画面外になるのを防ぐ。
+  // block:"nearest" なので既に見えていれば動かさない（不要なジャンプなし）。
+  // 初回一度きり（didInitialScrollRef）。以降の選択変更ではスクロールを強制しない。
+  const rootRef = useRef<HTMLElement>(null);
+  const didInitialScrollRef = useRef(false);
+  useEffect(() => {
+    if (didInitialScrollRef.current || !selectedCandidateId) return;
+    const el = rootRef.current?.querySelector(
+      `[data-candidate-id="${CSS.escape(selectedCandidateId)}"]`,
+    );
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
+      didInitialScrollRef.current = true;
+    }
+  }, [selectedCandidateId]);
+
   // PointerSensor の distance 制約で「クリック」と「ドラッグ」を区別する
   // （6px 以上動かさないとドラッグ起動しない → 行クリック / メニュー操作と衝突しない）。
   // KeyboardSensor は Tab 移動 → Space で持ち上げ → 矢印で移動 → Enter で確定。
@@ -288,7 +305,10 @@ export function CandidateListPane({
   };
 
   return (
-    <section className="flex w-[280px] shrink-0 flex-col border-r border-border bg-background">
+    <section
+      ref={rootRef}
+      className="flex w-[280px] shrink-0 flex-col border-r border-border bg-background"
+    >
       <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
         <h2 className="truncate text-sm font-semibold text-foreground">
           営業候補リスト

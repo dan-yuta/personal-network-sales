@@ -25,7 +25,7 @@
  * で「1 日早い」表示になる不具合を回避。
  */
 
-import { parseISODate } from "./profile";
+import { parseISODate, todayPartsJST } from "./profile";
 
 export type LastContactBadge = {
   /** 表示文字列 (例: "今日" / "12 日前" / "3 週間前" / "半年前" / "1 年前") */
@@ -55,7 +55,10 @@ export function getLastContactBadge(
     target.getMonth(),
     target.getDate(),
   );
-  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  // 「今日」は常に日本時間（Asia/Tokyo）で判定（SSR=UTC とクライアント=JST の
+  // 暦日ズレによる「今日↔昨日」ちらつきを防ぐ）。
+  const t = todayPartsJST(now);
+  const todayUtc = Date.UTC(t.year, t.month - 1, t.day);
   const diffDays = Math.round((todayUtc - targetUtc) / (1000 * 60 * 60 * 24));
 
   // 未来日は表示しない (異常データ防御)

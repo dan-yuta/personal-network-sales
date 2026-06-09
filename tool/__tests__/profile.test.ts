@@ -4,7 +4,37 @@ import {
   calculateAge,
   formatISODate,
   parseISODate,
+  todayPartsJST,
 } from "@/lib/computed/profile";
+
+describe("todayPartsJST", () => {
+  it("UTC の夜は JST では翌日になる（SSR=UTC とクライアント=JST のズレを吸収）", () => {
+    // 2026-06-09 20:00 UTC = 2026-06-10 05:00 JST → JST 暦日は 6/10
+    expect(todayPartsJST(new Date("2026-06-09T20:00:00Z"))).toEqual({
+      year: 2026,
+      month: 6,
+      day: 10,
+    });
+  });
+
+  it("UTC の昼は JST も同日", () => {
+    // 2026-06-10 01:00 UTC = 2026-06-10 10:00 JST → 6/10
+    expect(todayPartsJST(new Date("2026-06-10T01:00:00Z"))).toEqual({
+      year: 2026,
+      month: 6,
+      day: 10,
+    });
+  });
+
+  it("年跨ぎ: 大晦日の UTC 夜は JST では元日", () => {
+    // 2025-12-31 20:00 UTC = 2026-01-01 05:00 JST
+    expect(todayPartsJST(new Date("2025-12-31T20:00:00Z"))).toEqual({
+      year: 2026,
+      month: 1,
+      day: 1,
+    });
+  });
+});
 
 describe("parseISODate", () => {
   it("空文字は undefined", () => {

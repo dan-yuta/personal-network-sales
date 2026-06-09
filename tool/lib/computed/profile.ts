@@ -35,6 +35,33 @@ export function formatISODate(d: Date | undefined): string {
 }
 
 /**
+ * 実行環境のタイムゾーンに依存せず「日本 (Asia/Tokyo) の今日」の年月日を返す。
+ *
+ * `new Date()` の年月日成分は実行環境ローカル基準のため、SSR（サーバー=UTC）と
+ * クライアント（日本=JST）で暦日が 1 日ズレる時間帯があり、期限/最終接触バッジが
+ * 「明日↔今日」とハイドレーション時にちらつく原因になる。本ヘルパーは Intl で
+ * 常に Asia/Tokyo の暦日を返すため、SSR とクライアントで一致する。
+ *
+ * テスト等で基準時刻を固定したい場合は `now` を渡す（その瞬間の JST 暦日を返す）。
+ */
+export function todayPartsJST(now: Date = new Date()): {
+  year: number;
+  /** 1-12 */
+  month: number;
+  day: number;
+} {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const pick = (type: string) =>
+    Number(parts.find((p) => p.type === type)?.value);
+  return { year: pick("year"), month: pick("month"), day: pick("day") };
+}
+
+/**
  * 生年月日から年齢を派生計算し、「N 歳」形式で返す。
  * 空 / 不正な birthday は空文字を返す（UI 側で「未表示」になる）。
  *

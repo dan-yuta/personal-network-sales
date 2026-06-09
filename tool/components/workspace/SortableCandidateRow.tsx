@@ -99,6 +99,7 @@ export function SortableCandidateRow({
     <li
       ref={setNodeRef}
       style={style}
+      data-candidate-id={cand.id}
       className={cn(
         "group/candidate relative",
         isDragging && "pointer-events-none opacity-50",
