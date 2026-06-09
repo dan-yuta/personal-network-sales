@@ -115,39 +115,51 @@ npm run check:radius # 角丸ドリフト検出
 - 修飾キー付き (Cmd/Ctrl/Alt) はブラウザのタブ切替なので素通り (例外: ? = Shift+/)
 - 候補者切替 (↑↓) は `candidateGroups` の flat list を使い末尾でクランプ
 
-## Notion DB との同期 (Phase 3 で接続予定)
+## Notion DB との同期 (実装済み)
 
-接続先 DB: `https://www.notion.so/3409452b6de2494997f9b4275be266f1` (営業候補リスト)
+接続: `@notionhq/client` v5 のデータソースAPI（読取=`dataSources.query`、書込=
+`pages.update` / `pages.create(parent data_source_id)`）。データ層は `lib/notion/*`、
+`"use server"` ラッパーは `app/actions.ts`。`app/page.tsx` は `listCandidates()` で取得
+（`export const dynamic="force-dynamic"`、`NOTION_TOKEN` 未設定時のみ
+`data/candidates.json` フォールバック）。DB は2セット（公開=デモ/ダミー・ローカル=本番）を
+env のデータソースIDで切替。**権威ある対応表は `docs/03_データ設計書.md`**。
 
-Phase 1 (現状) はモック実装で、`tool/data/candidates.json` シードを zod parse で
-読み込む。各 Profile フィールドの Notion 側対応関係:
+各 Profile / Candidate フィールドの Notion 側対応（`toCandidate` / 各 update 関数）:
 
-| アプリ側 (Profile) | Notion 側 | 補足 |
+| アプリ側 | Notion 側 | 補足 |
 |---|---|---|
-| name | 顧客名 | アプリでは個人名のみ、Notion の「顧客企業名」は別途必要なら追加検討 |
-| furigana | (Notion になし) | アプリ独自、五十音ソート用 |
-| birthday | (Notion になし) | アプリ独自 |
-| source | 間柄 | Notion 側は別 DB relation、アプリでは自由テキストで簡略化 |
-| email / phone / address | Email / 連絡先 / 住所 | 直結 |
-| recruiter | 担当者 | Notion 側 Person、アプリは自由テキスト (Phase 3 で User 連携検討) |
-| desiredSalaryMin / Max | (Notion になし) | アプリ独自、想定取引規模 |
-| availableStartDate | 次回アクション期限 | 直結 |
-| **nextActionMemo** | **次回アクション** | 2026-05-25 追加 |
-| **priority** | **優先度** (高/中/低) | 2026-05-25 追加、Notion side select と整合 |
-| **backNetwork** | **バック人脈** | 2026-05-25 追加 |
-| careerText / motivationFull | 備考 / 進捗詳細 | アプリ側はテキスト 2 つに分離 |
-| stage | 進捗状況 | 6 種類で完全一致 (未連絡/アプローチ中/商談中/契約/失注/保留) |
+| profile.name | 顧客名 (title) | 書込可 |
+| profile.furigana | フリガナ (text) | デモDBに追加済（本番DBには無い→null許容） |
+| profile.birthday | 生年月日 (date) | デモDBに追加済（本番DBには無い） |
+| profile.source | 接触経路 (text) | 自由テキスト。間柄(relation)はスコープ外 |
+| profile.email / phone / address | Email / 連絡先 / 住所 | 直結・書込可 |
+| profile.recruiter | 担当者 (Person) | **読み取りのみ**（person型・書かない） |
+| profile.desiredSalaryMin / Max | 想定取引規模Min / Max (number) | デモDBに追加済・書込可 |
+| profile.availableStartDate | 次回アクション期限 (date) | 書込可 |
+| profile.nextActionMemo | 次回アクション | 書込可 |
+| profile.priority | 優先度 (高/中/低 select) | 書込可 |
+| profile.backNetwork | バック人脈 | 書込可 |
+| profile.careerText / motivationFull | 備考 / 進捗詳細 | テキスト2つに分離・書込可 |
+| stage | 進捗状況 (select) | **7段階**で完全一致 (未連絡/アプローチ中/紹介進行中/商談中/契約/失注/保留) |
+| axisScores 4軸 | 関係性の強さ/興味度合い/レスポンス速度/紹介ポテンシャル (number) | 現在スナップショットのみ・書込可 |
+| archived | アーカイブ (checkbox) | 書込可 |
+| lastContactDate | 最終連絡日 (date) | 接触ログ追加時に denormalized 同期 |
 
-未取り込み (Phase 3 検討):
-- 名刺 (file) / 担当者 (Person) / 間柄 (relation) / 親レコード (relation, 自己) /
-  リンク URL / 郵便番号
+接触ログは別DB（接触ログ_…）。`listContactLogsForCandidate` で表示、`addContactLog` で
+追加（候補者「最終連絡日」を同期）。`lib/data/mockLogs.ts` は app 本体からは未使用。
 
-Notion への書き込みは厳禁 (Phase 1 ではアプリ単体運用、Phase 3 で同期実装時に
-適切な権限分離を検討)。
+**読み取りのみ・書かない**（今回スコープ外）: 担当者(Person) / 間柄・親レコード(relation) /
+名刺(file) / リンクURL / 郵便番号。正規化マッパーは欠損列を optional/nullable で許容
+（本番DB/デモDB の列差を両対応）。
+
+書き込みは実装済み（楽観的更新＋失敗ロールバック＋トースト、接触ログ追加は `useOptimistic`、
+全書込は `writeChainRef` で直列化）。**AI連絡文生成のみ未実装**（発展課題=Phase E、
+Anthropic API + Upstash）。
 
 ## やらないこと
 
-- DB 接続・認証（次フェーズ）
+- 認証（公開は無認証＝デモ/ダミーDBに向けることで代替。本番運用時に要検討）
 - `react-beautiful-dnd`（廃止ライブラリ）への置き換え
 - Toast ライブラリ追加 (sonner/radix-toast 等)。自前 [`Toaster.tsx`](components/workspace/Toaster.tsx) で足りる範囲は依存追加しない
-- Notion DB の編集 (Phase 1 はアプリ単体、Phase 3 同期時も書き込み先は十分検討してから)
+- 本番DB（実データ）への書き込み（公開はデモDB限定。本番への列追加・書込はユーザー判断）
+- スコープ外フィールドへの書き込み: 担当者(Person)/間柄・親レコード(relation)/名刺(file)/リンク/郵便番号は読み取りのみ
