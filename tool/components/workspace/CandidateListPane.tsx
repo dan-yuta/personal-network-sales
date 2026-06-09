@@ -177,27 +177,72 @@ export function CandidateListPane({
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   // Pane2 のスクロール位置を Cookie に保存し、再読み込み時に「前回の位置へ
-  // 一切ずれずに復帰」させる。復元自体は初回 HTML 描画より前に走るインライン
-  // スクリプト（app/page.tsx）が行う（useEffect 復元だと一瞬先頭が見えるため）。
-  // ここでは保存（スクロールに追従して Cookie 更新）だけを担当する。
+  // ずれずに復帰」させる。初回 HTML 描画より前の復元はインラインスクリプト
+  // （app/page.tsx）が行うが、(A) 保存が遅れて Cookie が古い、(B) フォント遅延
+  // 読み込み等のレイアウトシフトで描画前の scrollTop がずれる、の2要因で
+  // 「ずれるとき/ずれないとき」が出る。ここで両方を潰す:
+  //   保存 = スクロール追従(短debounce) + 離脱直前(pagehide/可視性)に必ず保存
+  //   復元補正 = フォント確定後に保存値を再適用（ずれている時だけ）
   useEffect(() => {
     const vp = document
       .getElementById(PANE2_SCROLLAREA_ID)
-      ?.querySelector('[data-slot="scroll-area-viewport"]');
+      ?.querySelector<HTMLElement>('[data-slot="scroll-area-viewport"]');
     if (!vp) return;
-    let timer: number | undefined;
-    const save = () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        document.cookie = `${PANE2_SCROLL_COOKIE}=${Math.round(
-          vp.scrollTop,
-        )}; path=/; max-age=31536000; SameSite=Lax`;
-      }, 150);
+
+    const writeCookie = (top: number) => {
+      document.cookie = `${PANE2_SCROLL_COOKIE}=${Math.round(
+        top,
+      )}; path=/; max-age=31536000; SameSite=Lax`;
     };
-    vp.addEventListener("scroll", save, { passive: true });
+    const readSaved = (): number | null => {
+      const m = document.cookie.match(
+        new RegExp(`(?:^|;\\s*)${PANE2_SCROLL_COOKIE}=(\\d+)`),
+      );
+      return m ? Number.parseInt(m[1], 10) : null;
+    };
+
+    // --- 保存 ---
+    let timer: number | undefined;
+    const onScroll = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => writeCookie(vp.scrollTop), 100);
+    };
+    const onLeave = () => {
+      window.clearTimeout(timer);
+      writeCookie(vp.scrollTop);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") onLeave();
+    };
+    vp.addEventListener("scroll", onScroll, { passive: true });
+    // pagehide は reload/遷移/タブ閉じの直前に確実に発火する（beforeunload より
+    // モバイル含め信頼できる）。これで「スクロール直後の reload」でも最新を保存。
+    window.addEventListener("pagehide", onLeave);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // --- 復元補正 ---
+    // 描画前スクリプトが設定した値が、フォント適用などのレイアウト確定でずれた
+    // 場合に、保存値で1回だけ補正する（差が無ければ何もしない＝ジャンプなし）。
+    const saved = readSaved();
+    if (saved != null && Math.abs(vp.scrollTop - saved) > 1) {
+      const apply = () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            if (Math.abs(vp.scrollTop - saved) > 1) vp.scrollTop = saved;
+          }),
+        );
+      const fonts = (
+        document as Document & { fonts?: { ready: Promise<unknown> } }
+      ).fonts;
+      if (fonts?.ready) fonts.ready.then(apply, apply);
+      else apply();
+    }
+
     return () => {
       window.clearTimeout(timer);
-      vp.removeEventListener("scroll", save);
+      vp.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pagehide", onLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
