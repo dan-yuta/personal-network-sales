@@ -1,6 +1,26 @@
 # submission/ — 最終提出物
 
-AI-Driven School 5回目宿題 / 第3回 グループセッションで共有する提出物を置くフォルダです。
+AI-Driven School の宿題提出物を置くフォルダです。回ごとに図解HTMLを追加しています。
+
+---
+
+## 第7回宿題（4ヶ月目「自分の画面に記憶を持たせる」/ 2026-06）
+
+| 種別 | URL / ファイル | 備考 |
+|------|----------------|------|
+| **公開アプリ（提出物①）** | **https://personal-network-sales.vercel.app** | Vercel デプロイ。Notion(デモDB/ダミー)に永続化。無認証＝公開はダミーデータのみ |
+| **課題図解（提出物②）** | [07-memory-notion-deploy.html](07-memory-notion-deploy.html) | Notion永続化＋Vercel公開の図解。公開URLは別途デプロイ予定（前回同様 Surge 等） |
+| GitHub リポジトリ | https://github.com/dan-yuta/personal-network-sales | 設計・実装の全履歴 |
+
+- テーマ: リロードで消えていた画面に **Notion を保存先**として記憶を持たせ、**Vercel** で公開。
+- 保存先の線引き: 編集データ=Notion / 定義・マスタ=リポジトリ（ハイブリッド）。詳細は図解 B・C 章。
+- スクショ: `assets/screenshots/07-overview.png`（公開画面のクリーン版）を配置する想定。未配置でも図解はプレースホルダ表示で崩れない。
+
+---
+
+## 第5回宿題 / 第3回グループセッション（2026-05）
+
+以下は前回（人脈営業ツールの全体像）の提出物。
 
 ---
 

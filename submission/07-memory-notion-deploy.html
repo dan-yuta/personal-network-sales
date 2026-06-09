@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="人脈営業ツールに「記憶」を持たせて公開する — Notion永続化とVercelデプロイの図解">
+  <meta property="og:description" content="リロードで消えていた画面に、Notion を保存先として記憶を持たせ、Vercel で公開するまで。どのデータをどこに置いたか、なぜ Notion を選んだかを図解します。">
+  <meta property="og:type" content="article">
+  <title>「自分の画面に記憶を持たせる」— Notion永続化 + Vercel公開の図解</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body id="top" class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="brain" class="w-4 h-4"></i>
+    自分の画面に記憶を持たせる
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    人脈営業ツールに<br>
+    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">記憶</span>を持たせて<span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">公開</span>する
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    リロードで消えていた画面に、<strong class="text-slate-700">Notion</strong> を保存先として記憶を持たせ、<br>
+    <strong class="text-slate-700">Vercel</strong> で誰でも開けるURLとして公開しました。
+  </p>
+  <a href="https://personal-network-sales.vercel.app" target="_blank" rel="noopener"
+     class="no-print inline-flex items-center gap-2 mt-6 bg-ads-accent text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md hover:opacity-90 transition-opacity">
+    <i data-lucide="external-link" class="w-4 h-4"></i>
+    公開URL: personal-network-sales.vercel.app
+  </a>
+  <p class="text-xs text-ads-dim mt-4">
+    AI-Driven School 第7回宿題（4ヶ月目）/ personal-network-sales
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  目次 (Table of Contents)                                    -->
+<!-- ============================================================ -->
+<nav aria-label="目次" class="no-print mb-10 md:mb-12">
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-4 md:p-5">
+    <p class="text-xs font-bold text-ads-dim tracking-wider mb-3 flex items-center gap-1.5">
+      <i data-lucide="list" class="w-3.5 h-3.5"></i>
+      目次 (クリックでジャンプ)
+    </p>
+    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+      <li><a href="#a" class="text-ads-accent-light hover:underline">A. 今回やったこと（リロードで消える→残る）</a></li>
+      <li><a href="#b" class="text-ads-accent-light hover:underline">B. 何をどこに保存したか（保存先マップ）</a></li>
+      <li><a href="#c" class="text-ads-accent-light hover:underline">C. なぜ Notion を選んだか</a></li>
+      <li><a href="#d" class="text-ads-accent-light hover:underline">D. どうやって記憶させ・公開したか</a></li>
+      <li><a href="#e" class="text-ads-accent-light hover:underline">E. 実画面（公開・動作中）</a></li>
+      <li><a href="#f" class="text-ads-accent-light hover:underline">F. 工夫したポイント</a></li>
+      <li><a href="#g" class="text-ads-accent-light hover:underline">G. 苦戦したポイント</a></li>
+      <li><a href="#summary" class="text-ads-accent-light hover:underline">まとめ</a></li>
+      <li><a href="#glossary" class="text-ads-accent-light hover:underline">巻末: 用語の補足</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<!-- ============================================================ -->
+<!--  ONE-PAGE SUMMARY                                            -->
+<!-- ============================================================ -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      画面の編集が <span class="text-ads-accent-light">Notion に保存</span>され、<br class="hidden md:block">
+      リロードしても・別の端末で開いても <span class="text-ads-accent-light">残る</span>
+    </p>
+    <p class="text-sm text-ads-muted">
+      「見た目だけ・更新で消える」状態から、データが外部に永続化される状態へ
+    </p>
+  </div>
+
+  <!-- Core flow: ブラウザ ⇄ Vercel(Next.js) ⇄ Notion -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0 mb-6">
+    <!-- ブラウザ -->
+    <div class="flex flex-col items-center w-36 p-3">
+      <div class="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="monitor" class="w-7 h-7 text-blue-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">ブラウザ (PC)</div>
+      <div class="text-[11px] text-blue-600/70 mt-0.5">ドラッグで編集</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-16 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-accent tracking-wider">操作</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+      </div>
+    </div>
+
+    <!-- Vercel / Next.js (centerpiece) -->
+    <div class="flex flex-col items-center w-44 p-4 bg-ads-accent/5 border-2 border-ads-accent/20 rounded-2xl">
+      <div class="w-16 h-16 rounded-2xl bg-ads-accent/15 border-2 border-ads-accent/30 flex items-center justify-center mb-2.5">
+        <i data-lucide="server" class="w-8 h-8 text-ads-accent-light"></i>
+      </div>
+      <div class="font-bold text-ads-accent-light text-base">Vercel</div>
+      <div class="text-[11px] text-ads-muted mt-0.5 mb-2">Next.js アプリ本体（公開）</div>
+      <div class="text-[10px] text-ads-muted bg-white rounded-lg px-2.5 py-1 border border-ads-border/50">Server Action で読み書き</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-16 py-1 md:py-0">
+      <div class="flex flex-col items-center gap-0.5">
+        <span class="text-[9px] font-medium text-ads-accent tracking-wider">保存／取得</span>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+        <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+      </div>
+    </div>
+
+    <!-- Notion -->
+    <div class="flex flex-col items-center w-36 p-3">
+      <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="database" class="w-7 h-7 text-emerald-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">Notion DB</div>
+      <div class="text-[11px] text-emerald-600/70 mt-0.5">記憶の置き場</div>
+    </div>
+  </div>
+
+  <p class="text-center text-sm text-ads-muted max-w-xl mx-auto">
+    編集すると <strong class="text-slate-700">Notion に書き込まれ</strong>、画面を開くたびに <strong class="text-slate-700">Notion から取り直す</strong>。
+    だからリロードでも別端末でも同じ最新データが出る。
+  </p>
+</div>
+
+<p class="text-center text-sm text-ads-muted mb-16 md:mb-20">
+  ここから先、章ごとに説明していきます。
+</p>
+
+
+<!-- ============================================================ -->
+<!--  SECTION A: 今回やったこと                                    -->
+<!-- ============================================================ -->
+<section id="a" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 flex-shrink-0">
+      <i data-lucide="help-circle" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">A. 今回やったこと — 「消える画面」を「残る画面」に</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    前回までの人脈営業ツールは、<strong class="text-slate-900">見た目と操作感はできていたが、編集しても更新（リロード）すると元に戻る</strong>状態でした。データが <strong class="text-slate-900">ブラウザの一時的なメモリにしか無かった</strong>からです。<br>
+    今回の課題「<strong class="text-slate-900">自分の画面に記憶を持たせる</strong>」は、この編集を外部のデータベースに保存して消えなくし、さらに<strong class="text-slate-900">公開して誰でもURLで開ける</strong>ようにすることです。
+  </p>
+
+  <!-- Before → After -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-red-500/10 text-red-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+        これまで（記憶なし）
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed">候補者を別ステージに動かしても、<strong class="text-red-700">リロードで元に戻る</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed">データは <strong class="text-red-700">自分の PC のブラウザの中だけ</strong>。他の人・他の端末からは見られない</span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed">URLが無いので「動くもの」を人に見せられない</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        今回（記憶あり・公開済み）
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed">編集が <strong class="text-emerald-700">Notion に保存され、リロードしても残る</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed">毎回 Notion から取り直すので、<strong class="text-emerald-700">別の端末で開いても同じ最新データ</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm leading-relaxed"><strong class="text-emerald-700">公開URL</strong>で誰でもブラウザから開ける（Vercel）</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">課題の核心</strong>:
+    「どのデータをデータベース（Notion）に置き、どれをプログラム側（リポジトリ）の定義として残すか」を<strong class="text-slate-800">自分で線引きして説明できること</strong>。次の B・C 章がその答えです。
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION B: 保存先マップ                                       -->
+<!-- ============================================================ -->
+<section id="b" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 flex-shrink-0">
+      <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">B. 何をどこに保存したか — 保存先マップ</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    すべてをデータベースに入れるのではなく、<strong class="text-slate-900">「人が編集するデータ」だけを Notion に</strong>、<strong class="text-slate-900">「変わらない定義・ルール」はリポジトリ（プログラム）に</strong>残す、という線引きをしました。
+  </p>
+
+  <!-- 凡例 -->
+  <div class="flex flex-wrap gap-2 mb-4 text-xs">
+    <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1 text-emerald-700"><i data-lucide="database" class="w-3 h-3"></i>Notion = 編集データ（記憶）</span>
+    <span class="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-300 rounded-full px-3 py-1 text-slate-700"><i data-lucide="file-code" class="w-3 h-3"></i>リポジトリ = 定義・マスタ</span>
+  </div>
+
+  <!-- テーブル -->
+  <div class="overflow-x-auto rounded-xl border border-ads-border mb-6">
+    <table class="w-full text-sm border-collapse bg-white">
+      <thead>
+        <tr class="bg-ads-surface text-slate-700">
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">データ</th>
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">保存先</th>
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">理由</th>
+          <th class="text-center font-bold px-3 py-2.5 border-b border-ads-border whitespace-nowrap">保持</th>
+        </tr>
+      </thead>
+      <tbody class="text-ads-muted">
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">候補者プロフィール全項目</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（候補者DB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">ユーザーが編集する実データ</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-emerald-600">✓</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">評価4軸（現在値のみ・履歴なし）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（数値列）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">編集対象。履歴は営業に不要なので現在値に簡約</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-emerald-600">✓</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">進捗ステージ／優先度／アーカイブ</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（候補者DB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">編集対象（今回まず配線したのがステージ）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-emerald-600">✓</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">接触ログ（1対多）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（接触ログDB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">時系列で増える編集データ。1欄では足りない</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-emerald-600">✓</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">最終連絡日</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（候補者DB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">接触ログから派生して自動保存（連絡間隔の警告用）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-emerald-600">✓</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">ステージ定義／順序／色</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-slate-600 font-medium">リポジトリ</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">マスタ定義。AI の手元（コード）に置く</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-ads-dim">—</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">アプリ名・アイコン</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-slate-600 font-medium">リポジトリ</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">UI 設定（ユーザー編集なし）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-center text-ads-dim">—</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 text-slate-700">candidates.json（サンプル30人）</td>
+          <td class="px-3 py-2.5"><span class="text-slate-600 font-medium">リポジトリ → デモDBへ投入</span></td>
+          <td class="px-3 py-2.5">実行時はロードせず、デモDBの初期データとしてのみ使用</td>
+          <td class="px-3 py-2.5 text-center text-ads-dim">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">線引きの原則</strong>:
+    <strong class="text-slate-800">「人が手で書き換えるもの」＝ Notion</strong>（記憶として残す）。
+    <strong class="text-slate-800">「アプリのルール・定義」＝ リポジトリ</strong>（コードと一緒に管理）。
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION C: なぜ Notion を選んだか                            -->
+<!-- ============================================================ -->
+<section id="c" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/10 flex-shrink-0">
+      <i data-lucide="git-compare" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">C. なぜ保存先に Notion を選んだか</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    講義では保存先として <strong class="text-slate-900">Neon（クラウドのデータベース）</strong>が推奨されていました。それでも今回あえて <strong class="text-slate-900">Notion</strong> を選びました。理由とトレードオフを正直に書きます。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- メリット -->
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i>
+        Notion を選んだ理由
+      </div>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">既存の営業業務がすでに Notion 上にある</strong>ので、そのまま流用できる</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">人が直接 DB を覗ける・編集できる</strong>（アプリを介さなくても運用が回る）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>運用の変更コストがゼロ。今までの Notion の使い方を壊さない</span></li>
+      </ul>
+    </div>
+    <!-- トレードオフ -->
+    <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="scale" class="w-3.5 h-3.5"></i>
+        代償（講義の論点）
+      </div>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">「AI との距離」が遠くなる</strong>。Notion は人間向けの形なので、AI/プログラムから扱うには一手間かかる</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>専用DB（Neon等）に比べ、複雑なクエリや厳密な型は不得手</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">だから「ハイブリッド」にした</strong>:<br>
+    代償である「AI との距離」を埋めるため、<strong class="text-slate-800">アプリのルール・定義（ステージや色、画面構成）はリポジトリ＝AI の手元に残し</strong>、
+    <strong class="text-slate-800">人が編集する実データだけ Notion に置く</strong>。
+    こうすると「人が直接触れる手軽さ」と「AI が扱いやすい厳密な定義」の両取りになります。これが B 章の保存先マップの考え方です。
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION D: どうやって記憶させ・公開したか                     -->
+<!-- ============================================================ -->
+<section id="d" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-500/10 flex-shrink-0">
+      <i data-lucide="git-merge" class="w-5 h-5 text-cyan-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">D. どうやって記憶させ・公開したか（仕組み）</h2>
+  </div>
+
+  <div class="space-y-4 mb-6">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-1.5">
+        <i data-lucide="save" class="w-5 h-5 text-cyan-600"></i>
+        <p class="font-bold text-slate-900">① 保存は「サーバー側の処理」で Notion に書く</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        画面で候補者を動かすと、<strong class="text-slate-800">Server Action</strong>（サーバー側で動く保存処理）が Notion の進捗状況を更新する。画面は<strong class="text-slate-800">先に動かしておき（楽観的更新）</strong>、保存が失敗したら元に戻して通知。「取り消し」を押したときも Notion に反映する。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-1.5">
+        <i data-lucide="refresh-cw" class="w-5 h-5 text-cyan-600"></i>
+        <p class="font-bold text-slate-900">② 表示は「毎回 Notion から取り直す」</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        トップページを <strong class="text-slate-800">毎リクエスト動的取得</strong>（force-dynamic）に設定。ビルド時に焼き込まず、開くたびに Notion の最新を読む。だから別端末でリロードしても同じ最新データになる。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-1.5">
+        <i data-lucide="shield" class="w-5 h-5 text-cyan-600"></i>
+        <p class="font-bold text-slate-900">③ 公開用と本番用で「DBを2セット」に分けた</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        公開URLは無認証で誰でも見られるので、<strong class="text-slate-800">公開には実データを一切出さず、ダミーデータのデモDBに向ける</strong>。本番（実データ）はローカル専用。切替は環境変数のDB-ID だけ。個人情報の漏洩をゼロにする設計。
+      </p>
+    </div>
+  </div>
+
+  <div class="rounded-lg border border-amber-500/30 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+    <strong>※ AI による連絡文の下書き機能（前回紹介）は、今回のスコープでは発展課題</strong>として位置づけ、本提出は「記憶＝永続化」と「公開」に集中しています。
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION E: 実画面                                            -->
+<!-- ============================================================ -->
+<section id="e" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 flex-shrink-0">
+      <i data-lucide="camera" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">E. 実画面（公開・動作中）</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    公開URL <a href="https://personal-network-sales.vercel.app" target="_blank" rel="noopener" class="text-ads-accent-light hover:underline font-medium">personal-network-sales.vercel.app</a> で実際に動いている画面です（ダミーデータのデモDBに接続）。
+  </p>
+
+  <div class="mb-4">
+    <a href="assets/screenshots/07-overview.png" target="_blank" rel="noopener" title="クリックで原寸大表示"
+       class="group block rounded-xl overflow-hidden border border-ads-border shadow-md bg-ads-surface transition-shadow hover:shadow-lg">
+      <img src="assets/screenshots/07-overview.png"
+           onerror="this.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';"
+           alt="公開された人脈営業ツールの画面。4ペイン構成で30人のダミー候補者がステージ別に並んでいる。"
+           class="w-full h-auto block transition-transform group-hover:scale-[1.01]"
+           loading="lazy">
+    </a>
+    <!-- スクショ未配置時のプレースホルダ -->
+    <div style="display:none" class="flex-col items-center justify-center text-center rounded-xl border-2 border-dashed border-ads-border bg-ads-surface p-10 text-ads-muted">
+      <i data-lucide="image" class="w-10 h-10 text-ads-dim mb-3"></i>
+      <p class="text-sm font-bold text-slate-700 mb-1">スクリーンショットをここに配置</p>
+      <p class="text-xs">公開画面のクリーンなスクショを <code class="bg-white px-1.5 py-0.5 rounded border border-ads-border text-slate-700">submission/assets/screenshots/07-overview.png</code> として保存してください。</p>
+    </div>
+    <p class="text-[11px] text-ads-dim mt-1.5 flex items-center gap-1">
+      <i data-lucide="zoom-in" class="w-3 h-3"></i>
+      画像をクリックで原寸大表示
+    </p>
+  </div>
+
+  <!-- 永続化の証跡 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+      <div class="font-bold text-emerald-900 mb-1 flex items-center gap-1.5"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>リロードで残る</div>
+      <div class="text-xs text-emerald-800/80">候補者を動かして F5 → 変更が残る（＝メモリでなく Notion に保存されている証拠）</div>
+    </div>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+      <div class="font-bold text-emerald-900 mb-1 flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4"></i>Notion 側でも変わる</div>
+      <div class="text-xs text-emerald-800/80">画面で動かした候補者の進捗状況が、Notion の DB を直接見ても更新されている</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION F: 工夫したポイント                                   -->
+<!-- ============================================================ -->
+<section id="f" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 flex-shrink-0">
+      <i data-lucide="award" class="w-5 h-5 text-amber-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">F. 工夫したポイント</h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="search-check" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">① 作る前に実 Notion を調べてズレを発見</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        実装前に実際の Notion DB の構造を取得して検証。設計メモとのズレ（進捗が実は7段階だった等）を着手前に見つけ、手戻りを防いだ。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="users" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">② AI 3体で計画を敵対的レビュー</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        着手前に複数のAIに計画を批判させ、Notion SDK の新方式（データソースAPI）が正しいことをコードで実証してから書き始めた。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="split" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">③ 編集データと定義の線引き</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        「編集データ＝Notion／定義＝リポジトリ」をはっきり分け、Notion採用の代償（AIとの距離）を意識的に埋めた（C章）。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="shield-check" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">④ 公開用ダミーDBで漏洩ゼロ</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        DBを2セットにし、公開はダミーのデモDBへ。実データは一切公開URLに出さない。発表前に再投入してクリーンな状態でデモできる。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="zap" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">⑤ 体感を速くする楽観的更新＋整合</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        操作は即反映、保存は裏で実行。失敗時はロールバック＋通知。「取り消し」も Notion に反映して、画面とDBがズレないようにした。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="globe" class="w-5 h-5 text-amber-600"></i>
+        <p class="font-bold text-slate-900">⑥ 毎回最新を返す公開設計</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        トップを動的取得にして、別端末リロードでも確実に最新。キャッシュのタイミングに依存しない「記憶が効く」状態にした。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION G: 苦戦したポイント                                  -->
+<!-- ============================================================ -->
+<section id="g" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-rose-500/10 flex-shrink-0">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">G. 苦戦したポイント</h2>
+  </div>
+
+  <!-- 苦戦① Vercel saga (主役) -->
+  <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5 mb-5">
+    <div class="flex items-baseline gap-3 mb-3">
+      <span class="text-2xl font-black text-rose-500 leading-none">①</span>
+      <h3 class="text-lg font-bold text-slate-900">Vercel デプロイが何度も失敗（最大の難所）</h3>
+    </div>
+    <p class="text-sm text-slate-700 leading-relaxed mb-3">
+      ローカルでは成功するのに、Vercel だけ <code class="bg-white px-1 rounded border border-rose-200 text-rose-700 text-xs">routes-manifest-deterministic.json が無い</code> というエラーで連続失敗。bundler 変更・環境変数・公開フォルダ設定…と試しても直らなかった。
+    </p>
+    <p class="text-sm text-ads-muted leading-relaxed mb-2">
+      そこで当て推量をやめ、<strong class="text-slate-700">そのファイル名が Next.js 本体（複数バージョン）に存在するかをパッケージごと調べて検証</strong>。結果「Next 由来ではなく、<strong class="text-slate-700">Vercel 側のデプロイ後処理が要求するファイル</strong>」と判明。最終的に真因は <strong class="text-slate-700">設定ファイルの 1 行（<code class="bg-white px-1 rounded border border-rose-200 text-xs">outputFileTracingRoot</code>）</strong>で、これがアプリをサブフォルダに置いた構成と噛み合わず、Vercel のファイル探索をずらしていた。1行削除で解決。
+    </p>
+    <div class="text-xs text-rose-700/80 bg-white/60 rounded-lg px-3 py-2 border border-rose-200 mt-3">
+      学び: 謎のエラーは「症状（ログ）」でなく「原因」を、<strong>事実を1つずつ検証して</strong>切り分ける。当て推量での修正は時間を溶かす。
+    </div>
+  </div>
+
+  <!-- 苦戦② -->
+  <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5 mb-5">
+    <div class="flex items-baseline gap-3 mb-3">
+      <span class="text-2xl font-black text-rose-500 leading-none">②</span>
+      <h3 class="text-lg font-bold text-slate-900">想定と違った Notion の実構造</h3>
+    </div>
+    <ul class="text-sm text-ads-muted leading-relaxed space-y-1 list-disc pl-5">
+      <li>進捗ステージが想定の6段階でなく <strong class="text-slate-700">実は7段階</strong>（「紹介進行中」）だった → コードを7段階に修正</li>
+      <li>「フリガナ／生年月日／想定取引規模」の列は実DBに無かった → デモDBに追加して対応</li>
+      <li>担当者は人物リンク型・間柄はDB間リレーション → 今回は<strong class="text-slate-700">書かない（読み取りのみ）</strong>と割り切り</li>
+    </ul>
+  </div>
+
+  <!-- 苦戦③ -->
+  <div class="bg-rose-500/5 border border-rose-500/20 rounded-xl p-5">
+    <div class="flex items-baseline gap-3 mb-3">
+      <span class="text-2xl font-black text-rose-500 leading-none">③</span>
+      <h3 class="text-lg font-bold text-slate-900">「公開」ならではの落とし穴</h3>
+    </div>
+    <ul class="text-sm text-ads-muted leading-relaxed space-y-1 list-disc pl-5">
+      <li><strong class="text-slate-700">Claude Code(Max) と API は別課金</strong>。公開アプリのAI呼び出しはAPI従量課金になるため、公開では安価なモデル＋利用制限で守る設計に（AIは発展課題）</li>
+      <li>公開DBに実データがあると<strong class="text-slate-700">個人情報漏洩</strong> → デモDBをダミー化（実データの削除という後戻りできない操作を慎重に実行）</li>
+      <li>テスト環境ではサーバー専用コードが読み込めず落ちる → テスト用に差し替えて回避</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  まとめ                                                       -->
+<!-- ============================================================ -->
+<section id="summary" class="scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-ads-accent/10 flex-shrink-0">
+      <i data-lucide="check-circle" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">まとめ — 覚えて帰ってほしい 3 つのこと</h2>
+  </div>
+
+  <div class="space-y-4 mb-10">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-blue-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-blue-500 leading-none flex-shrink-0 mt-1">01</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">記憶の置き場は Notion、定義はコードに</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            「人が編集するデータ」だけを Notion に永続化し、「アプリの定義・ルール」はリポジトリに残す。リロードでも別端末でも消えない一方で、AI が扱う部分は手元に保てる。
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-emerald-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-emerald-500 leading-none flex-shrink-0 mt-1">02</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">Notion を選んだのは「人が直接見れる」から</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            推奨のNeonでなくNotionにしたのは、既存業務がNotion上にあり人が直接DBを覗けるから。代償の「AIとの距離」はハイブリッド構成で埋めた。<strong class="text-slate-800">トレードオフを理解した上での選択</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-6 border-l-4 border-l-rose-500">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl font-black text-rose-500 leading-none flex-shrink-0 mt-1">03</div>
+        <div>
+          <h3 class="font-bold text-slate-900 mb-2">詰まったら「症状」でなく「原因」を検証で特定する</h3>
+          <p class="text-sm text-ads-muted leading-relaxed">
+            Vercel デプロイの連続失敗は、当て推量でなくファイルの実体を調べて真因（設定1行）にたどり着いた。<strong class="text-slate-800">事実を1つずつ確かめる</strong>のが結局いちばん速い。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center bg-gradient-to-b from-ads-accent/5 to-transparent border border-ads-accent/10 rounded-xl p-8 md:p-10">
+    <i data-lucide="brain" class="w-8 h-8 text-ads-accent mx-auto mb-4"></i>
+    <p class="text-lg font-bold text-slate-900 mb-3">「動く画面」から「記憶を持つ・公開された道具」へ。</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed">
+      編集が消えず、URLで誰でも開け、データの置き場と理由を自分の言葉で説明できる ── 今回でツールは「デモ」から「実際に使える道具の入り口」に変わりました。
+    </p>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  巻末: 用語の補足                                             -->
+<!-- ============================================================ -->
+<section id="glossary" class="mt-16 md:mt-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-6">
+    <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-500/10 flex-shrink-0">
+      <i data-lucide="book-open" class="w-4 h-4 text-slate-600"></i>
+    </div>
+    <h2 class="text-base md:text-lg font-bold text-slate-900">巻末: 用語の補足</h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="hard-drive" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">永続化（えいぞくか）</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        データを<strong class="text-slate-800">電源を切っても消えない場所（DB）に保存</strong>すること。今回は Notion が保存先。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="server-cog" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">Server Action（サーバーアクション）</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        ボタン操作をきっかけに<strong class="text-slate-800">サーバー側で実行される処理</strong>。今回は Notion への保存をここで行う。トークン等の秘密を画面に出さずに済む。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="refresh-cw" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">動的取得（force-dynamic）</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        ページを<strong class="text-slate-800">開くたびに毎回 DB から取り直す</strong>設定。ビルド時に固定しないので、常に最新が出る。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="zap" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">楽観的更新</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        ボタンを押した瞬間に画面を先に更新し、保存は裏で進める方式。体感が速い。失敗したら画面を元に戻す。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="rocket" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">Vercel / デプロイ</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        作ったアプリを<strong class="text-slate-800">インターネット上に公開（デプロイ）するサービス</strong>。GitHub に push すると自動で公開URLが更新される。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-4">
+      <div class="flex items-start gap-2 mb-1.5">
+        <i data-lucide="copy" class="w-4 h-4 text-ads-accent mt-1 flex-shrink-0"></i>
+        <p class="font-bold text-slate-900 text-sm">DB 2セット（本番 / デモ）</p>
+      </div>
+      <p class="text-xs text-ads-muted leading-relaxed pl-6">
+        実データの「本番DB」と、ダミーの「デモDB」を用意。<strong class="text-slate-800">公開はデモDBに向け</strong>、実データを外に出さない。切替は環境変数のIDだけ。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School 第7回宿題 / 人脈営業ツール（personal-network-sales）</p>
+  </footer>
+
+  <a href="#top" aria-label="ページの先頭に戻る" title="ページの先頭に戻る"
+     class="no-print fixed bottom-6 right-6 z-50 inline-flex size-11 items-center justify-center rounded-full bg-ads-accent text-white shadow-lg transition-opacity hover:opacity-90 focus-visible:opacity-90">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </a>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
