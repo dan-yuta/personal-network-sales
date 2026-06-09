@@ -100,6 +100,9 @@ export function SortableCandidateRow({
       ref={setNodeRef}
       style={style}
       data-candidate-id={cand.id}
+      // 初回描画前のスクロール復元スクリプト（app/page.tsx）がこの印で
+      // 選択中の行を探し、ちらつかせずに表示位置へスクロールする。
+      data-selected={selected ? "true" : undefined}
       className={cn(
         "group/candidate relative",
         isDragging && "pointer-events-none opacity-50",

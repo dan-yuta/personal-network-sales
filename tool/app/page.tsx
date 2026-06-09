@@ -39,11 +39,28 @@ export default async function Page() {
   }
 
   return (
-    <Workspace
-      initialDepartments={deptResult.data}
-      initialCandidates={candidates}
-      initialSelectedCandidateId={initialSelectedCandidateId}
-      workspace={wsResult.data}
-    />
+    <>
+      <Workspace
+        initialDepartments={deptResult.data}
+        initialCandidates={candidates}
+        initialSelectedCandidateId={initialSelectedCandidateId}
+        workspace={wsResult.data}
+      />
+      {/*
+        Pane2 のスクロール復元（ちらつき防止）。
+        本文の後ろに置いた同期インラインスクリプトは、ブラウザが Pane2 を
+        「先頭」で初回描画する前（HTML パース中）に実行される。選択中
+        （Cookie で復元した前回の人）の行 data-selected="true" を探して
+        scrollIntoView するため、最初の描画時点で既に対象者の位置になり、
+        「一瞬先頭 → スクロール」のフラッシュが原理的に起きない。
+        useEffect だと SSR 先頭描画→JS 後スクロールで一瞬先頭が見えてしまう。
+      */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{var e=document.querySelector('[data-candidate-id][data-selected]');if(e){e.scrollIntoView({block:'nearest'});}}catch(_){}})();",
+        }}
+      />
+    </>
   );
 }
