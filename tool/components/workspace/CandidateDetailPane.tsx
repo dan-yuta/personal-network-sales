@@ -26,6 +26,7 @@ import {
   CONTACT_METHOD_THEME_DEFAULT,
 } from "@/lib/labels";
 import { listContactLogsAction, addContactLogAction } from "@/app/actions";
+import { useAnimateOnChange } from "@/lib/useAnimateOnChange";
 import { useToast } from "@/components/workspace/Toaster";
 import { dateNDaysAgo } from "@/lib/computed/dateOffsets";
 import { Pane4Toggle } from "@/components/workspace/Pane4Toggle";
@@ -51,6 +52,8 @@ export function CandidateDetailPane({
   onContactLogAdded,
 }: CandidateDetailPaneProps) {
   const [activeTab, setActiveTab] = useState<TabId>("log");
+  // タブを切り替えた時だけフェード。初回ロード/リロードではアニメさせない。
+  const animateTab = useAnimateOnChange(activeTab);
 
   return (
     <aside
@@ -92,12 +95,15 @@ export function CandidateDetailPane({
           </div>
 
           <ScrollArea className="min-h-0 flex-1">
-            {/* key={activeTab} で remount → tw-animate-css の fade-in が発火。
-                タブ切替時のフェードで「コンテンツが切り替わった」感を出す。
+            {/* タブ切替時のみフェード（animateTab）。初回ロード/リロードでは
+                アニメさせず即時表示し、リロード時のちらつきを防ぐ。
                 motion-reduce 設定のユーザーにはアニメーションを切る。 */}
             <div
               key={activeTab}
-              className="animate-in fade-in duration-150 motion-reduce:animate-none"
+              className={cn(
+                animateTab &&
+                  "animate-in fade-in duration-150 motion-reduce:animate-none",
+              )}
             >
               {activeTab === "log" ? (
                 // key={candidate.id} で候補者切替時に remount → ログ再取得＋

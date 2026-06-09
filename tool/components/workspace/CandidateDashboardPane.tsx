@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAnimateOnChange } from "@/lib/useAnimateOnChange";
 import {
   type AxisKey,
   type Profile,
@@ -769,15 +770,22 @@ export function CandidateDashboardPane({
   /** 絞り込みを解除して選択候補者を Pane2 に再表示する */
   onClearFiltersForSelected: () => void;
 }) {
+  // 候補者を切り替えた時だけフェード。初回ロード/リロードでは false ＝
+  // アニメさせない（リロード時に中身がフェードして“ちらつく”のを防ぐ）。
+  const animateSwitch = useAnimateOnChange(selectedCandidateId);
   return (
     <section className="min-w-0 flex-1 bg-canvas">
       <ScrollArea className="h-full">
-        {/* key={selectedCandidateId} で候補者切替時に remount → fade-in。
-            内部の InlineTextField 群も新しい defaultValue で初期化し直される。
-            motion-reduce 設定のユーザーにはアニメーションを切る (a11y 配慮)。 */}
+        {/* key={selectedCandidateId} で候補者切替時に remount。内部の
+            InlineTextField 群も新しい defaultValue で初期化し直される。
+            フェードは「切替時のみ」(animateSwitch)。motion-reduce では無効化。 */}
         <div
           key={selectedCandidateId}
-          className="mx-auto flex max-w-3xl animate-in fade-in flex-col gap-4 px-8 py-8 duration-200 motion-reduce:animate-none"
+          className={cn(
+            "mx-auto flex max-w-3xl flex-col gap-4 px-8 py-8",
+            animateSwitch &&
+              "animate-in fade-in duration-200 motion-reduce:animate-none",
+          )}
         >
           {/* 表示中の候補者が Pane2 の絞り込みで非表示になっているとき、
               「リストにいない人を編集している」認知不整合を防ぐためにバナーを出す。
