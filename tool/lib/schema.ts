@@ -300,10 +300,10 @@ export type CandidateRow = {
   /** 接触経路 (`profile.source`)。空文字列なら未設定。
    *  Pane 2 副情報の 2 行目に短縮表示する。例: 「△△交流会で名刺交換」 */
   source: string;
-  /** 最終接触日 (接触ログから派生)。null なら未接触。
+  /** 最終接触日。null なら未接触。
    *  Pane 2 で「12 日前 / 3 週間前 / 半年前」の相対表記を出すために使う。
-   *  Phase 1 は MOCK_LOG_DATASET 由来、Phase 3 で Notion 接続後は
-   *  「接触ログ DB の createdTime 降順 1 件」に差し替わる。 */
+   *  Notion「最終連絡日」列由来（`Candidate.lastContactDate`、接触ログ追加時に
+   *  denormalized 同期）。 */
   lastContactDate: string | null;
   /** 優先度 (`profile.priority`)。Pane 2 の優先度マーカー表示と
    *  ソート (priority 順) に使う。空文字は未設定。 */

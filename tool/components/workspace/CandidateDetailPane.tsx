@@ -7,8 +7,8 @@
  *   - タブA: 接触ログ（過去の接触履歴 + 新規ログ追加フォーム）
  *   - タブB: 連絡文作成（AIによる連絡文ドラフト生成）
  *
- * 現フェーズはモック実装。Notion API / Anthropic API は未接続で、
- * UI と動作感だけ提示する。本格実装は Phase 2-3 で行う。
+ * タブA（接触ログ）は Notion 接触ログDB と接続済み（表示・追加・最終連絡日同期）。
+ * タブB（連絡文作成）の AI 生成はまだモック（Anthropic 接続は発展課題=Phase E）。
  */
 
 import {
@@ -158,10 +158,10 @@ function TabButton({
   );
 }
 
-// ===== タブA: 接触ログ（モック） =====
+// ===== タブA: 接触ログ（Notion 連携済み） =====
 //
-// dataset は lib/data/mockLogs.ts に切り出し済み (Pane2/Pane3 でも参照するため)。
-// ここでは getMockLogs ヘルパー経由で取り出す。
+// 表示は listContactLogsAction で Notion 接触ログDB から取得（新→旧）、
+// 追加は addContactLogAction（最終連絡日も同期）。useOptimistic で即時反映する。
 
 const CONTACT_METHOD_OPTIONS = [
   "電話",
@@ -333,7 +333,7 @@ function ContactLogTab({
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      {/* 新規ログ追加フォーム（モック・送信は未実装） */}
+      {/* 新規ログ追加フォーム（保存で Notion 接触ログDB に永続化） */}
       <section
         aria-labelledby="log-add-heading"
         className="rounded-lg border border-primary/30 bg-primary/5 p-3"

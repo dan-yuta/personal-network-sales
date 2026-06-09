@@ -1,13 +1,13 @@
 /**
  * 接触ログのモックデータと派生ヘルパー。
  *
- * Phase 1 (Notion API 未接続) は接触ログをこの dataset から読み出す。
- * Pane4「接触ログ」タブだけでなく、Pane2/Pane3 に「最終接触からの経過日数」を
- * 出すためにも参照する必要が生じたため、CandidateDetailPane の中に閉じていた
- * MOCK_LOG_DATASET をモジュールとしてここに切り出した。
+ * 【現状】Phase D で接触ログ／最終連絡日を Notion 連携に切り替えたため、
+ * このモジュールは **アプリ本体からは未使用**（接触ログ表示=listContactLogsAction、
+ * 最終連絡日=Candidate.lastContactDate）。テスト(mockLogs.test.ts)と、将来の
+ * デモ用シード素材として残置している。
  *
- * Phase 3 で Notion 接続後は `getLastContactDate` だけ「接触ログ DB の
- * createdTime 降順 1 件」に差し替えれば、UI 側はそのまま動く想定。
+ * （以下は当初メモ）Notion 未接続だった頃は接触ログをこの dataset から読み出し、
+ * Pane2/Pane3 の「最終接触からの経過日数」もここから派生していた。
  */
 
 export type MockLogEntry = {
