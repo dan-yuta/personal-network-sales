@@ -253,6 +253,10 @@ export const candidateSchema = z.object({
   // 復元時は `stage` をそのまま使って元のステージへ戻る。JSON シードでは省略可
   // （`.default(false)` で読み込み時に補完）。
   archived: z.boolean().default(false),
+  // 最終連絡日（Notion「最終連絡日」列由来、接触ログ追加時に denormalized 同期）。
+  // Pane2 候補者行 / Pane3 ヘッダーの「最終接触 N 日前」バッジの入力。null は未接触。
+  // JSON シード（candidates.json）では省略可（`.default(null)` で補完）。
+  lastContactDate: z.string().nullable().default(null),
 });
 export type Candidate = z.infer<typeof candidateSchema>;
 

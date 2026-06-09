@@ -49,6 +49,7 @@ import {
 
 import {
   type AxisKey,
+  type AxisScores,
   type Profile,
   type StageKey,
   type Department,
@@ -63,7 +64,6 @@ import {
   createMinimalProfile,
   createMinimalScorecard,
 } from "@/lib/data/factories";
-import { getLastContactDate } from "@/lib/data/mockLogs";
 import { getCandidateAverageScore } from "@/lib/computed/scorecards";
 import { normalizeForSearch } from "@/lib/computed/searchNormalize";
 import { ARCHIVED_GROUP_LABEL, STAGE_LABELS } from "@/lib/labels";
@@ -75,7 +75,12 @@ import { CandidateDashboardPane } from "@/components/workspace/CandidateDashboar
 import { CandidateDetailPane } from "@/components/workspace/CandidateDetailPane";
 import { ShortcutsHelpDialog } from "@/components/workspace/ShortcutsHelpDialog";
 import { ToasterProvider, useToast } from "@/components/workspace/Toaster";
-import { updateStageAction } from "@/app/actions";
+import {
+  updateStageAction,
+  updateProfileAction,
+  updateAxisScoresAction,
+  setArchivedAction,
+} from "@/app/actions";
 
 // ========== UI 内部型 ==========
 //
@@ -88,6 +93,35 @@ type WorkspaceProps = {
   initialCandidates: Candidate[];
   workspace: { name: string; icon: string };
 };
+
+// ===== Notion 永続化ヘルパー =====
+
+/** Profile の変更キーだけを抽出（updateProfileAction へ渡す最小パッチ）。 */
+function diffProfile(oldP: Profile, newP: Profile): Partial<Profile> {
+  const patch: Partial<Profile> = {};
+  for (const k of Object.keys(newP) as (keyof Profile)[]) {
+    if (oldP[k] !== newP[k]) {
+      Object.assign(patch, { [k]: newP[k] });
+    }
+  }
+  return patch;
+}
+
+/** 現在の評価4軸スナップショット（最新 done scorecard、無ければ全 null）。 */
+function getCurrentAxisScores(candidate: Candidate | undefined): AxisScores {
+  const empty: AxisScores = {
+    achievements: null,
+    thinkingAbility: null,
+    communication: null,
+    cultureFit: null,
+  };
+  if (!candidate) return empty;
+  for (let i = candidate.scorecards.length - 1; i >= 0; i--) {
+    const sc = candidate.scorecards[i];
+    if (sc.decision && sc.decision.trim() !== "") return sc.axisScores;
+  }
+  return empty;
+}
 
 /**
  * Workspace 公開エントリ。ToasterProvider で包んでから WorkspaceContent を描画。
@@ -112,6 +146,26 @@ function WorkspaceContent({
   const [departments, setDepartments] =
     useState<Department[]>(initialDepartments);
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
+  // 最新 candidates を同期保持する ref。各 mutation ハンドラが「変更前の値」を
+  // 古い閉包に頼らず参照して diff/rollback を組み立てるために使う。
+  const candidatesRef = useRef(candidates);
+  candidatesRef.current = candidates;
+
+  // Notion 書込の直列化キュー (D6)。星の連打や複数フィールドの連続 blur で
+  // pages.update が同時多発し、順序逆転や Notion レート制限(平均3req/s)に
+  // 触れるのを防ぐ。全ての書込をこのチェーンに通し、1 件ずつ順に実行する。
+  // 各呼び出し元は返り値に .catch() を付けて自分のロールバック/通知を行う。
+  const writeChainRef = useRef<Promise<unknown>>(Promise.resolve());
+  const enqueueWrite = useCallback(
+    (fn: () => Promise<unknown>): Promise<unknown> => {
+      const run = writeChainRef.current.then(fn, fn);
+      // チェーン自体は失敗を飲み込んで生かし続ける (呼び出し元が別途 catch する)。
+      writeChainRef.current = run.catch(() => {});
+      return run;
+    },
+    [],
+  );
+
   const [selectedCandidateId, setSelectedCandidateId] = useState<string>("c2");
   // 営業ツール用: Pane1 で選択中のステージ。null = 全候補者を表示。
   // positions.json の position.id が "stage-{StageKey}" の形式なので、それを基に判定する。
@@ -182,16 +236,35 @@ function WorkspaceContent({
   // 関数形 (p => next) と値形 (next) の両方に対応する。
   const setProfile = useCallback<React.Dispatch<React.SetStateAction<Profile>>>(
     (action) => {
+      const id = selectedCandidateId;
+      const current = candidatesRef.current.find((c) => c.id === id);
+
+      // 1) 楽観的にローカル state を更新（UI 即反映）
       setCandidates((prev) =>
         prev.map((c) => {
-          if (c.id !== selectedCandidateId) return c;
+          if (c.id !== id) return c;
           const next =
             typeof action === "function" ? action(c.profile) : action;
           return { ...c, profile: next };
         }),
       );
+
+      // 2) 変更分だけ Notion に永続化（D1）。担当者(person型)は updateCandidateProfile
+      //    側で書かれない（スコープ外）。差分が空なら何もしない。
+      if (!current) return;
+      const nextProfile =
+        typeof action === "function" ? action(current.profile) : action;
+      const patch = diffProfile(current.profile, nextProfile);
+      if (Object.keys(patch).length === 0) return;
+      void enqueueWrite(() => updateProfileAction(id, patch)).catch(() => {
+        // テキスト欄は uncontrolled（defaultValue）のため画面の自動巻き戻しは
+        // できない。保存失敗を明示し、リロードで Notion 最新に揃う旨を通知する。
+        pushToast({
+          message: `${current.profile.name || "候補者"} の編集を保存できませんでした（再読み込みで最新をご確認ください）`,
+        });
+      });
     },
-    [selectedCandidateId],
+    [selectedCandidateId, enqueueWrite, pushToast],
   );
 
   // Pane 2 の候補者行クリックでアクティブ候補者を切り替える。
@@ -224,6 +297,7 @@ function WorkspaceContent({
       scorecards: [],
       stage,
       archived: false,
+      lastContactDate: null,
     };
     setCandidates((prev) => [...prev, newCandidate]);
     setSelectedCandidateId(newId);
@@ -263,6 +337,19 @@ function WorkspaceContent({
       });
       setPane4ManuallyClosed(false);
 
+      // Notion にアーカイブ状態を永続化（D3）。失敗で巻き戻し＋通知。
+      void enqueueWrite(() => setArchivedAction(id, true)).catch(() => {
+        setCandidates((prev) =>
+          prev.map((c) =>
+            c.id === id ? { ...c, archived: previousArchived } : c,
+          ),
+        );
+        setSelectedCandidateId(id);
+        pushToast({
+          message: `${name} のアーカイブを保存できませんでした。元に戻しました。`,
+        });
+      });
+
       // 既にアーカイブ済の場合はトースト出さない (UI 上は通常起こらないが防御)
       if (!previousArchived) {
         pushToast({
@@ -274,11 +361,17 @@ function WorkspaceContent({
               ),
             );
             setSelectedCandidateId(id);
+            // Undo も Notion に反映（UI だけ戻すとリロードで復活するため）
+            void enqueueWrite(() => setArchivedAction(id, false)).catch(() => {
+              pushToast({
+                message: `${name} の取り消しを保存できませんでした。`,
+              });
+            });
           },
         });
       }
     },
-    [candidates, pushToast],
+    [candidates, enqueueWrite, pushToast],
   );
 
   // アーカイブ済み候補者を元のステージに復元する。`stage` は archived 中も保持
@@ -294,17 +387,32 @@ function WorkspaceContent({
       );
 
       if (previousArchived) {
+        // Notion に復元（アーカイブ解除）を永続化（D3）。失敗で巻き戻し＋通知。
+        void enqueueWrite(() => setArchivedAction(id, false)).catch(() => {
+          setCandidates((prev) =>
+            prev.map((c) => (c.id === id ? { ...c, archived: true } : c)),
+          );
+          pushToast({
+            message: `${name} の復元を保存できませんでした。元に戻しました。`,
+          });
+        });
         pushToast({
           message: `${name} を復元しました`,
           undo: () => {
             setCandidates((prev) =>
               prev.map((c) => (c.id === id ? { ...c, archived: true } : c)),
             );
+            // Undo（再アーカイブ）も Notion に反映
+            void enqueueWrite(() => setArchivedAction(id, true)).catch(() => {
+              pushToast({
+                message: `${name} の取り消しを保存できませんでした。`,
+              });
+            });
           },
         });
       }
     },
-    [candidates, pushToast],
+    [candidates, enqueueWrite, pushToast],
   );
 
   // 4 軸スコアの 1 つを更新する。Pane3「現時点評価」カードでユーザーが
@@ -322,6 +430,14 @@ function WorkspaceContent({
   // この更新だけで全箇所が自動追従する。
   const setAxisScore = useCallback(
     (candidateId: string, axisKey: AxisKey, value: number | null) => {
+      // ロールバック用に変更前 scorecards を撮影し、Notion に書く4軸の最終形を算出。
+      const current = candidatesRef.current.find((c) => c.id === candidateId);
+      const prevScorecards = current ? current.scorecards : null;
+      const resultingAxis: AxisScores = {
+        ...getCurrentAxisScores(current),
+        [axisKey]: value,
+      };
+
       setCandidates((prev) =>
         prev.map((c) => {
           if (c.id !== candidateId) return c;
@@ -359,8 +475,24 @@ function WorkspaceContent({
           return { ...c, scorecards: [...c.scorecards, newScorecard] };
         }),
       );
+
+      // 評価4軸（現在スナップショット）を Notion に永続化（D2）。失敗で巻き戻し。
+      void enqueueWrite(() =>
+        updateAxisScoresAction(candidateId, resultingAxis),
+      ).catch(() => {
+        if (prevScorecards) {
+          setCandidates((prev) =>
+            prev.map((c) =>
+              c.id === candidateId ? { ...c, scorecards: prevScorecards } : c,
+            ),
+          );
+        }
+        pushToast({
+          message: `${current?.profile.name || "候補者"} の評価を保存できませんでした。元に戻しました。`,
+        });
+      });
     },
-    [],
+    [enqueueWrite, pushToast],
   );
 
   // 候補者を別ステージへ移動 / 同ステージ内で並び替え。
@@ -570,6 +702,20 @@ function WorkspaceContent({
   // Pane 4 の開閉トグル。
   const togglePane4 = useCallback(() => setPane4ManuallyClosed((v) => !v), []);
 
+  // 接触ログ追加時に候補者の「最終連絡日」をローカル state にも反映（D5）。
+  // Notion 側は addContactLog が denormalized 同期するので、UI のバッジ
+  // （Pane2/Pane3 の「最終接触 N 日前」）を reload せず即時追随させる。
+  const handleContactLogAdded = useCallback(
+    (candidateId: string, date: string) => {
+      setCandidates((prev) =>
+        prev.map((c) =>
+          c.id === candidateId ? { ...c, lastContactDate: date } : c,
+        ),
+      );
+    },
+    [],
+  );
+
   // 営業候補リスト用: Pane1 のステージタブ選択状態を breadcrumb に反映。
   // selectedStage が null のときは「全候補者」、ステージ選択中は STAGE_LABELS から派生。
   const positionTitle = selectedStage
@@ -730,7 +876,7 @@ function WorkspaceContent({
           averageScore: getCandidateAverageScore(c),
           nextActionDate: c.profile.availableStartDate,
           source: c.profile.source,
-          lastContactDate: getLastContactDate(c.id),
+          lastContactDate: c.lastContactDate,
           priority: c.profile.priority,
         })),
     }));
@@ -747,7 +893,7 @@ function WorkspaceContent({
         averageScore: getCandidateAverageScore(c),
         nextActionDate: c.profile.availableStartDate,
         source: c.profile.source,
-        lastContactDate: getLastContactDate(c.id),
+        lastContactDate: c.lastContactDate,
         priority: c.profile.priority,
       }));
 
@@ -964,6 +1110,7 @@ function WorkspaceContent({
             profile={profile}
             scorecards={scorecards}
             stage={activeCandidate.stage}
+            lastContactDate={activeCandidate.lastContactDate}
             setProfile={setProfile}
             applicationInfoOpen={applicationInfoOpen}
             onApplicationInfoOpenChange={setApplicationInfoOpen}
@@ -988,6 +1135,7 @@ function WorkspaceContent({
             candidate={activeCandidate}
             pane4Open={pane4Open}
             onTogglePane4={togglePane4}
+            onContactLogAdded={handleContactLogAdded}
           />
         </div>
       </SidebarInset>

@@ -98,4 +98,13 @@ describe("toCandidate マッピング", () => {
   it("archived を引き継ぐ", () => {
     expect(toCandidate(makeNotion({ archived: true })).archived).toBe(true);
   });
+
+  it("最終連絡日を引き継ぐ（null は null）", () => {
+    expect(
+      toCandidate(makeNotion({ lastContactDate: "2026-06-01" })).lastContactDate,
+    ).toBe("2026-06-01");
+    expect(
+      toCandidate(makeNotion({ lastContactDate: null })).lastContactDate,
+    ).toBeNull();
+  });
 });

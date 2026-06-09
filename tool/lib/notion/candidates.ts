@@ -148,6 +148,7 @@ export function toCandidate(nc: NotionCandidate): Candidate {
     scorecards,
     stage: STAGE_JA_TO_KEY[nc.stage],
     archived: nc.archived,
+    lastContactDate: nc.lastContactDate ?? null,
   };
 }
 

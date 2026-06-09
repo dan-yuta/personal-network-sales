@@ -109,6 +109,7 @@ describe("getCandidateAverageScore / getScorecardsAverageScore", () => {
       scorecards: [],
       stage: "screening",
       archived: false,
+      lastContactDate: null,
     };
     expect(getCandidateAverageScore(candidate)).toBeNull();
     expect(getScorecardsAverageScore([])).toBeNull();

@@ -11,7 +11,13 @@
  * UI と動作感だけ提示する。本格実装は Phase 2-3 で行う。
  */
 
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 import { Clock, PlusCircle, Sparkles, type LucideIcon } from "lucide-react";
 
 import { type Candidate } from "@/lib/schema";
@@ -19,7 +25,8 @@ import {
   CONTACT_METHOD_THEME,
   CONTACT_METHOD_THEME_DEFAULT,
 } from "@/lib/labels";
-import { getMockLogs } from "@/lib/data/mockLogs";
+import { listContactLogsAction, addContactLogAction } from "@/app/actions";
+import { useToast } from "@/components/workspace/Toaster";
 import { dateNDaysAgo } from "@/lib/computed/dateOffsets";
 import { Pane4Toggle } from "@/components/workspace/Pane4Toggle";
 import { InlineDateField } from "@/components/primitives";
@@ -31,6 +38,8 @@ type CandidateDetailPaneProps = {
   candidate: Candidate;
   pane4Open: boolean;
   onTogglePane4: () => void;
+  /** 接触ログ追加成功時に呼ぶ。Workspace 側で候補者の「最終連絡日」を即時更新する（D5）。 */
+  onContactLogAdded: (candidateId: string, date: string) => void;
 };
 
 type TabId = "log" | "draft";
@@ -39,6 +48,7 @@ export function CandidateDetailPane({
   candidate,
   pane4Open,
   onTogglePane4,
+  onContactLogAdded,
 }: CandidateDetailPaneProps) {
   const [activeTab, setActiveTab] = useState<TabId>("log");
 
@@ -90,7 +100,13 @@ export function CandidateDetailPane({
               className="animate-in fade-in duration-150 motion-reduce:animate-none"
             >
               {activeTab === "log" ? (
-                <ContactLogTab candidate={candidate} />
+                // key={candidate.id} で候補者切替時に remount → ログ再取得＋
+                // フォーム初期化（接触ログの取得・追加状態を候補者ごとに分離）。
+                <ContactLogTab
+                  key={candidate.id}
+                  candidate={candidate}
+                  onContactLogAdded={onContactLogAdded}
+                />
               ) : (
                 <DraftMessageTab candidate={candidate} />
               )}
@@ -211,12 +227,57 @@ function QuickDateButtons({
   );
 }
 
-function ContactLogTab({ candidate }: { candidate: Candidate }) {
-  const logs = getMockLogs(candidate.id);
+type DisplayLog = {
+  id: string;
+  date: string;
+  method: string;
+  content: string;
+};
 
-  // 新規ログ追加フォームの状態。candidate 切替で初期化したいので
-  // key={candidate.id} で再マウントされる前提 (Pane3 切替は CandidateDetailPane
-  // ごと remount しない設計のため、ここでは個別に reset する)。
+function ContactLogTab({
+  candidate,
+  onContactLogAdded,
+}: {
+  candidate: Candidate;
+  onContactLogAdded: (candidateId: string, date: string) => void;
+}) {
+  const { push: pushToast } = useToast();
+
+  // Notion 接触ログDB から取得した履歴（新→旧）。null = ロード中。
+  const [logs, setLogs] = useState<DisplayLog[] | null>(null);
+  const [isPending, startTransition] = useTransition();
+  // 楽観的追加: 保存中は新ログを先頭に即時表示し、transition 完了で base(logs) に同期。
+  const [optimisticLogs, addOptimisticLog] = useOptimistic(
+    logs ?? [],
+    (cur: DisplayLog[], item: DisplayLog) => [item, ...cur],
+  );
+
+  // 候補者の接触ログを取得（key={candidate.id} で候補者ごとに mount → 1 回実行）。
+  useEffect(() => {
+    let cancelled = false;
+    listContactLogsAction(candidate.id)
+      .then((rows) => {
+        if (cancelled) return;
+        setLogs(
+          rows.map((r) => ({
+            id: r.id,
+            date: r.date,
+            method: r.method,
+            content: r.content,
+          })),
+        );
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLogs([]);
+        pushToast({ message: "接触ログの取得に失敗しました" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [candidate.id, pushToast]);
+
+  // 新規ログ追加フォームの状態。
   // 「先週の打ち合わせを思い出して翌週入力する」が現実的な運用シナリオなので、
   // デフォルトは「今日」、ただし変更されたら保存後リセットで「今日」に戻す。
   const todayIso = dateNDaysAgo(0);
@@ -228,6 +289,46 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
     setDate(dateNDaysAgo(0));
     setMethod("電話");
     setContent("");
+  };
+
+  // 保存: 楽観的に履歴へ追加 → Notion へ書込 → 実 ID 付き最新一覧で確定。
+  // 失敗時は base(logs) を変えないので transition 終了で楽観追加が自動的に消える。
+  const handleSave = () => {
+    const trimmed = content.trim();
+    if (!date || !trimmed) return;
+    const savedDate = date;
+    const savedMethod = method;
+    const optimistic: DisplayLog = {
+      id: `temp-${crypto.randomUUID()}`,
+      date: savedDate,
+      method: savedMethod,
+      content: trimmed,
+    };
+    resetForm();
+    startTransition(async () => {
+      addOptimisticLog(optimistic);
+      try {
+        await addContactLogAction({
+          candidateId: candidate.id,
+          date: savedDate,
+          method: savedMethod,
+          content: trimmed,
+        });
+        const rows = await listContactLogsAction(candidate.id);
+        setLogs(
+          rows.map((r) => ({
+            id: r.id,
+            date: r.date,
+            method: r.method,
+            content: r.content,
+          })),
+        );
+        // Pane2/Pane3 の「最終接触」バッジを即時更新（D5）。
+        onContactLogAdded(candidate.id, savedDate);
+      } catch {
+        pushToast({ message: "接触ログの保存に失敗しました" });
+      }
+    });
   };
 
   return (
@@ -304,15 +405,10 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
             <Button
               type="button"
               size="sm"
-              disabled={!date || !content.trim()}
-              onClick={() => {
-                alert(
-                  `現在モック動作のため、入力内容は記録されません。\n(${date} / ${method} / ${content.trim().slice(0, 30)}…)\n\nNotion 接続は Phase 3 (来月以降) で実装予定。`,
-                );
-                resetForm();
-              }}
+              disabled={!date || !content.trim() || isPending}
+              onClick={handleSave}
             >
-              保存
+              {isPending ? "保存中..." : "保存"}
             </Button>
           </div>
           {/* 「今日」がデフォルトでも、ユーザーが他の日付を選んだら保存ボタンの
@@ -336,7 +432,11 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
         >
           履歴（新→旧）
         </h3>
-        {logs.length === 0 ? (
+        {logs === null ? (
+          <p className="rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
+            読み込み中…
+          </p>
+        ) : optimisticLogs.length === 0 ? (
           <p className="rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
             まだ接触ログがありません
           </p>
@@ -344,7 +444,7 @@ function ContactLogTab({ candidate }: { candidate: Candidate }) {
           // タイムライン表示: 左に縦線を 1 本通し、各ログの左端にドット (手段色) を打つ。
           // 時系列の連続性が視覚的に伝わりやすい。
           <ol className="relative ml-3 flex flex-col gap-3 border-l-2 border-border pl-5">
-            {logs.map((log) => {
+            {optimisticLogs.map((log) => {
               const methodTheme =
                 CONTACT_METHOD_THEME[log.method] ?? CONTACT_METHOD_THEME_DEFAULT;
               return (

@@ -7,8 +7,11 @@ import {
   updateCandidateProfile,
   updateCandidateStage,
 } from "@/lib/notion/candidates";
-import { addContactLog } from "@/lib/notion/contact-logs";
-import type { ContactMethod } from "@/lib/notion/schema";
+import {
+  addContactLog,
+  listContactLogsForCandidate,
+} from "@/lib/notion/contact-logs";
+import type { ContactMethod, NotionContactLog } from "@/lib/notion/schema";
 import type { AxisScores, Profile, StageKey } from "@/lib/schema";
 
 /**
@@ -50,6 +53,16 @@ export async function setArchivedAction(
 ): Promise<void> {
   await setCandidateArchived(pageId, archived);
   revalidatePath("/");
+}
+
+/**
+ * 候補者の接触ログを Notion から取得（新→旧）。Pane4 接触ログタブが
+ * 候補者切替時に呼ぶ読み取り専用アクション。revalidate は不要。
+ */
+export async function listContactLogsAction(
+  candidateId: string,
+): Promise<NotionContactLog[]> {
+  return listContactLogsForCandidate(candidateId);
 }
 
 export async function addContactLogAction(params: {

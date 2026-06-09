@@ -49,7 +49,6 @@ import {
 import { calculateAge } from "@/lib/computed/profile";
 import { getDeadlineBadge } from "@/lib/computed/deadline";
 import { getLastContactBadge } from "@/lib/computed/lastContact";
-import { getLastContactDate } from "@/lib/data/mockLogs";
 import { getScoreColorClass } from "@/lib/computed/scoreColor";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -609,22 +608,22 @@ function CandidateHeader({
   profile,
   scorecards,
   stage,
-  candidateId,
+  lastContactDate,
   onChangeStage,
 }: {
   profile: Profile;
   scorecards: Scorecard[];
   stage: StageKey;
-  candidateId: string;
+  /** 最終連絡日（Notion 由来、null は未接触）。接触ログ追加で即時更新される。 */
+  lastContactDate: string | null;
   onChangeStage: (next: StageKey) => void;
 }) {
   const stageTheme = STAGE_THEME[stage];
   const stageLabel = STAGE_LABELS[stage];
   const deadline = getDeadlineBadge(profile.availableStartDate);
-  // 最終接触は接触ログ DB から派生 (Phase 1 は MOCK_LOG_DATASET)。
+  // 最終接触は Notion「最終連絡日」由来（接触ログ追加時に denormalized 同期）。
   // Pane2 と同じバッジで「12 日前 / 3 週間前」を表示し、Pane3 ヘッダーだけを
   // 見ても「最後にいつ触った人か」が即座にわかるようにする。
-  const lastContactDate = getLastContactDate(candidateId);
   const lastContact = getLastContactBadge(lastContactDate);
 
   return (
@@ -732,6 +731,7 @@ export function CandidateDashboardPane({
   profile,
   scorecards,
   stage,
+  lastContactDate,
   setProfile,
   applicationInfoOpen,
   onApplicationInfoOpenChange,
@@ -748,6 +748,8 @@ export function CandidateDashboardPane({
   profile: Profile;
   scorecards: Scorecard[];
   stage: StageKey;
+  /** 最終連絡日（Notion 由来、null は未接触）。Pane3 ヘッダーのバッジに使う。 */
+  lastContactDate: string | null;
   setProfile: React.Dispatch<React.SetStateAction<Profile>>;
   applicationInfoOpen: boolean;
   onApplicationInfoOpenChange: (open: boolean) => void;
@@ -802,7 +804,7 @@ export function CandidateDashboardPane({
             profile={profile}
             scorecards={scorecards}
             stage={stage}
-            candidateId={selectedCandidateId}
+            lastContactDate={lastContactDate}
             onChangeStage={onChangeStage}
           />
 
