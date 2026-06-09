@@ -105,6 +105,6 @@ export async function generateDraftMessage(
   void ANTHROPIC_MODEL;
   void SYSTEM_PROMPT;
   throw new Error(
-    "generateDraftMessage is not implemented yet. Phase 3 で Anthropic API 接続後に実装してください。",
+    "generateDraftMessage is not implemented yet. Phase E（発展課題）で Anthropic API 接続後に実装してください。",
   );
 }

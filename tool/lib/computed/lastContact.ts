@@ -1,7 +1,7 @@
 /**
  * 「最終接触からの経過日数」相対表記ヘルパー。
  *
- * `getLastContactDate(candidateId)` (lib/data/mockLogs.ts) で取得した
+ * Notion 由来の `Candidate.lastContactDate`（接触ログ追加時に denormalized 同期）の
  * YYYY-MM-DD 文字列を今日と比較し、人間が「やばさ」を直感で判別できる
  * 相対表記に変換する。営業ツールとして「12 日前 / 3 週間前 / 半年前」と
  * 表示することで、引き算を脳でしなくて済む。

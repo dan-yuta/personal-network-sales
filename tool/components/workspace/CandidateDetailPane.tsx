@@ -925,7 +925,7 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               variant="secondary"
               size="sm"
               onClick={() =>
-                alert("接触ログとして保存（モック）: 実装は Phase 3 で")
+                alert("接触ログとして保存（モック）: 実装は Phase E（発展課題）で")
               }
             >
               接触ログとして保存

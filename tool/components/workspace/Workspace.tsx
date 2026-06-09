@@ -788,7 +788,7 @@ function WorkspaceContent({
   }, [candidates]);
 
   // departments の position.count を派生値で上書きしたものを PositionPane に渡す。
-  // 想定外の id (Phase 3 でユーザー定義カテゴリを許容する場合等) はそのまま。
+  // 想定外の id (将来ユーザー定義カテゴリを許容する場合等) はそのまま。
   const departmentsWithLiveCount = useMemo(() => {
     return departments.map((dept) => ({
       ...dept,
@@ -961,7 +961,7 @@ function WorkspaceContent({
 
   // Pane1 のステージタブ（position.id = "stage-{StageKey}"）クリック時のハンドラ。
   // 同じステージを再クリックすると null (全表示) に戻る、というトグル動作にする。
-  // 非ステージ ID (Phase 3 の独自カテゴリ用) は弾く。
+  // 非ステージ ID (将来の独自カテゴリ用) は弾く。
   const handleSelectPosition = useCallback((positionId: string) => {
     if (!positionId.startsWith("stage-")) return;
     const key = positionId.slice("stage-".length);

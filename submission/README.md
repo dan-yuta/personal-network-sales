@@ -153,4 +153,4 @@ surge teardown network-sales-overview.surge.sh
 - [../README.md](../README.md) — リポジトリ全体の index
 - [../docs/00_ツール起動・確認方法.md](../docs/00_ツール起動・確認方法.md) — `tool/` のローカル起動手順
 - [../docs/02_UI設計書.md](../docs/02_UI設計書.md) — 4ペイン + 連絡文 11 シーンの設計
-- [../docs/07_工夫したポイント.md](../docs/07_工夫したポイント.md) — 10 点の craftsmanship 整理
+- [../docs/07_工夫したポイント.md](../docs/07_工夫したポイント.md) — 15 点の craftsmanship 整理

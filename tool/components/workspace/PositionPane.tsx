@@ -115,11 +115,11 @@ export function PositionPane({
                 {dept.name}
               </SidebarGroupLabel>
               {/*
-                営業ツールではステージ階層を固定 (メインステージ4 + サブステージ2)。
+                営業ツールではステージ階層を固定 (メインステージ5 + サブステージ2 = 7段階)。
                 新規追加された position の id は `p-${Date.now()}` で生まれるが、
                 Workspace.handleSelectPosition が `stage-` prefix 以外を弾くため、
                 クリックしても何も起きない死操作になる。
-                Phase 3 でユーザー定義カテゴリを許容するなら、その時点で再有効化する。
+                将来ユーザー定義カテゴリを許容するなら、その時点で再有効化する。
               */}
               <SidebarGroupContent>
                 <SidebarMenu>
