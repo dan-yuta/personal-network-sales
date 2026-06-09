@@ -116,6 +116,23 @@ Vercel` 段階で失敗。ビルド自体は毎回成功）。切り分けの順
   dangi.yuta.business@gmail.com）。
 - **提出物①: https://personal-network-sales.vercel.app / ②: https://network-sales-memory.surge.sh**
 
+### Phase D 完了（2026-06-09）— 編集サーフェス全面を Notion 永続化
+コミット `9074939`。これまで永続化はステージ移動のみだったのを、残る編集も全て Notion へ:
+- D1 プロフィール: `setProfile` に diff 永続化（`updateProfileAction`）。テキスト欄は
+  uncontrolled のため失敗時は画面巻き戻し不可→通知のみ（リロードで最新に揃う）。
+- D2 評価4軸: `setAxisScore` で現在スナップショットを `updateAxisScoresAction`。
+  楽観更新＋失敗時 scorecards ロールバック。
+- D3 アーカイブ/復元: `setArchivedAction`。Undo も Notion 反映、失敗で巻き戻し。
+- D4 接触ログ: `getMockLogs` 廃止。`listContactLogsAction` で表示、`addContactLogAction`
+  ＋`useOptimistic` で追加（実ID付き一覧で確定、失敗は楽観追加を自動取消）。
+- D5 最終連絡日: `Candidate.lastContactDate` 新設＋`toCandidate` マッピング。Pane2/Pane3
+  バッジを Notion 由来に。ログ追加で `onContactLogAdded` 経由で即時更新。
+- D6 直列化: 全書込を `writeChainRef` のキューに通し、連打・順序逆転・レート制限を回避。
+
+検証: tsc / vitest 109 / next build（server-only 境界OK）/ 実デモDBで全操作の往復＋
+最終連絡日同期を確認（一時 verify スクリプトで実証後に削除）。
+補足: `lib/data/mockLogs.ts` は app から未使用化（テストは残置）。
+
 ### 残（任意の上積み）
-- Phase D（プロフィール/評価/アーカイブ/接触ログの書込全面・useOptimistic）。
-- Phase E（AI連絡文+Upstash・発展課題）。
+- Phase E（AI連絡文 draft-message.ts 実装 + Upstash レート制限・発展課題）。
+- Phase F 仕上げ（任意）。
