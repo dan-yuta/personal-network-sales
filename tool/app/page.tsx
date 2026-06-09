@@ -58,7 +58,7 @@ export default async function Page() {
       <script
         dangerouslySetInnerHTML={{
           __html:
-            "(function(){try{var e=document.querySelector('[data-candidate-id][data-selected]');if(e){e.scrollIntoView({block:'nearest'});}}catch(_){}})();",
+            "(function(){try{var e=document.querySelector('[data-candidate-id][data-selected]');if(e){e.scrollIntoView({block:'center'});}}catch(_){}})();",
         }}
       />
     </>
