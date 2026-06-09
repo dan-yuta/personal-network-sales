@@ -70,3 +70,52 @@
 - その後: 書込全面(D) → AI連絡文+Upstash(E) → 図解統合・提出(F)。
 
 詳細プラン: `~/.claude/plans/serialized-juggling-matsumoto.md`
+
+---
+
+## 2026-06-09 追記: Phase C 完了 → Vercel 公開達成（提出物①完成）
+
+### やったこと
+- ユーザーが Notion Internal Integration（アクセストークン方式）作成 → トークンを
+  `.env.local` に設定 → デモ2DBに「コネクト」接続。スモークテストで `dataSources.query`
+  200 を確認。
+- `node scripts/seed-notion.mjs` 実行（既存90行クリア→30人ダミー投入）。
+- `npm run dev` で30人がNotion経由表示を確認（読み取りパス end-to-end）。
+- **Phase C 配線**: `Workspace.moveCandidate` のステージ跨ぎ時に `updateStageAction`
+  を呼び Notion へ永続化。楽観更新維持、失敗時ロールバック＋Toast、**Undoも
+  Notionへ反映**（UIだけ戻すとリロードで復活するため）。同ステージ内並び替えは
+  非永続（Notionに順序列なし）。tsc/108テスト/書込ラウンドトリップ検証OK。
+- `app/page.tsx` を `export const dynamic = "force-dynamic"` に（別端末リロードで
+  確実に最新Notionデータを返すため）。
+- **Vercel 公開**（71kaiji個人GitHub連携・Hobby・Root Directory=`tool`・デモenv3つ）。
+  → **https://personal-network-sales.vercel.app**（HTTP200・候補者描画・force-dynamic確認）。
+
+### 苦戦＝Vercelデプロイが連続失敗。真因特定までの記録（図解item4の主素材）
+エラー: `ENOENT ... /.next/routes-manifest-deterministic.json`（`onBuildComplete from
+Vercel` 段階で失敗。ビルド自体は毎回成功）。切り分けの順序と結論:
+1. bundler? → `next build --webpack` に変更 → **変化なし**（red herring）。
+2. env / Root Directory / 「Include files outside root」OFF → **変化なし**。
+3. 文字列 `routes-manifest-deterministic` を **Next 16.2.6 / 16.2.7 / 16.3canary の
+   tarball を展開して grep → どれにも存在しない**ことを実証。
+   ＝このファイルは Next 由来でなく **Vercel のデプロイアダプタ（Next 16.2 で安定化
+   した Adapters API: modifyConfig/onBuildComplete）が扱う成果物**と判明。
+4. 公式情報 + 報告事例「Vercelの routes-manifest ENOENT は next.config の
+   **`outputFileTracingRoot` を削除したら直る**」に合致。
+5. **真因 = `next.config.ts` の `outputFileTracingRoot: projectRoot`**。サブディレクトリ
+   (`tool`)に固定していたためアダプタのマニフェスト探索パスがずれていた。削除して解決
+   （親階層に lockfile が無く、元の設定理由は現状不要）。**ローカルでアダプタは走らない
+   ため再現しなかった**＝ローカル成功・Vercelのみ失敗の症状と一致。
+   修正コミット: `2950b8b`。
+
+### C5/C6/F 完了 — 提出物①②そろった
+- C5: PCでドラッグ→F5で保持＋Notion直接確認の2点で永続化を実証（スマホは「PC前提ツール」
+  のため不要と判断し省略）。
+- C6/F2: 図解を新規作成 `submission/07-memory-notion-deploy.html`（前回 tool-overview.html
+  のデザイン踏襲）。4必須項目網羅。スクショ `assets/screenshots/07-overview.png` 配置。
+- 図解を Surge 公開 → **https://network-sales-memory.surge.sh**（アカウント
+  dangi.yuta.business@gmail.com）。
+- **提出物①: https://personal-network-sales.vercel.app / ②: https://network-sales-memory.surge.sh**
+
+### 残（任意の上積み）
+- Phase D（プロフィール/評価/アーカイブ/接触ログの書込全面・useOptimistic）。
+- Phase E（AI連絡文+Upstash・発展課題）。

@@ -9,7 +9,7 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 | 種別 | URL / ファイル | 備考 |
 |------|----------------|------|
 | **公開アプリ（提出物①）** | **https://personal-network-sales.vercel.app** | Vercel デプロイ。Notion(デモDB/ダミー)に永続化。無認証＝公開はダミーデータのみ |
-| **課題図解（提出物②）** | [07-memory-notion-deploy.html](07-memory-notion-deploy.html) | Notion永続化＋Vercel公開の図解。公開URLは別途デプロイ予定（前回同様 Surge 等） |
+| **課題図解（提出物②）** | **https://network-sales-memory.surge.sh** | Surge公開・検索エンジン非インデックス。原本は [07-memory-notion-deploy.html](07-memory-notion-deploy.html) |
 | GitHub リポジトリ | https://github.com/dan-yuta/personal-network-sales | 設計・実装の全履歴 |
 
 - テーマ: リロードで消えていた画面に **Notion を保存先**として記憶を持たせ、**Vercel** で公開。
