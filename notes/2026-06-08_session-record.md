@@ -203,6 +203,7 @@ Vercel` 段階で失敗。ビルド自体は毎回成功）。切り分けの順
 
 ### 要・ユーザー（公開でも AI を使う場合）
 - Vercel → Settings → Environment Variables に `ANTHROPIC_API_KEY` を追加（推奨: 公開用は
-  **別キーを新規発行**＝漏洩時に個別失効可、`ANTHROPIC_MODEL=claude-haiku-4-5` で単価圧縮）。
+  **別キーを新規発行**＝漏洩時に個別失効可）。モデルは**ローカル／公開とも Sonnet を採用**
+  （`ANTHROPIC_MODEL=claude-sonnet-4-6` か未設定＝既定 Sonnet。単価を抑えたい場合のみ Haiku）。
 - Anthropic Console で **auto-reload を OFF**（＋任意で月額 Usage limit を $5 等）。
 - 再デプロイ。これで公開URLでも実 AI が動く。

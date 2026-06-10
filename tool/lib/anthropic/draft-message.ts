@@ -22,14 +22,15 @@ import type { NotionContactLog } from "@/lib/notion/schema";
  *
  * Prompt Caching:
  *   - system プロンプトに `cache_control: { type: "ephemeral" }` を付ける。
- *   - 同じ system で複数回生成・再生成しても、system はキャッシュ命中（命中時は
+ *   - 同じ system で複数回生成・再生成すると system はキャッシュ命中（命中時は
  *     usage.cache_read_input_tokens に現れる）。
- *   - 注意: Haiku 4.5 の最小キャッシュ長は 4096 トークン。本 SYSTEM_PROMPT は
- *     それより短いので公開(Haiku)では実質キャッシュされない可能性があるが、
- *     付けても無害（エラーにはならない）。ローカル(Sonnet)では 1024〜のため命中する。
+ *   - 注意: 各モデルに最小キャッシュ長がある（Sonnet 4.6 は 2048 / Haiku 4.5 は 4096
+ *     トークン）。本 SYSTEM_PROMPT がそれに満たない場合は実質キャッシュされないが、
+ *     付けても無害（エラーにはならない）。
  *
- * モデル出し分け:
- *   - `ANTHROPIC_MODEL`（client.ts）で公開=Haiku / ローカル=Sonnet を切替。
+ * モデル:
+ *   - `ANTHROPIC_MODEL`（client.ts）で指定。ローカル／公開とも既定は Sonnet
+ *     (claude-sonnet-4-6)。単価を抑えたい場合のみ公開側を Haiku にする選択肢あり。
  *
  * 画像 (vision):
  *   - base64 の ImageBlock として user メッセージに添付（最大3枚はクライアント検証）。
