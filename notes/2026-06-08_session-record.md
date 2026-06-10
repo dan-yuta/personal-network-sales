@@ -134,5 +134,45 @@ Vercel` 段階で失敗。ビルド自体は毎回成功）。切り分けの順
 補足: `lib/data/mockLogs.ts` は app から未使用化（テストは残置）。
 
 ### 残（任意の上積み）
-- Phase E（AI連絡文 draft-message.ts 実装 + Upstash レート制限・発展課題）。
+- ~~Phase E（AI連絡文）~~ → **2026-06-10 完了**（下記追記）。
 - Phase F 仕上げ（任意）。
+
+---
+
+## 2026-06-10 追記: Phase E 完了（AI連絡文・発展課題）— Upstash 不採用に確定
+
+### やったこと
+- `lib/anthropic/draft-message.ts` の `generateDraftMessage` 本体を実装。候補者基本
+  （UI の `Candidate` から組み立てた軽量サマリ `DraftCandidateSummary`）＋接触ログ直近3件
+  ＋シーン/媒体/補足＋過去画像を user メッセージに組み立て、**system に prompt caching**、
+  `max_tokens` 1024、モデルは `ANTHROPIC_MODEL`（ローカル=Sonnet 既定）。**vision** は
+  base64 ImageBlock を user 先頭に添付。
+- `app/actions.ts` に `draftMessageAction`（"use server"）。結果型 `DraftMessageResult`＝
+  `{ok:true,text}` / `{ok:false,reason:"no-key"}`。接触ログ直近3件はここで Notion 取得。
+- `components/workspace/CandidateDetailPane.tsx` の `DraftMessageTab` をモック→**実接続**。
+  画像添付UI（最大3枚・5MB・JPEG/PNG/GIF/WebP のクライアント検証＋チップ表示/削除）、
+  微調整（丁寧/カジュアル/短く＝note に tone を足して再生成）、コピー、**「接触ログとして
+  保存」**（`addContactLogAction`＋`onContactLogAdded` で最終連絡日も同期）。
+- 既存のシーン別モック（`getSceneTemplate`/`getMockDraft`）は削除せず、**キー未設定
+  （公開デモ）時のサンプル文フォールバック**として再利用（黄帯で「ローカルでは実 AI」案内）。
+
+### 設計判断（grill 後の方針変更を記録）
+- 当初プランは「公開でも AI 有効・Haiku＋**Upstash レート制限**でコスト防御」だった。
+  だがユーザーとの確認で「**このツールは現状ひとりで使う**」ことが明確になり、
+  **AI をローカル専用**にする方が本質的にシンプルかつ安全と判断:
+  - 公開 Vercel には `ANTHROPIC_API_KEY` を**置かない**→ 無認証の公開URLに「誰でも叩けて
+    課金が乗る入口」が存在しない → **守るべきコストがない → Upstash 不要**。
+  - 公開側はキー未設定なのでサンプル文を表示し「ローカルでは実 AI が動く」と案内。
+  - 課題の発展課題「AIが動く機能を組み込む」はローカル実演で完全に満たす。
+  - 外部サービスを増やさない（Notion/Vercel/Anthropic の3つのまま）。
+  - 将来チーム公開で AI を出すなら、その時 `draftMessageAction` 冒頭にレート制限を足す
+    （middleware では効かない知見は維持）。
+
+### 検証
+- `tsc` クリーン / `vitest` **112 件**通過 / `next build`（server-only 境界OK・exit 0）。
+- AI の実生成往復は `ANTHROPIC_API_KEY` を `.env.local` に設定したローカルで目視確認する
+  （ブラウザ表示・画像添付・トーン調整・接触ログ保存）。公開はサンプル文表示で確認。
+
+### 要・ユーザー（ローカルで実 AI を使う場合のみ）
+- `tool/.env.local` に `ANTHROPIC_API_KEY=sk-ant-...` を1行追加（任意で `ANTHROPIC_MODEL`）。
+  Vercel には**追加しない**（公開はサンプル文のままにする）。

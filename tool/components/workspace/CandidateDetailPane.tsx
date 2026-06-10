@@ -8,7 +8,10 @@
  *   - タブB: 連絡文作成（AIによる連絡文ドラフト生成）
  *
  * タブA（接触ログ）は Notion 接触ログDB と接続済み（表示・追加・最終連絡日同期）。
- * タブB（連絡文作成）の AI 生成はまだモック（Anthropic 接続は発展課題=Phase E）。
+ * タブB（連絡文作成）は Anthropic API に接続済み（Phase E）。候補者基本＋接触ログ直近
+ * 3件＋シーン/媒体/補足＋過去のやり取り画像(vision)を渡して連絡文を生成する。
+ * AI 生成は ANTHROPIC_API_KEY 設定環境（ローカル）でのみ動作し、公開デモでは
+ * 「ローカル専用」案内を返す（無認証の公開URLに課金の入口を作らないため）。
  */
 
 import {
@@ -24,8 +27,20 @@ import { type Candidate } from "@/lib/schema";
 import {
   CONTACT_METHOD_THEME,
   CONTACT_METHOD_THEME_DEFAULT,
+  STAGE_LABELS,
+  PRIORITY_LABELS,
 } from "@/lib/labels";
-import { listContactLogsAction, addContactLogAction } from "@/app/actions";
+import {
+  listContactLogsAction,
+  addContactLogAction,
+  draftMessageAction,
+} from "@/app/actions";
+import type {
+  DraftCandidateSummary,
+  DraftImage,
+  DraftMedium,
+  DraftScene,
+} from "@/lib/anthropic/draft-message";
 import { useAnimateOnChange } from "@/lib/useAnimateOnChange";
 import { useToast } from "@/components/workspace/Toaster";
 import { dateNDaysAgo } from "@/lib/computed/dateOffsets";
@@ -114,7 +129,12 @@ export function CandidateDetailPane({
                   onContactLogAdded={onContactLogAdded}
                 />
               ) : (
-                <DraftMessageTab candidate={candidate} />
+                // key={candidate.id} で候補者切替時に remount → 生成結果・入力を初期化。
+                <DraftMessageTab
+                  key={candidate.id}
+                  candidate={candidate}
+                  onContactLogAdded={onContactLogAdded}
+                />
               )}
             </div>
           </ScrollArea>
@@ -494,7 +514,7 @@ function ContactLogTab({
   );
 }
 
-// ===== タブB: 連絡文作成（モック） =====
+// ===== タブB: 連絡文作成（AI 生成。キー未設定＝公開デモではサンプル文にフォールバック） =====
 
 const SCENE_OPTIONS = [
   "初回声かけ（既存知人）",
@@ -513,7 +533,9 @@ const SCENE_OPTIONS = [
 const MEDIUM_OPTIONS = ["メール", "LINE", "電話用トーク台本"] as const;
 
 // シーンごとに「件名」「導入文」「本題テンプレート」「締め」を切り替える。
-// 営業フェーズ全体（初回〜契約）+ 派生紹介の連鎖までカバーする 11 シーン用のモック。
+// 営業フェーズ全体（初回〜契約）+ 派生紹介の連鎖までカバーする 11 シーン分のサンプル文。
+// ANTHROPIC_API_KEY 未設定（公開デモ）のとき、AI の代わりにこの文例を出して
+// 「ローカルでは実 AI が動く」ことを案内する（公開URLに課金の入口を作らないため）。
 type SceneTemplate = {
   subjectSuffix: string;
   emailLead: string;
@@ -778,31 +800,165 @@ function getMockDraft(
   ].join("\n");
 }
 
-function DraftMessageTab({ candidate }: { candidate: Candidate }) {
-  const [scene, setScene] = useState<string>(SCENE_OPTIONS[0]);
-  const [medium, setMedium] = useState<string>(MEDIUM_OPTIONS[0]);
-  const [note, setNote] = useState<string>("");
-  const [output, setOutput] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
+// 画像添付の上限（クライアント検証）。公開でも有効にするための保護的バリデーション。
+const MAX_IMAGES = 3;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+] as const;
 
-  const handleGenerate = () => {
+// 媒体 → 接触ログ手段。「接触ログとして保存」で使う。
+const MEDIUM_TO_METHOD = {
+  メール: "メール",
+  LINE: "LINE",
+  電話用トーク台本: "電話",
+} as const;
+
+type AttachedImage = { name: string; image: DraftImage };
+
+type DraftOutput = { text: string; source: "ai" | "sample" };
+
+/** File を base64 ImageBlock（data URL プレフィックス除去済み）に変換。 */
+function fileToDraftImage(file: File): Promise<DraftImage> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result);
+      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      resolve({
+        mediaType: file.type as DraftImage["mediaType"],
+        data: base64,
+      });
+    };
+    reader.onerror = () => reject(new Error("画像の読み込みに失敗しました"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function DraftMessageTab({
+  candidate,
+  onContactLogAdded,
+}: {
+  candidate: Candidate;
+  onContactLogAdded: (candidateId: string, date: string) => void;
+}) {
+  const { push: pushToast } = useToast();
+
+  const [scene, setScene] = useState<DraftScene>(SCENE_OPTIONS[0]);
+  const [medium, setMedium] = useState<DraftMedium>(MEDIUM_OPTIONS[0]);
+  const [note, setNote] = useState<string>("");
+  const [images, setImages] = useState<AttachedImage[]>([]);
+  const [output, setOutput] = useState<DraftOutput | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [savingLog, setSavingLog] = useState(false);
+
+  // 候補者の取得済みデータから AI に渡す基本情報サマリを組み立てる（Notion 再往復なし）。
+  const summary: DraftCandidateSummary = useMemo(
+    () => ({
+      name: candidate.profile.name,
+      source: candidate.profile.source || null,
+      backNetwork: candidate.profile.backNetwork || null,
+      stageLabel: STAGE_LABELS[candidate.stage],
+      priorityLabel:
+        candidate.profile.priority === ""
+          ? null
+          : PRIORITY_LABELS[candidate.profile.priority],
+      lastContactDate: candidate.lastContactDate,
+    }),
+    [candidate],
+  );
+
+  const handleAddImages = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const accepted: File[] = [];
+    for (const file of Array.from(files)) {
+      if (
+        !(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)
+      ) {
+        pushToast({ message: `${file.name}: 画像形式は JPEG/PNG/GIF/WebP のみ対応です` });
+        continue;
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        pushToast({ message: `${file.name}: 5MB を超える画像は添付できません` });
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (images.length + accepted.length > MAX_IMAGES) {
+      pushToast({ message: `画像は最大 ${MAX_IMAGES} 枚までです` });
+    }
+    const room = Math.max(0, MAX_IMAGES - images.length);
+    const toAdd = accepted.slice(0, room);
+    Promise.all(
+      toAdd.map(async (f) => ({ name: f.name, image: await fileToDraftImage(f) })),
+    )
+      .then((added) => setImages((cur) => [...cur, ...added]))
+      .catch(() => pushToast({ message: "画像の読み込みに失敗しました" }));
+  };
+
+  const removeImage = (idx: number) =>
+    setImages((cur) => cur.filter((_, i) => i !== idx));
+
+  // 生成: AI 接続あり → 実生成、なし(no-key) → サンプル文。実エラーはトースト。
+  // toneHint は微調整ボタン（もっと丁寧/カジュアル/短く）から渡す追加指示（AI のみ反映）。
+  const handleGenerate = async (toneHint?: string) => {
     setGenerating(true);
-    // モック: 0.3秒の遅延を入れて生成感を出す
-    setTimeout(() => {
-      setOutput(getMockDraft(candidate, scene, medium, note));
+    try {
+      const aiNote = [note.trim(), toneHint?.trim()].filter(Boolean).join(" ／ ");
+      const res = await draftMessageAction({
+        candidateId: candidate.id,
+        candidate: summary,
+        scene,
+        medium,
+        note: aiNote || undefined,
+        pastImages: images.map((i) => i.image),
+      });
+      if (res.ok) {
+        setOutput({ text: res.text, source: "ai" });
+      } else {
+        // ANTHROPIC_API_KEY 未設定（公開デモ）→ サンプル文を表示。
+        setOutput({ text: getMockDraft(candidate, scene, medium, note), source: "sample" });
+      }
+    } catch {
+      pushToast({ message: "連絡文の生成に失敗しました。もう一度お試しください" });
+    } finally {
       setGenerating(false);
-    }, 300);
+    }
   };
 
   const handleCopy = async () => {
     if (!output) return;
-    // navigator.clipboard.writeText は Promise を返すので、成功 / 失敗を
-    // 待ってから alert を出す。古いブラウザや権限拒否時の誤フィードバックを防ぐ。
     try {
-      await navigator.clipboard.writeText(output);
-      alert("クリップボードにコピーしました");
+      await navigator.clipboard.writeText(output.text);
+      pushToast({ message: "クリップボードにコピーしました" });
     } catch {
-      alert("コピーに失敗しました。手動で選択してコピーしてください");
+      pushToast({ message: "コピーに失敗しました。手動で選択してコピーしてください" });
+    }
+  };
+
+  // 生成結果を接触ログとして Notion に保存（タブA と同じ addContactLogAction 経由）。
+  const handleSaveAsLog = async () => {
+    if (!output) return;
+    const date = dateNDaysAgo(0); // 今日 (JST)
+    const method = MEDIUM_TO_METHOD[medium];
+    setSavingLog(true);
+    try {
+      await addContactLogAction({
+        candidateId: candidate.id,
+        date,
+        method,
+        content: output.text,
+      });
+      // Pane2/Pane3 の「最終接触」バッジを即時更新（D5 と同じ経路）。
+      onContactLogAdded(candidate.id, date);
+      pushToast({ message: "接触ログとして保存しました" });
+    } catch {
+      pushToast({ message: "接触ログの保存に失敗しました" });
+    } finally {
+      setSavingLog(false);
     }
   };
 
@@ -826,7 +982,7 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
             </span>
             <select
               value={scene}
-              onChange={(e) => setScene(e.target.value)}
+              onChange={(e) => setScene(e.target.value as DraftScene)}
               className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
             >
               {SCENE_OPTIONS.map((s) => (
@@ -840,7 +996,7 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
             </span>
             <select
               value={medium}
-              onChange={(e) => setMedium(e.target.value)}
+              onChange={(e) => setMedium(e.target.value as DraftMedium)}
               className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
             >
               {MEDIUM_OPTIONS.map((m) => (
@@ -860,11 +1016,54 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
             />
           </label>
+          {/* 過去のやり取り画像（任意・最大3枚/5MB）。Claude Vision に base64 で渡す。 */}
+          <div className="flex items-start gap-2">
+            <span className="mt-1 w-16 shrink-0 text-xs text-muted-foreground">
+              画像
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                multiple
+                disabled={images.length >= MAX_IMAGES}
+                onChange={(e) => {
+                  handleAddImages(e.target.files);
+                  e.target.value = ""; // 同じファイル再選択を許可
+                }}
+                className="text-xs file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-0.5 file:text-xs"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                過去のやり取りのスクショを添付すると先方の温度感を反映します（最大{" "}
+                {MAX_IMAGES} 枚・各 5MB）
+              </p>
+              {images.length > 0 && (
+                <ul className="flex flex-wrap gap-1.5">
+                  {images.map((img, i) => (
+                    <li
+                      key={`${img.name}-${i}`}
+                      className="flex items-center gap-1 rounded border border-input bg-background px-2 py-0.5 text-[10px]"
+                    >
+                      <span className="max-w-[8rem] truncate">{img.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        aria-label={`${img.name} を削除`}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
           <div className="mt-1 flex justify-end">
             <Button
               type="button"
               size="sm"
-              onClick={handleGenerate}
+              onClick={() => handleGenerate()}
               disabled={generating}
             >
               {generating ? "生成中..." : "生成する"}
@@ -881,19 +1080,27 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
         >
           <h3
             id="draft-output-heading"
-            className="mb-3 text-xs font-semibold text-muted-foreground"
+            className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
           >
-            生成結果（モック）
+            <Sparkles aria-hidden="true" className="size-3.5" />
+            {output.source === "ai" ? "生成結果（AI）" : "生成結果（サンプル）"}
           </h3>
+          {output.source === "sample" && (
+            <p className="mb-2 rounded border border-amber-300 bg-amber-50 p-2 text-[11px] leading-relaxed text-amber-800">
+              これはサンプル文です。AI による生成は ANTHROPIC_API_KEY を設定した
+              ローカル環境で動作します（公開デモでは課金防止のため無効）。
+            </p>
+          )}
           <pre className="whitespace-pre-wrap rounded border border-input bg-background p-3 text-xs leading-relaxed text-foreground">
-            {output}
+            {output.text}
           </pre>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerate}
+              disabled={generating}
+              onClick={() => handleGenerate("もっと丁寧な敬語で")}
             >
               もっと丁寧
             </Button>
@@ -901,7 +1108,8 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerate}
+              disabled={generating}
+              onClick={() => handleGenerate("もっとカジュアルな口調で")}
             >
               もっとカジュアル
             </Button>
@@ -909,7 +1117,8 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerate}
+              disabled={generating}
+              onClick={() => handleGenerate("もっと短く要点だけで")}
             >
               もっと短く
             </Button>
@@ -917,7 +1126,8 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerate}
+              disabled={generating}
+              onClick={() => handleGenerate()}
             >
               再生成
             </Button>
@@ -930,11 +1140,10 @@ function DraftMessageTab({ candidate }: { candidate: Candidate }) {
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() =>
-                alert("接触ログとして保存（モック）: 実装は Phase E（発展課題）で")
-              }
+              disabled={savingLog}
+              onClick={handleSaveAsLog}
             >
-              接触ログとして保存
+              {savingLog ? "保存中..." : "接触ログとして保存"}
             </Button>
           </div>
         </section>

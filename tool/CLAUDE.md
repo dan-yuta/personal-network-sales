@@ -153,8 +153,14 @@ env のデータソースIDで切替。**権威ある対応表は `docs/03_デ�
 （本番DB/デモDB の列差を両対応）。
 
 書き込みは実装済み（楽観的更新＋失敗ロールバック＋トースト、接触ログ追加は `useOptimistic`、
-全書込は `writeChainRef` で直列化）。**AI連絡文生成のみ未実装**（発展課題=Phase E、
-Anthropic API + Upstash）。
+全書込は `writeChainRef` で直列化）。**AI連絡文生成（発展課題=Phase E）も実装済み**:
+`lib/anthropic/draft-message.ts` の `generateDraftMessage`（prompt caching・vision・
+`ANTHROPIC_MODEL` 出し分け）→ `app/actions.ts` の `draftMessageAction` → タブB の
+`DraftMessageTab`（シーン11×媒体3＋補足＋画像最大3枚、生成結果は接触ログ保存可）。
+**AI は `ANTHROPIC_API_KEY` がある環境（ローカル）でのみ動作**。公開 Vercel ではキーを
+設定せず、画面はサンプル文を表示する（無認証の公開URLに課金の入口を作らない方針）。
+そのため **Upstash 等のレート制限は不採用**（ひとり運用・AIはローカル実データで使う）。
+将来チーム公開で AI を出すなら `draftMessageAction` 冒頭にレート制限を足す。
 
 ## やらないこと
 
