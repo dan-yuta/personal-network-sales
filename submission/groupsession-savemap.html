@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="第4回グループセッション — 人脈営業ツールに『何を・どこに保存するか』">
+  <meta property="og:description" content="人脈営業ツールの紹介と、画面に記憶を持たせるために『何を・どこに保存するか』を整理した共有用の図解。編集データはNotion、定義・マスタはリポジトリに分けるハイブリッド設計。">
+  <meta property="og:type" content="article">
+  <title>第4回グループセッション — 何を・どこに保存するか（人脈営業ツール）</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body id="top" class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="users" class="w-4 h-4"></i>
+    第4回グループセッション
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    人脈営業ツールに<br>
+    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">何を</span>・<span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">どこに</span>保存するか
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    画面に「記憶」を持たせる準備として、<br>
+    <strong class="text-slate-700">何を残したいか</strong> と <strong class="text-slate-700">どこに保存するか</strong> を整理して共有します。
+  </p>
+  <p class="text-xs text-ads-dim mt-5">
+    AI-Driven School 4ヶ月目「自分の画面に記憶を持たせる」/ 段木 裕太
+  </p>
+</div>
+
+<!-- 一言サマリ（初対面の人へ） -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-8 mb-10">
+  <p class="text-center text-base md:text-lg text-slate-800 leading-relaxed">
+    このツールは、<strong class="text-ads-accent-light">自分の人脈からの営業</strong>を、<strong class="text-slate-900">相手ごとに時系列で追える</strong>4ペインのワークスペース。<br class="hidden md:block">
+    今日はこの画面に<strong class="text-slate-900">「記憶」</strong>を持たせるために、
+    <strong class="text-slate-900">編集データは Notion / 定義・ルールはコード</strong>に分けた考え方を共有します。
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!--  目次                                                         -->
+<!-- ============================================================ -->
+<nav aria-label="目次" class="no-print mb-10 md:mb-12">
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-4 md:p-5">
+    <p class="text-xs font-bold text-ads-dim tracking-wider mb-3 flex items-center gap-1.5">
+      <i data-lucide="list" class="w-3.5 h-3.5"></i>
+      目次 (クリックでジャンプ)
+    </p>
+    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+      <li><a href="#intro" class="text-ads-accent-light hover:underline">0. はじめに — このツールは何か</a></li>
+      <li><a href="#what" class="text-ads-accent-light hover:underline">1. 何を「記憶」に残したいか</a></li>
+      <li><a href="#where" class="text-ads-accent-light hover:underline">2. どこに保存するか（保存先マップ）</a></li>
+      <li><a href="#why" class="text-ads-accent-light hover:underline">3. なぜ Notion を選んだか</a></li>
+      <li><a href="#decided" class="text-ads-accent-light hover:underline">4. 決まったこと／論点</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!--  §0 はじめに — このツールは何か                               -->
+<!-- ============================================================ -->
+<section id="intro" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 flex-shrink-0">
+      <i data-lucide="compass" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">0. はじめに — このツールは何か（初めての方へ）</h2>
+  </div>
+
+  <!-- 課題 → 解決 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-red-500/10 text-red-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+        困りごと
+      </div>
+      <p class="text-sm leading-relaxed text-slate-700">
+        人脈（既存知人・紹介・コミュニティ・これから出会う新規）はあるのに、
+        <strong class="text-red-700">「誰に・いつ・何を話したか」「次に何をすべきか」が頭やバラバラのメモに散らばり</strong>、
+        フォロー漏れ＝機会損失になっていた。
+      </p>
+    </div>
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        このツールで
+      </div>
+      <p class="text-sm leading-relaxed text-slate-700">
+        1画面で <strong class="text-emerald-700">「絞り込み → 選択 → 詳細 → 次の一手」</strong> が完結。
+        朝イチで開けば<strong class="text-emerald-700">その日のターゲットが数秒で見つかり</strong>、通話直後にログを30秒で記録できる。
+      </p>
+    </div>
+  </div>
+
+  <!-- 4ペインひと目 -->
+  <p class="mb-3 text-sm font-bold text-slate-700">画面ひと目 — 4ペインのワークスペース</p>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+    <div class="rounded-xl border border-ads-border bg-white p-3">
+      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="layers" class="w-4 h-4 text-blue-600"></i><span class="text-xs font-bold text-slate-900">Pane 1</span></div>
+      <p class="text-xs font-medium text-slate-800 mb-0.5">営業ステージ</p>
+      <p class="text-[11px] text-ads-muted leading-snug">未連絡／アプローチ中／紹介進行中／商談中／契約／失注／保留</p>
+    </div>
+    <div class="rounded-xl border border-ads-border bg-white p-3">
+      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="list" class="w-4 h-4 text-blue-600"></i><span class="text-xs font-bold text-slate-900">Pane 2</span></div>
+      <p class="text-xs font-medium text-slate-800 mb-0.5">候補者リスト</p>
+      <p class="text-[11px] text-ads-muted leading-snug">検索・ソート・絞り込み。最終接触からの経過も表示</p>
+    </div>
+    <div class="rounded-xl border border-ads-border bg-white p-3">
+      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="id-card" class="w-4 h-4 text-blue-600"></i><span class="text-xs font-bold text-slate-900">Pane 3</span></div>
+      <p class="text-xs font-medium text-slate-800 mb-0.5">候補者の詳細</p>
+      <p class="text-[11px] text-ads-muted leading-snug">プロフィール・評価4軸・営業条件（取引規模/優先度）</p>
+    </div>
+    <div class="rounded-xl border border-ads-accent/30 bg-ads-accent/5 p-3">
+      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="zap" class="w-4 h-4 text-ads-accent-light"></i><span class="text-xs font-bold text-slate-900">Pane 4</span></div>
+      <p class="text-xs font-medium text-slate-800 mb-0.5">次の一手</p>
+      <p class="text-[11px] text-ads-muted leading-snug">接触ログ／AI連絡文の下書き</p>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">前提</strong>:
+    ベースは AI-Driven School の雛形「workspace-ui-kit」（4ペイン）を、自分の<strong class="text-slate-800">人脈営業向けに作り変えた</strong>もの。
+    前回まではこの画面が <strong class="text-slate-800">リロードで消える（見た目だけ）</strong> 状態。今回はここに「記憶」を持たせる ── その<strong class="text-slate-800">保存先の線引き</strong>が今日の本題です。
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  §1 何を残したいか                                            -->
+<!-- ============================================================ -->
+<section id="what" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-violet-500/10 flex-shrink-0">
+      <i data-lucide="hard-drive" class="w-5 h-5 text-violet-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">1. 何を「記憶」に残したいか</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    まず「<strong class="text-slate-900">リロードしても消したくないもの</strong>」を書き出しました。それが保存対象です。逆に「アプリのルール・定義」は毎回コードから読めばよく、保存は不要です。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
+        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+        残したい（＝記憶）
+      </div>
+      <ul class="space-y-1.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>候補者プロフィール（名前・連絡先・接触経路 ほか）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>進捗ステージ／優先度／アーカイブ</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>評価4軸（関係性／興味／レスポンス／紹介ポテンシャル）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>接触ログ（いつ・どの手段で・何を話したか／時系列）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>最終連絡日（接触ログから自動で算出）</span></li>
+      </ul>
+    </div>
+    <div class="bg-slate-100 border border-slate-300 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
+        <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+        残さなくてよい（＝定義）
+      </div>
+      <ul class="space-y-1.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i><span>ステージの種類・順序・色（アプリのルール）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i><span>画面構成・アプリ名・アイコン</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i><span>連絡文のシーン定義（11種）・媒体定義</span></li>
+      </ul>
+      <p class="mt-3 text-xs text-ads-muted leading-relaxed">
+        これらは「人が手で書き換えるもの」ではなく、コードと一緒に管理すべき<strong class="text-slate-700">マスタ定義</strong>。だから保存先を分ける。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  §2 保存先マップ（主役）                                       -->
+<!-- ============================================================ -->
+<section id="where" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 flex-shrink-0">
+      <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">2. どこに保存するか — 保存先マップ</h2>
+  </div>
+
+  <p class="mb-5 leading-relaxed">
+    結論は <strong class="text-slate-900">ハイブリッド</strong>。<strong class="text-emerald-700">「人が編集するデータ」だけを Notion</strong> に、<strong class="text-slate-700">「変わらない定義・ルール」はリポジトリ（コード）</strong>に置きます。
+  </p>
+
+  <!-- 凡例 -->
+  <div class="flex flex-wrap gap-2 mb-4 text-xs">
+    <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1 text-emerald-700"><i data-lucide="database" class="w-3 h-3"></i>Notion = 編集データ（記憶）</span>
+    <span class="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-300 rounded-full px-3 py-1 text-slate-700"><i data-lucide="file-code" class="w-3 h-3"></i>リポジトリ = 定義・マスタ</span>
+  </div>
+
+  <div class="overflow-x-auto rounded-xl border border-ads-border mb-6">
+    <table class="w-full text-sm border-collapse bg-white">
+      <thead>
+        <tr class="bg-ads-surface text-slate-700">
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">データ</th>
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">保存先</th>
+          <th class="text-left font-bold px-3 py-2.5 border-b border-ads-border">理由</th>
+        </tr>
+      </thead>
+      <tbody class="text-ads-muted">
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">候補者プロフィール／評価4軸／ステージ・優先度・アーカイブ</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（候補者DB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">ユーザーが手で編集する実データ</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">接触ログ（1対多）</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（接触ログDB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">時系列で増える。1欄の自由メモでは足りない</td>
+        </tr>
+        <tr class="bg-emerald-50/40">
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">最終連絡日</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-emerald-700 font-medium">Notion（候補者DB）</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">接触ログから派生して自動保存（連絡間隔の警告用）</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">ステージ定義／順序／色</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-slate-600 font-medium">リポジトリ</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">マスタ定義。AI の手元（コード）に置く</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 border-b border-ads-border/60 text-slate-700">連絡文シーン定義（11）・アプリ名・アイコン</td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60"><span class="text-slate-600 font-medium">リポジトリ</span></td>
+          <td class="px-3 py-2.5 border-b border-ads-border/60">純粋な定義・UI 設定（ユーザー編集なし）</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2.5 text-slate-700">candidates.json（サンプル30人）</td>
+          <td class="px-3 py-2.5"><span class="text-slate-600 font-medium">リポジトリ → デモDBへ投入</span></td>
+          <td class="px-3 py-2.5">実行時はロードせず、公開デモDBの初期データとしてのみ使用</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">線引きの原則</strong>:
+    <strong class="text-slate-800">「人が手で書き換えるもの」＝ Notion</strong>（記憶として残す）。
+    <strong class="text-slate-800">「アプリのルール・定義」＝ リポジトリ</strong>（コードと一緒に管理）。
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  §3 なぜ Notion か                                            -->
+<!-- ============================================================ -->
+<section id="why" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/10 flex-shrink-0">
+      <i data-lucide="git-compare" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">3. なぜ保存先に Notion を選んだか</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    講義の推奨は <strong class="text-slate-900">Neon（クラウドDB）</strong>。それでも今回あえて <strong class="text-slate-900">Notion</strong> を選びました。トレードオフごと共有します。
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i>
+        Notion を選んだ理由
+      </div>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">既存の営業業務がすでに Notion 上にある</strong>ので、そのまま流用できる</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">人が直接 DB を覗ける・編集できる</strong>（アプリを介さなくても運用が回る）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>運用の変更コストがゼロ。今までの Notion の使い方を壊さない</span></li>
+      </ul>
+    </div>
+    <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-600 px-3 py-1 rounded-full text-xs font-bold mb-4">
+        <i data-lucide="scale" class="w-3.5 h-3.5"></i>
+        代償（講義の論点）
+      </div>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span><strong class="text-slate-800">「AI との距離」が遠くなる</strong>。Notion は人間向けの形なので、AI/プログラムから扱うには一手間かかる</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="minus" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>専用DB（Neon等）に比べ、複雑なクエリや厳密な型は不得手</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5 text-sm leading-relaxed">
+    <strong class="text-ads-accent-light">だから「ハイブリッド」にした</strong>:<br>
+    代償である「AI との距離」を埋めるため、<strong class="text-slate-800">アプリのルール・定義はリポジトリ＝AI の手元に残し</strong>、
+    <strong class="text-slate-800">人が編集する実データだけ Notion に置く</strong>。
+    「人が直接触れる手軽さ」と「AI が扱いやすい厳密な定義」の両取りが狙いです（§2 の保存先マップ）。
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!--  §4 決まったこと／論点                                         -->
+<!-- ============================================================ -->
+<section id="decided" class="mb-12 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-500/10 flex-shrink-0">
+      <i data-lucide="clipboard-check" class="w-5 h-5 text-cyan-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">4. 決まったこと／検討した論点</h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        決まったこと
+      </div>
+      <ul class="space-y-1.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>保存先＝Notion（編集データ）／リポジトリ（定義）のハイブリッド</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>接触ログは新規の Notion DB（候補者と 1 対多）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>DB は 2 セット運用 ── <strong class="text-slate-800">公開＝デモ/ダミー</strong>・<strong class="text-slate-800">ローカル＝本番</strong>（個人情報を公開URLに出さない）</span></li>
+      </ul>
+    </div>
+    <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+      <div class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
+        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+        検討した論点（迷いどころ）
+      </div>
+      <ul class="space-y-1.5 text-sm">
+        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>推奨の Neon ではなく Notion で大丈夫か（AIとの距離）</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>公開時の個人情報をどう守るか → デモDBをダミー化で対応</span></li>
+        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>紹介ネットワーク（誰の紹介か）の関連付けは今回スコープ外</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mt-8 text-center bg-gradient-to-b from-ads-accent/5 to-transparent border border-ads-accent/10 rounded-xl p-6 md:p-8">
+    <i data-lucide="brain" class="w-7 h-7 text-ads-accent mx-auto mb-3"></i>
+    <p class="text-base md:text-lg font-bold text-slate-900 mb-2">今日いちばん伝えたいこと</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed text-sm md:text-base">
+      「全部 DB に入れる」のではなく、<strong class="text-slate-700">人が編集するもの＝Notion／アプリの定義＝コード</strong>と線引きしたこと。
+      この線引きと「Notion を選んだ理由（AIとの距離のトレードオフ）」が、今回いちばんの学びです。
+    </p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School 第4回グループセッション / 人脈営業ツール（personal-network-sales）</p>
+  </footer>
+
+  <a href="#top" aria-label="ページの先頭に戻る" title="ページの先頭に戻る"
+     class="no-print fixed bottom-6 right-6 z-50 inline-flex size-11 items-center justify-center rounded-full bg-ads-accent text-white shadow-lg transition-opacity hover:opacity-90 focus-visible:opacity-90">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </a>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
