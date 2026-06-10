@@ -21,12 +21,12 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 
 「何を・どこに保存するか」を初対面の人にも伝える共有資料。提出物②（07図解）とは役割を分けて独立管理する。
 
-| 種別 | ファイル | 備考 |
-|------|----------|------|
-| **発表用 図解（HTML）** | [groupsession-savemap.html](groupsession-savemap.html) | 画面共有用。§0 ツール紹介 → §1 何を残すか → §2 保存先マップ（主役）→ §3 なぜNotion → §4 決定/論点。デザインは他図解と統一・自己完結（CDN・画像不使用） |
+| 種別 | URL / ファイル | 備考 |
+|------|----------------|------|
+| **発表用 図解（公開）** | **https://network-sales-savemap.surge.sh** | 2026-06-10 Surge 公開済み・検索エンジン非インデックス。原本 [groupsession-savemap.html](groupsession-savemap.html)。§0 ツール紹介 → §1 何を残すか → §2 保存先マップ（主役）→ §3 なぜNotion → §4 決定/論点。デザインは他図解と統一・自己完結（CDN・画像不使用） |
 | **トークメモ（台本）** | [groupsession-talk.md](groupsession-talk.md) | 5分の発表台本（時間配分・話す文例・想定質問つき） |
 
-- 公開する場合の Surge 例: `surge <dir> network-sales-savemap.surge.sh`（手順は下記「デプロイ手順」に準ずる。ソースは `groupsession-savemap.html`）。
+- 再デプロイは下記「デプロイ手順」と同じパターン（ソース＝`groupsession-savemap.html` / ドメイン＝`network-sales-savemap.surge.sh`）。
 - この回は「grill-me で整理して話す」のが要件で清書資料は必須ではないが、初対面の人向けにツール紹介を含めた共有資料として用意。
 
 ---

@@ -11,7 +11,8 @@ AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作�
 | **課題図解（提出物②）** | **https://network-sales-memory.surge.sh** | 第7回図解。原本 [submission/07-memory-notion-deploy.html](submission/07-memory-notion-deploy.html) |
 | GitHub リポジトリ | https://github.com/dan-yuta/personal-network-sales | 設計・実装の全履歴 |
 
-> 前回（第5/6回）のツール全体像の図解は https://network-sales-overview.surge.sh/ （原本 [submission/tool-overview.html](submission/tool-overview.html)）。第4回グループセッション用の発表資料は [submission/groupsession-savemap.html](submission/groupsession-savemap.html)（+ [トークメモ](submission/groupsession-talk.md)）。
+> 第4回グループセッション用の発表資料（公開）: https://network-sales-savemap.surge.sh （原本 [submission/groupsession-savemap.html](submission/groupsession-savemap.html) + [トークメモ](submission/groupsession-talk.md)）。
+> 前回（第5/6回）のツール全体像の図解は https://network-sales-overview.surge.sh/ （原本 [submission/tool-overview.html](submission/tool-overview.html)）。
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
