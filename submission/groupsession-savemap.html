@@ -146,7 +146,7 @@
         このツールで
       </div>
       <p class="text-sm leading-relaxed text-slate-700">
-        1画面で <strong class="text-emerald-700">「絞り込み → 選択 → 詳細 → 次の一手」</strong> が完結。
+        1画面で <strong class="text-emerald-700">「絞り込み → 選択 → 詳細 → 次の一手」</strong> が完結。<br>
         朝イチで開けば<strong class="text-emerald-700">その日のターゲットが数秒で見つかり</strong>、通話直後にログを30秒で記録できる。
       </p>
     </div>
@@ -170,8 +170,8 @@
       <p class="text-xs font-medium text-slate-800 mb-0.5">候補者の詳細</p>
       <p class="text-[11px] text-ads-muted leading-snug">プロフィール・評価4軸・営業条件（取引規模/優先度）</p>
     </div>
-    <div class="rounded-xl border border-ads-accent/30 bg-ads-accent/5 p-3">
-      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="zap" class="w-4 h-4 text-ads-accent-light"></i><span class="text-xs font-bold text-slate-900">Pane 4</span></div>
+    <div class="rounded-xl border border-ads-border bg-white p-3">
+      <div class="flex items-center gap-1.5 mb-1.5"><i data-lucide="zap" class="w-4 h-4 text-blue-600"></i><span class="text-xs font-bold text-slate-900">Pane 4</span></div>
       <p class="text-xs font-medium text-slate-800 mb-0.5">次の一手</p>
       <p class="text-[11px] text-ads-muted leading-snug">接触ログ／AI連絡文の下書き</p>
     </div>
@@ -217,12 +217,12 @@
       <div class="text-[10px] text-emerald-600/70">記憶の置き場</div>
     </div>
   </div>
-  <p class="mb-6 text-center text-xs text-ads-muted">編集すると <strong class="text-slate-700">Notion に保存</strong>され、開くたび <strong class="text-slate-700">Notion から取り直す</strong>。だからリロードでも別端末でも消えない。</p>
+  <p class="mb-6 text-center text-xs text-ads-muted">編集すると <strong class="text-slate-700">Notion に保存</strong>され、開くたび <strong class="text-slate-700">Notion から取り直す</strong>。<br>だからリロードでも別端末でも消えない。</p>
 
   <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
     <strong class="text-ads-accent-light">前提</strong>:
-    ベースは AI-Driven School の雛形「workspace-ui-kit」（4ペイン）を、自分の<strong class="text-slate-800">人脈営業向けに作り変えた</strong>もの。
-    前回まではこの画面が <strong class="text-slate-800">リロードで消える（見た目だけ）</strong> 状態。今回はここに「記憶」を持たせる ── その<strong class="text-slate-800">保存先の線引き</strong>が今日の本題です。
+    ベースは AI-Driven School の雛形「workspace-ui-kit」（4ペイン）を、自分の<strong class="text-slate-800">人脈営業向けに作り変えた</strong>もの。<br>
+    前回まではこの画面が <strong class="text-slate-800">リロードで消える（見た目だけ）</strong> 状態。<br>今回はここに「記憶」を持たせる ── その<strong class="text-slate-800">保存先の線引き</strong>が今日の本題です。
   </div>
 </section>
 
@@ -238,7 +238,7 @@
   </div>
 
   <p class="mb-6 leading-relaxed">
-    まず「<strong class="text-slate-900">リロードしても消したくないもの</strong>」を書き出しました。それが保存対象です。逆に「アプリのルール・定義」は毎回コードから読めばよく、保存は不要です。
+    まず「<strong class="text-slate-900">リロードしても消したくないもの</strong>」を書き出しました。<br>それが保存対象です。<br>逆に「アプリのルール・定義」は毎回コードから読めばよく、保存は不要です。
   </p>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -284,7 +284,7 @@
   </div>
 
   <p class="mb-5 leading-relaxed">
-    結論は <strong class="text-slate-900">ハイブリッド</strong>。<strong class="text-emerald-700">「人が編集するデータ」だけを Notion</strong> に、<strong class="text-slate-700">「変わらない定義・ルール」はリポジトリ（コード）</strong>に置きます。
+    結論は <strong class="text-slate-900">ハイブリッド</strong>。<br><strong class="text-emerald-700">「人が編集するデータ」だけを Notion</strong> に、<strong class="text-slate-700">「変わらない定義・ルール」はリポジトリ（コード）</strong>に置きます。
   </p>
 
   <!-- 線引きの図（Notion / リポジトリ） -->
@@ -363,7 +363,7 @@
 
   <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
     <strong class="text-ads-accent-light">線引きの原則</strong>:
-    <strong class="text-slate-800">「人が手で書き換えるもの」＝ Notion</strong>（記憶として残す）。
+    <strong class="text-slate-800">「人が手で書き換えるもの」＝ Notion</strong>（記憶として残す）。<br>
     <strong class="text-slate-800">「アプリのルール・定義」＝ リポジトリ</strong>（コードと一緒に管理）。
   </div>
 </section>
@@ -380,7 +380,7 @@
   </div>
 
   <p class="mb-6 leading-relaxed">
-    講義の推奨は <strong class="text-slate-900">Neon（クラウドDB）</strong>。それでも今回あえて <strong class="text-slate-900">Notion</strong> を選びました。トレードオフごと共有します。
+    講義の推奨は <strong class="text-slate-900">Neon（クラウドDB）</strong>。<br>それでも今回あえて <strong class="text-slate-900">Notion</strong> を選びました。<br>トレードオフごと共有します。
   </p>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -410,7 +410,7 @@
   <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5 text-sm leading-relaxed">
     <strong class="text-ads-accent-light">だから「ハイブリッド」にした</strong>:<br>
     代償である「AI との距離」を埋めるため、<strong class="text-slate-800">アプリのルール・定義はリポジトリ＝AI の手元に残し</strong>、
-    <strong class="text-slate-800">人が編集する実データだけ Notion に置く</strong>。
+    <strong class="text-slate-800">人が編集する実データだけ Notion に置く</strong>。<br>
     「人が直接触れる手軽さ」と「AI が扱いやすい厳密な定義」の両取りが狙いです（§2 の保存先マップ）。
   </div>
 </section>
@@ -455,7 +455,7 @@
     <i data-lucide="brain" class="w-7 h-7 text-ads-accent mx-auto mb-3"></i>
     <p class="text-base md:text-lg font-bold text-slate-900 mb-2">今日いちばん伝えたいこと</p>
     <p class="text-ads-muted max-w-lg mx-auto leading-relaxed text-sm md:text-base">
-      「全部 DB に入れる」のではなく、<strong class="text-slate-700">人が編集するもの＝Notion／アプリの定義＝コード</strong>と線引きしたこと。
+      「全部 DB に入れる」のではなく、<strong class="text-slate-700">人が編集するもの＝Notion／アプリの定義＝コード</strong>と線引きしたこと。<br>
       この線引きと「Notion を選んだ理由（AIとの距離のトレードオフ）」が、今回いちばんの学びです。
     </p>
   </div>
