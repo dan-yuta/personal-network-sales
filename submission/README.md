@@ -14,7 +14,8 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 
 - テーマ: リロードで消えていた画面に **Notion を保存先**として記憶を持たせ、**Vercel** で公開。
 - 保存先の線引き: 編集データ=Notion / 定義・マスタ=リポジトリ（ハイブリッド）。詳細は図解 B・C 章。
-- スクショ: `assets/screenshots/07-overview.png`（公開画面のクリーン版）を配置する想定。未配置でも図解はプレースホルダ表示で崩れない。
+- **発展課題（任意）も達成**: AI 連絡文の下書き機能（Anthropic API・vision）を実装し、**公開URLでも動作**。公開での課金は「財布側の上限（前払い残高/月額上限・自動チャージOFF）」で守り、Upstash 等のアプリ側レート制限は不採用。詳細は図解「発展課題」節。
+- スクショ: `assets/screenshots/07-overview.png`（公開画面のクリーン版）を配置する想定。未配置でも図解はプレースホルダ表示で崩れない。AI タブのスクショを足すなら `07-ai-draft.png` 等で追加可（任意）。
 
 ---
 
@@ -107,7 +108,25 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 
 詳細は [docs/00_ツール起動・確認方法.md](../docs/00_ツール起動・確認方法.md) も参照。
 
-### 初回デプロイ
+### 第7回図解（07-memory-notion-deploy.html → network-sales-memory.surge.sh）
+
+現行の提出物②。図解を更新したら、この手順で再デプロイする。
+
+```powershell
+# 1. Surge アカウント確認 (必ず先に確認)
+surge whoami   # 期待値: dangi.yuta.business@gmail.com
+
+# 2. デプロイ用フォルダに index.html としてコピー
+$src  = "C:\Users\dangi\src\personal-network-sales\submission\07-memory-notion-deploy.html"
+$dest = "C:\Users\dangi\deploy\personal-network-sales-memory"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Copy-Item -Force $src -Destination "$dest\index.html"
+
+# 3. デプロイ（更新も同じコマンド）
+surge $dest network-sales-memory.surge.sh
+```
+
+### 第6回図解（初回デプロイ）
 
 ```powershell
 # 1. Surge アカウント確認 (必ず先に確認)
@@ -153,4 +172,4 @@ surge teardown network-sales-overview.surge.sh
 - [../README.md](../README.md) — リポジトリ全体の index
 - [../docs/00_ツール起動・確認方法.md](../docs/00_ツール起動・確認方法.md) — `tool/` のローカル起動手順
 - [../docs/02_UI設計書.md](../docs/02_UI設計書.md) — 4ペイン + 連絡文 11 シーンの設計
-- [../docs/07_工夫したポイント.md](../docs/07_工夫したポイント.md) — 15 点の craftsmanship 整理
+- [../docs/07_工夫したポイント.md](../docs/07_工夫したポイント.md) — 16 点の craftsmanship 整理（#16 = 公開 AI のコストをどの層で守るか）

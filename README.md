@@ -56,7 +56,7 @@ personal-network-sales/          ← リポジトリルート
 | 4 | [docs/04_技術仕様書.md](docs/04_技術仕様書.md) | 技術スタック・実行環境・認証・楽観的更新フロー |
 | 5 | [docs/05_実装ロードマップ.md](docs/05_実装ロードマップ.md) | 着手順・未決事項・フェーズ計画 |
 | 6 | [docs/06_やることリスト.md](docs/06_やることリスト.md) | 全タスクの進捗管理（Phase別表形式） |
-| 7 | [docs/07_工夫したポイント.md](docs/07_工夫したポイント.md) | 設計・実装でこだわった15点（判断/データ/UI/AI/コード基盤/進め方/堅牢性/公開/状態復元） |
+| 7 | [docs/07_工夫したポイント.md](docs/07_工夫したポイント.md) | 設計・実装でこだわった16点（判断/データ/UI/AI/コード基盤/進め方/堅牢性/公開/状態復元。#16=公開AIのコストをどの層で守るか） |
 | 8 | [docs/08_修正・トラブルシュート記録.md](docs/08_修正・トラブルシュート記録.md) | 第7回で遭遇した不具合の 症状→原因→対処→学び（Mermaid 図つき） |
 
 ### 提出物（グループセッション準備）
@@ -70,7 +70,7 @@ personal-network-sales/          ← リポジトリルート
 
 ## 工夫したポイント
 
-設計・実装の過程でこだわった15点は [docs/07_工夫したポイント.md](docs/07_工夫したポイント.md) （正本）と [notes/2026-05-12_craftsmanship.md](notes/2026-05-12_craftsmanship.md) （制作時の雑記）にまとめています。
+設計・実装の過程でこだわった16点は [docs/07_工夫したポイント.md](docs/07_工夫したポイント.md) （正本）と [notes/2026-05-12_craftsmanship.md](notes/2026-05-12_craftsmanship.md) （制作時の雑記）にまとめています。
 
 ハイライト:
 - **grill-me で1問ずつ詰めた** — 「なぜその判断にしたか」を docs に残せる
@@ -154,26 +154,34 @@ personal-network-sales/          ← リポジトリルート
 
 ---
 
-## 4ヶ月目（第7回宿題「画面に記憶を持たせる」）の進捗（2026-06-08）
+## 4ヶ月目（第7回宿題「画面に記憶を持たせる」）の進捗（2026-06-10 完了）
 
-第7回講義のスコープ＝**Notion を保存先にした永続化 ＋ Vercel 公開**に着手。
+第7回講義のスコープ＝**Notion を保存先にした永続化 ＋ Vercel 公開**。さらに発展課題（AI連絡文）まで**完了・提出済み**。
 保存先は grill-me で **Notion 確定**（推奨の Neon は不採用。理由は「既存業務が Notion 上にあり流用でき、人が直接 DB を見られる」一方、代償＝AIとの距離。だから定義・マスタはリポジトリに残すハイブリッド）。
 
+| 提出物 | URL |
+|------|-----|
+| **公開アプリ（提出物①）** | **https://personal-network-sales.vercel.app** （NotionデモDBに永続化・実AIも動作） |
+| **課題図解（提出物②）** | **https://network-sales-memory.surge.sh** （原本 [submission/07-memory-notion-deploy.html](submission/07-memory-notion-deploy.html)） |
+
 ```
-読み取りパス実装まで完了（全 tsc + vitest 108 件 通過・push 済）
+必須課題＋発展課題まで完了（tsc + vitest 112 件 通過・next build OK・push 済）
 ├─ ステージ 6→7 段階化（紹介進行中 を追加、実 Notion DB と一致）      ✓
 ├─ Notion データ層（dataSources API v5・読み書き）                  ✓
 │   └─ lib/notion/{schema,props,candidates,contact-logs}.ts
-├─ Server Actions（app/actions.ts・revalidatePath）                ✓
-├─ page.tsx を await listCandidates() に（TOKEN 無時 JSON フォールバック） ✓
-├─ デモ Notion DB 構築（MCP・列強化＋接触ログ DB 新規）             ✓
-├─ seed-notion.mjs（冪等・実クリア→ダミー投入）                    ✓
-└─ 次: Integration トークン → 表示検証 → 縦串(stage書込) → Vercel 公開（提出可能チェックポイント）
+├─ Server Actions（app/actions.ts。revalidatePath は最終的に全廃＝楽観更新＋force-dynamic） ✓
+├─ page.tsx を await listCandidates()＋force-dynamic に                ✓
+├─ Phase C: ステージ書込の永続化 ＋ Vercel 公開（提出可能チェックポイント）  ✓
+├─ Phase D: 編集サーフェス全面の永続化（プロフィール/評価4軸/アーカイブ/接触ログ/最終連絡日） ✓
+├─ Phase E（発展課題）: AI連絡文（generateDraftMessage・vision・接触ログ保存）  ✓
+│   └─ ローカル／公開 Vercel 両方で実AI（Sonnet）。コストは財布側上限で管理・Upstash不採用
+└─ デモ Notion DB 構築（MCP）＋ seed-notion.mjs（冪等・ダミー投入）        ✓
 ```
 
 - DB は 2 セット運用（公開=デモ/ダミー、ローカル=本番）。データソース ID は
   [docs/03_データ設計書.md](docs/03_データ設計書.md) と
-  [notes/2026-06-08_session-record.md](notes/2026-06-08_session-record.md) 参照。
+  [notes/2026-06-08_session-record.md](notes/2026-06-08_session-record.md)（2026-06-09/10 追記含む）参照。
+- トラブルシュート記録（不具合9件の症状→原因→対処→学び）: [docs/08_修正・トラブルシュート記録.md](docs/08_修正・トラブルシュート記録.md)
 - 実装プラン全体: `~/.claude/plans/serialized-juggling-matsumoto.md`
 
 ---
@@ -181,7 +189,7 @@ personal-network-sales/          ← リポジトリルート
 ## 作成情報
 
 - 作成日: 2026-05-10
-- 最終更新: 2026-06-08
+- 最終更新: 2026-06-10
 - 作成者: 段木 裕太
 - 設計手法: `grill-me` スキルによる対話的グリル
 - 提出先: AI-Driven School 受講生ポータル

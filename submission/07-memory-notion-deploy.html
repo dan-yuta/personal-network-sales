@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="googlebot" content="noindex, nofollow">
   <meta property="og:title" content="人脈営業ツールに「記憶」を持たせて公開する — Notion永続化とVercelデプロイの図解">
-  <meta property="og:description" content="リロードで消えていた画面に、Notion を保存先として記憶を持たせ、Vercel で公開するまで。どのデータをどこに置いたか、なぜ Notion を選んだかを図解します。">
+  <meta property="og:description" content="リロードで消えていた画面に、Notion を保存先として記憶を持たせ、Vercel で公開するまで。どのデータをどこに置いたか、なぜ Notion を選んだか、さらに発展課題の AI 連絡文を公開でも安全に動かす設計までを図解します。">
   <meta property="og:type" content="article">
   <title>「自分の画面に記憶を持たせる」— Notion永続化 + Vercel公開の図解</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
@@ -115,6 +115,7 @@
       <li><a href="#c" class="text-ads-accent-light hover:underline">C. なぜ Notion を選んだか</a></li>
       <li><a href="#d" class="text-ads-accent-light hover:underline">D. どうやって記憶させ・公開したか</a></li>
       <li><a href="#e" class="text-ads-accent-light hover:underline">E. 実画面（公開・動作中）</a></li>
+      <li><a href="#ai" class="text-ads-accent-light hover:underline">発展課題. AI連絡文を安全に公開する</a></li>
       <li><a href="#f" class="text-ads-accent-light hover:underline">F. 工夫したポイント</a></li>
       <li><a href="#g" class="text-ads-accent-light hover:underline">G. 苦戦したポイント</a></li>
       <li><a href="#summary" class="text-ads-accent-light hover:underline">まとめ</a></li>
@@ -448,8 +449,8 @@
     </div>
   </div>
 
-  <div class="rounded-lg border border-amber-500/30 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
-    <strong>※ AI による連絡文の下書き機能（前回紹介）は、今回のスコープでは発展課題</strong>として位置づけ、本提出は「記憶＝永続化」と「公開」に集中しています。
+  <div class="rounded-lg border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm leading-relaxed text-emerald-900">
+    <strong>※ さらに発展課題「AI が動く機能」も達成。</strong>AI による連絡文の下書き機能（前回紹介）を実装し、公開URLでも動作します。安全に公開した設計判断は <a href="#ai" class="underline font-medium">下の「発展課題」節</a>へ。
   </div>
 </section>
 
@@ -500,6 +501,81 @@
       <div class="font-bold text-emerald-900 mb-1 flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4"></i>Notion 側でも変わる</div>
       <div class="text-xs text-emerald-800/80">画面で動かした候補者の進捗状況が、Notion の DB を直接見ても更新されている</div>
     </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  発展課題: AI連絡文                                            -->
+<!-- ============================================================ -->
+<section id="ai" class="mb-16 md:mb-20 scroll-mt-6">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-violet-500/10 flex-shrink-0">
+      <i data-lucide="sparkles" class="w-5 h-5 text-violet-600"></i>
+    </div>
+    <div>
+      <div class="inline-flex items-center gap-1.5 bg-violet-500/10 text-violet-700 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1">発展課題（任意）も達成</div>
+      <h2 class="text-xl md:text-2xl font-bold text-slate-900">AI に連絡文を下書きさせる — 公開でも動く</h2>
+    </div>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    必須課題（記憶＝永続化＋公開）に加えて、発展課題「<strong class="text-slate-900">AI が動く機能を足す</strong>」も実装しました。Pane4 のタブBで、<strong class="text-slate-900">相手・場面（11シーン）× 媒体（メール / LINE / 電話台本）＋補足＋過去のやり取りの画像</strong>を AI に渡すと、その候補者の接触ログも踏まえた<strong class="text-slate-900">連絡文の下書き</strong>が生成されます。結果はコピーでき、「接触ログとして保存」もできます。<strong class="text-slate-900">送るのは人間（AI は下書きまで）</strong>。
+  </p>
+
+  <!-- 入力 → AI → 下書き の流れ -->
+  <div class="flex flex-col md:flex-row items-stretch gap-2 md:gap-0 mb-6">
+    <div class="flex-1 bg-ads-surface border border-ads-border rounded-xl p-4 text-center">
+      <i data-lucide="sliders-horizontal" class="w-6 h-6 text-violet-600 mx-auto mb-2"></i>
+      <p class="font-bold text-slate-900 text-sm mb-0.5">シーン×媒体×補足</p>
+      <p class="text-[11px] text-ads-muted">＋過去のやり取り画像（vision）</p>
+    </div>
+    <div class="flex items-center justify-center md:w-12 py-1 md:py-0">
+      <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+    </div>
+    <div class="flex-1 bg-violet-500/5 border-2 border-violet-500/20 rounded-xl p-4 text-center">
+      <i data-lucide="sparkles" class="w-6 h-6 text-violet-700 mx-auto mb-2"></i>
+      <p class="font-bold text-violet-800 text-sm mb-0.5">AI（Claude Sonnet）</p>
+      <p class="text-[11px] text-ads-muted">サーバー側で生成・接触ログ直近も加味</p>
+    </div>
+    <div class="flex items-center justify-center md:w-12 py-1 md:py-0">
+      <i data-lucide="arrow-right" class="w-5 h-5 text-ads-accent hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-5 h-5 text-ads-accent md:hidden"></i>
+    </div>
+    <div class="flex-1 bg-ads-surface border border-ads-border rounded-xl p-4 text-center">
+      <i data-lucide="file-text" class="w-6 h-6 text-emerald-600 mx-auto mb-2"></i>
+      <p class="font-bold text-slate-900 text-sm mb-0.5">連絡文の下書き</p>
+      <p class="text-[11px] text-ads-muted">コピー / 接触ログとして保存</p>
+    </div>
+  </div>
+
+  <!-- 核心: 公開でも安全に動かす設計判断 -->
+  <div class="bg-violet-500/5 border border-violet-500/20 rounded-xl p-5 md:p-6 mb-4">
+    <p class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+      <i data-lucide="shield-check" class="w-5 h-5 text-violet-600"></i>
+      工夫の核心 — 公開URLで AI を「安全に」動かす設計
+    </p>
+    <p class="text-sm leading-relaxed mb-4">
+      公開URLは<strong class="text-slate-800">無認証＝誰でも生成ボタンを押せる</strong>ため、放っておくと自分の AI 課金が乗ってしまうのが唯一のリスクでした。これを<strong class="text-slate-800">「どの層で守るか」</strong>を選ぶのがハーネス設計の判断どころです。
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div class="bg-white border border-ads-border rounded-lg p-4">
+        <p class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5"><i data-lucide="user-x" class="w-4 h-4 text-emerald-600"></i>漏洩リスク → すでにゼロ</p>
+        <p class="text-xs text-ads-muted leading-relaxed">公開はダミーのデモDB（D章③）。誰が使っても個人情報は出ない。つまり<strong class="text-slate-700">気にするのは「お金」だけ</strong>に絞れた。</p>
+      </div>
+      <div class="bg-white border border-ads-border rounded-lg p-4">
+        <p class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5"><i data-lucide="wallet" class="w-4 h-4 text-violet-600"></i>課金リスク → 財布側で天井</p>
+        <p class="text-xs text-ads-muted leading-relaxed">回数を止める代わりに<strong class="text-slate-700">金額で止める</strong>。Anthropic 側の前払い残高＋月額上限（自動チャージOFF）で、最悪でも残高で API が止まる。</p>
+      </div>
+    </div>
+    <p class="text-sm leading-relaxed">
+      この結果、<strong class="text-slate-800">Upstash のような「4つ目の外部サービス」やアプリ側の複雑なレート制限を足さずに</strong>、最小の構成で公開 AI を安全に実現できました。「どの作業を AI に任せ、どこで・どう安全に動かすか」を自分で設計する ── これが今回の<strong class="text-slate-800">ハーネスエンジニアリングの実践</strong>です。
+    </p>
+  </div>
+
+  <div class="rounded-lg border border-ads-border bg-ads-surface px-4 py-3 text-sm leading-relaxed text-ads-muted">
+    <strong class="text-slate-800">「AI との距離」とも一貫</strong>：連絡文生成は <strong class="text-slate-700">Server Action（サーバー側）</strong>で実行し、API キーは画面に出さない。シーン定義などのマスタはリポジトリ＝AI の手元に置く（B・C 章の線引きと同じ思想）。実際に公開URLで生成すると、Anthropic 側の使用量・残高が動くことも確認済み。
   </div>
 </section>
 
@@ -622,7 +698,7 @@
       <h3 class="text-lg font-bold text-slate-900">「公開」ならではの落とし穴</h3>
     </div>
     <ul class="text-sm text-ads-muted leading-relaxed space-y-1 list-disc pl-5">
-      <li><strong class="text-slate-700">Claude Code(Max) と API は別課金</strong>。公開アプリのAI呼び出しはAPI従量課金になるため、公開では安価なモデル＋利用制限で守る設計に（AIは発展課題）</li>
+      <li><strong class="text-slate-700">Claude Code(Max) と API は別課金</strong>。公開アプリのAI呼び出しはAPI従量課金になる。当初は「公開はAIを出さない／レート制限で守る」案も検討したが、最終的に<strong class="text-slate-700">財布側（前払い残高・月額上限）で天井を切り、公開でもAIを動かす</strong>設計に（詳細は<a href="#ai" class="underline">発展課題の節</a>）</li>
       <li>公開DBに実データがあると<strong class="text-slate-700">個人情報漏洩</strong> → デモDBをダミー化（実データの削除という後戻りできない操作を慎重に実行）</li>
       <li>テスト環境ではサーバー専用コードが読み込めず落ちる → テスト用に差し替えて回避</li>
     </ul>
@@ -681,7 +757,7 @@
     <i data-lucide="brain" class="w-8 h-8 text-ads-accent mx-auto mb-4"></i>
     <p class="text-lg font-bold text-slate-900 mb-3">「動く画面」から「記憶を持つ・公開された道具」へ。</p>
     <p class="text-ads-muted max-w-lg mx-auto leading-relaxed">
-      編集が消えず、URLで誰でも開け、データの置き場と理由を自分の言葉で説明できる ── 今回でツールは「デモ」から「実際に使える道具の入り口」に変わりました。
+      編集が消えず、URLで誰でも開け、データの置き場と理由を自分の言葉で説明できる ── 今回でツールは「デモ」から「実際に使える道具の入り口」に変わりました。さらに発展課題で <strong class="text-slate-700">AI 連絡文も公開で動かし</strong>、「どこで・どう安全に AI を動かすか」まで設計しました。
     </p>
   </div>
 </section>
