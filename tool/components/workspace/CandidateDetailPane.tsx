@@ -828,6 +828,12 @@ type DraftOutput = { text: string; source: "ai" | "sample"; medium: DraftMedium 
 /** File を base64 ImageBlock（data URL プレフィックス除去済み）に変換。 */
 function fileToDraftImage(file: File): Promise<DraftImage> {
   return new Promise((resolve, reject) => {
+    // 呼び出し側でも検証しているが、単体でも型安全になるよう media_type を再確認
+    // （許可外の type が Anthropic に渡って 400 になるのを防ぐ）。
+    if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
+      reject(new Error("対応していない画像形式です"));
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === "string" ? reader.result : "";
@@ -1090,8 +1096,9 @@ function DraftMessageTab({
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
+                        disabled={generating}
                         aria-label={`${img.name} を削除`}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-50"
                       >
                         ×
                       </button>

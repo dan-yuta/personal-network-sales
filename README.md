@@ -1,15 +1,17 @@
-# 5回目宿題 — 人脈営業ツール 設計ドキュメント
+# 人脈営業ツール（personal-network-sales）— 設計・実装ドキュメント
 
-AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作り変える）の設計記録です。
-自分の人脈経由（既存知人・紹介・コミュニティ + これから交流会や仕事で出会う新規）の営業活動を支える、Next.js + Notion API 連携のツールを設計しました。
+AI-Driven School 月次課題（workspace-ui-kit を自分の業務向けに作り変える）の設計・実装記録です。
+自分の人脈経由（既存知人・紹介・コミュニティ + これから交流会や仕事で出会う新規）の営業活動を支える、Next.js + Notion API 連携のツール。
 
-## 🔗 グループセッション共有用URL（必読）
+## 🔗 公開URL（最新・第7回「画面に記憶を持たせる」提出物）
 
 | 種別 | URL | 用途 |
 |------|-----|------|
-| **課題図解（公開デプロイ）** | **https://network-sales-overview.surge.sh/** | グループセッションで画面共有する代わりに、各自で開いてもらう想定。Surge.sh にデプロイ済み、検索エンジン非インデックス |
-| ローカル原本 | [submission/tool-overview.html](submission/tool-overview.html) | 上記の元ファイル |
+| **公開アプリ（提出物①）** | **https://personal-network-sales.vercel.app** | Vercel 公開。Notion(デモDB/ダミー)に永続化、実 AI 連絡文も動作（無認証＝公開はダミーデータのみ） |
+| **課題図解（提出物②）** | **https://network-sales-memory.surge.sh** | 第7回図解。原本 [submission/07-memory-notion-deploy.html](submission/07-memory-notion-deploy.html) |
 | GitHub リポジトリ | https://github.com/dan-yuta/personal-network-sales | 設計・実装の全履歴 |
+
+> 前回（第5/6回）のツール全体像の図解は https://network-sales-overview.surge.sh/ （原本 [submission/tool-overview.html](submission/tool-overview.html)）。第4回グループセッション用の発表資料は [submission/groupsession-savemap.html](submission/groupsession-savemap.html)（+ [トークメモ](submission/groupsession-talk.md)）。
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
