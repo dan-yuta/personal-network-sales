@@ -43,7 +43,7 @@ personal-network-sales/          ← リポジトリルート
 ├── tool/                        ← 実装モジュール (workspace-ui-kit のコピー、編集対象)
 ├── assets/                      ← 画像・スクリーンショット・図表素材
 ├── notes/                       ← 実装中の雑記・議事録・KPT・振り返り
-├── submission/                  ← 最終提出物 (tool-overview.html ほか)
+├── submission/                  ← 提出物・発表資料 (07-memory-notion-deploy.html / groupsession-savemap.html ほか)
 ├── references/                  ← 外部資料・参考リンク集
 └── .gitignore                   ← Git管理除外設定
 ```
@@ -62,12 +62,7 @@ personal-network-sales/          ← リポジトリルート
 | 7 | [docs/07_工夫したポイント.md](docs/07_工夫したポイント.md) | 設計・実装でこだわった16点（判断/データ/UI/AI/コード基盤/進め方/堅牢性/公開/状態復元。#16=公開AIのコストをどの層で守るか） |
 | 8 | [docs/08_修正・トラブルシュート記録.md](docs/08_修正・トラブルシュート記録.md) | 第7回で遭遇した不具合の 症状→原因→対処→学び（Mermaid 図つき） |
 
-### 提出物（グループセッション準備）
-
-| 形式 | URL / ファイル | 内容 |
-|------|---------------|------|
-| **公開デプロイ** | **https://network-sales-overview.surge.sh/** | グループセッションで共有する公開 URL。Surge.sh、検索エンジン非インデックス |
-| HTML 原本 | [submission/tool-overview.html](submission/tool-overview.html) | 必須「解決したい課題」+ 任意1「ペイン構成」+ 連絡文作成タブ（11シーン）+ **工夫したポイント** の図解 |
+> 提出物・公開URL は**冒頭の表**にまとめています（提出物①②／前回図解／グループセッション資料）。
 
 ---
 
@@ -111,7 +106,8 @@ personal-network-sales/          ← リポジトリルート
 
 ---
 
-## 現在地（2026-05-26 時点）
+<details>
+<summary>📜 （参考・折りたたみ）2026-05-26 時点の進捗ログ ＋ 当時の公開URL</summary>
 
 ```
 第7回ワーク発表 (5月末) — 提出完了 (2026-05-26)
@@ -155,6 +151,8 @@ personal-network-sales/          ← リポジトリルート
 
 詳細は [docs/06_やることリスト.md](docs/06_やることリスト.md) と [notes/2026-05-24_session-record.md](notes/2026-05-24_session-record.md) を参照。
 
+</details>
+
 ---
 
 ## 4ヶ月目（第7回宿題「画面に記憶を持たせる」）の進捗（2026-06-10 完了）
@@ -162,10 +160,7 @@ personal-network-sales/          ← リポジトリルート
 第7回講義のスコープ＝**Notion を保存先にした永続化 ＋ Vercel 公開**。さらに発展課題（AI連絡文）まで**完了・提出済み**。
 保存先は grill-me で **Notion 確定**（推奨の Neon は不採用。理由は「既存業務が Notion 上にあり流用でき、人が直接 DB を見られる」一方、代償＝AIとの距離。だから定義・マスタはリポジトリに残すハイブリッド）。
 
-| 提出物 | URL |
-|------|-----|
-| **公開アプリ（提出物①）** | **https://personal-network-sales.vercel.app** （NotionデモDBに永続化・実AIも動作） |
-| **課題図解（提出物②）** | **https://network-sales-memory.surge.sh** （原本 [submission/07-memory-notion-deploy.html](submission/07-memory-notion-deploy.html)） |
+> 提出物①②の公開URLは**冒頭の表**を参照（重複を避けてここでは省略）。
 
 ```
 必須課題＋発展課題まで完了（tsc + vitest 112 件 通過・next build OK・push 済）
