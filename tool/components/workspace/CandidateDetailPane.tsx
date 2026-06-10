@@ -10,8 +10,9 @@
  * タブA（接触ログ）は Notion 接触ログDB と接続済み（表示・追加・最終連絡日同期）。
  * タブB（連絡文作成）は Anthropic API に接続済み（Phase E）。候補者基本＋接触ログ直近
  * 3件＋シーン/媒体/補足＋過去のやり取り画像(vision)を渡して連絡文を生成する。
- * AI 生成は ANTHROPIC_API_KEY 設定環境（ローカル）でのみ動作し、公開デモでは
- * 「ローカル専用」案内を返す（無認証の公開URLに課金の入口を作らないため）。
+ * AI 生成は ANTHROPIC_API_KEY が設定された環境で動作する（ローカル／公開 Vercel とも
+ * キーを置けば有効）。キー未設定の環境ではサンプル文を返す。コスト防御はアプリ側の
+ * レート制限ではなく Anthropic Console の前払い残高/月額上限（財布側）で管理する方針。
  */
 
 import {
@@ -514,7 +515,7 @@ function ContactLogTab({
   );
 }
 
-// ===== タブB: 連絡文作成（AI 生成。キー未設定＝公開デモではサンプル文にフォールバック） =====
+// ===== タブB: 連絡文作成（AI 生成。キー設定環境で実生成・キー未設定ならサンプル文） =====
 
 const SCENE_OPTIONS = [
   "初回声かけ（既存知人）",
@@ -534,8 +535,8 @@ const MEDIUM_OPTIONS = ["メール", "LINE", "電話用トーク台本"] as cons
 
 // シーンごとに「件名」「導入文」「本題テンプレート」「締め」を切り替える。
 // 営業フェーズ全体（初回〜契約）+ 派生紹介の連鎖までカバーする 11 シーン分のサンプル文。
-// ANTHROPIC_API_KEY 未設定（公開デモ）のとき、AI の代わりにこの文例を出して
-// 「ローカルでは実 AI が動く」ことを案内する（公開URLに課金の入口を作らないため）。
+// ANTHROPIC_API_KEY 未設定のとき、AI の代わりにこの文例をフォールバック表示する
+// （キーを置けばローカル／公開 Vercel とも実 AI が動く）。
 type SceneTemplate = {
   subjectSuffix: string;
   emailLead: string;
@@ -1087,8 +1088,8 @@ function DraftMessageTab({
           </h3>
           {output.source === "sample" && (
             <p className="mb-2 rounded border border-amber-300 bg-amber-50 p-2 text-[11px] leading-relaxed text-amber-800">
-              これはサンプル文です。AI による生成は ANTHROPIC_API_KEY を設定した
-              ローカル環境で動作します（公開デモでは課金防止のため無効）。
+              これはサンプル文です。実際の AI 生成は ANTHROPIC_API_KEY を設定した
+              環境で動作します（この環境ではキーが未設定です）。
             </p>
           )}
           <pre className="whitespace-pre-wrap rounded border border-input bg-background p-3 text-xs leading-relaxed text-foreground">

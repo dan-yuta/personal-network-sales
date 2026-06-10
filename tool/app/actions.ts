@@ -78,7 +78,7 @@ export async function addContactLogAction(params: {
 /**
  * 連絡文生成の結果。
  *   - { ok: true }  : AI 生成成功（本物の連絡文）。
- *   - { ok: false } : ANTHROPIC_API_KEY 未設定（公開デモ等）。クライアントは
+ *   - { ok: false } : ANTHROPIC_API_KEY 未設定（キー未設定環境）。クライアントは
  *                     サンプル文（getMockDraft）にフォールバックして案内表示する。
  * ※ 生成の実エラー（API 失敗等）は例外として throw され、クライアントで catch する。
  */
@@ -89,13 +89,15 @@ export type DraftMessageResult =
 /**
  * AI 連絡文ドラフトを生成する（発展課題 Phase E）。
  *
- * 課金・公開ポリシー（grill 後の確定方針）:
- *   - AI 生成は **ANTHROPIC_API_KEY が設定された環境でのみ**動作する。
- *   - 公開 Vercel ではキーを設定しない運用にすることで、無認証の公開URLに
- *     「誰でも叩けて課金が乗る入口」を作らない。よって Upstash 等のレート制限は
- *     不要（このツールは現状ひとり運用で、AI はローカル実データ環境で使う）。
- *   - キー未設定時は { ok:false, reason:"no-key" } を返し、画面はサンプル文を出す。
- *   - 将来チーム公開で AI を公開したくなったら、ここにレート制限を足せる。
+ * 課金・公開ポリシー（確定方針）:
+ *   - AI 生成は **ANTHROPIC_API_KEY が設定された環境でのみ**動作する。キー未設定時は
+ *     { ok:false, reason:"no-key" } を返し、画面はサンプル文を出す。
+ *   - ローカル（.env.local）と公開 Vercel の**両方にキーを置いて AI を有効**にする。
+ *     デモDBはダミーデータのため個人情報漏洩はなく、懸念は課金のみ。
+ *   - コスト防御はアプリ側のレート制限ではなく **Anthropic Console の前払い残高/
+ *     月額上限（財布側）**で管理する（auto-reload OFF にすれば最悪でも残高で止まる）。
+ *     よって Upstash 等のレート制限は不採用。将来、不特定多数の連打を厳密に防ぎたく
+ *     なったら、ここ（action 冒頭）にレート制限を足せる（middleware では効かない）。
  *
  * 候補者基本情報（DraftCandidateSummary）はクライアントの取得済み Candidate から
  * 組み立てて渡す。接触ログ直近3件はここで Notion から取得する。

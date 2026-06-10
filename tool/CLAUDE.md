@@ -157,10 +157,12 @@ env のデータソースIDで切替。**権威ある対応表は `docs/03_デ�
 `lib/anthropic/draft-message.ts` の `generateDraftMessage`（prompt caching・vision・
 `ANTHROPIC_MODEL` 出し分け）→ `app/actions.ts` の `draftMessageAction` → タブB の
 `DraftMessageTab`（シーン11×媒体3＋補足＋画像最大3枚、生成結果は接触ログ保存可）。
-**AI は `ANTHROPIC_API_KEY` がある環境（ローカル）でのみ動作**。公開 Vercel ではキーを
-設定せず、画面はサンプル文を表示する（無認証の公開URLに課金の入口を作らない方針）。
-そのため **Upstash 等のレート制限は不採用**（ひとり運用・AIはローカル実データで使う）。
-将来チーム公開で AI を出すなら `draftMessageAction` 冒頭にレート制限を足す。
+**AI は `ANTHROPIC_API_KEY` がある環境で動作**し、**ローカル／公開 Vercel の両方にキーを
+置いて有効化**する（キー未設定の環境はサンプル文を表示）。デモDBはダミーのため漏洩懸念は
+なく、気にするのは課金のみ。**コスト防御はアプリ側のレート制限ではなく Anthropic Console の
+前払い残高/月額上限（財布側）で管理**する（auto-reload OFF で最悪でも残高で止まる）。
+そのため **Upstash 等のアプリ側レート制限は不採用**。将来、不特定多数の連打を厳密に防ぎたく
+なったら `draftMessageAction` 冒頭にレート制限を足す（middleware では効かない）。
 
 ## やらないこと
 
