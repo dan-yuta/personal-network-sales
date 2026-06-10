@@ -19,6 +19,7 @@ import {
   useEffect,
   useMemo,
   useOptimistic,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -820,15 +821,21 @@ const MEDIUM_TO_METHOD = {
 
 type AttachedImage = { name: string; image: DraftImage };
 
-type DraftOutput = { text: string; source: "ai" | "sample" };
+// 生成時のスナップショット。媒体は「接触ログとして保存」で使うため、生成後に
+// 媒体セレクトを変えても保存が生成時の媒体に追従するよう output に固定する。
+type DraftOutput = { text: string; source: "ai" | "sample"; medium: DraftMedium };
 
 /** File を base64 ImageBlock（data URL プレフィックス除去済み）に変換。 */
 function fileToDraftImage(file: File): Promise<DraftImage> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const result = String(reader.result);
-      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      const result = typeof reader.result === "string" ? reader.result : "";
+      const base64 = result.includes(",") ? result.split(",")[1] : "";
+      if (!base64) {
+        reject(new Error("画像の読み込みに失敗しました"));
+        return;
+      }
       resolve({
         mediaType: file.type as DraftImage["mediaType"],
         data: base64,
@@ -847,6 +854,17 @@ function DraftMessageTab({
   onContactLogAdded: (candidateId: string, date: string) => void;
 }) {
   const { push: pushToast } = useToast();
+
+  // 候補者切替で本タブは remount（key={candidate.id}）される。生成/保存の非同期が
+  // 飛んでいる最中にアンマウントされた場合、解決後の setState・トーストを抑止して、
+  // 別候補へ移った後に「迷子のトースト」が出るのを防ぐ。
+  const activeRef = useRef(true);
+  useEffect(() => {
+    activeRef.current = true;
+    return () => {
+      activeRef.current = false;
+    };
+  }, []);
 
   const [scene, setScene] = useState<DraftScene>(SCENE_OPTIONS[0]);
   const [medium, setMedium] = useState<DraftMedium>(MEDIUM_OPTIONS[0]);
@@ -891,13 +909,19 @@ function DraftMessageTab({
     if (images.length + accepted.length > MAX_IMAGES) {
       pushToast({ message: `画像は最大 ${MAX_IMAGES} 枚までです` });
     }
-    const room = Math.max(0, MAX_IMAGES - images.length);
-    const toAdd = accepted.slice(0, room);
     Promise.all(
-      toAdd.map(async (f) => ({ name: f.name, image: await fileToDraftImage(f) })),
+      accepted.map(async (f) => ({ name: f.name, image: await fileToDraftImage(f) })),
     )
-      .then((added) => setImages((cur) => [...cur, ...added]))
-      .catch(() => pushToast({ message: "画像の読み込みに失敗しました" }));
+      // 上限は append 時の最新 state に対して slice で確定させる。連続選択で
+      // 古い images.length を見ても 3 枚を超えて積まれないようにする。
+      .then((added) =>
+        setImages((cur) => [...cur, ...added].slice(0, MAX_IMAGES)),
+      )
+      .catch(() => {
+        if (activeRef.current) {
+          pushToast({ message: "画像の読み込みに失敗しました" });
+        }
+      });
   };
 
   const removeImage = (idx: number) =>
@@ -906,6 +930,8 @@ function DraftMessageTab({
   // 生成: AI 接続あり → 実生成、なし(no-key) → サンプル文。実エラーはトースト。
   // toneHint は微調整ボタン（もっと丁寧/カジュアル/短く）から渡す追加指示（AI のみ反映）。
   const handleGenerate = async (toneHint?: string) => {
+    // 生成中は入力（シーン/媒体/補足/画像）を固定し、生成結果と入力がズレないようにする。
+    const genMedium = medium;
     setGenerating(true);
     try {
       const aiNote = [note.trim(), toneHint?.trim()].filter(Boolean).join(" ／ ");
@@ -913,20 +939,27 @@ function DraftMessageTab({
         candidateId: candidate.id,
         candidate: summary,
         scene,
-        medium,
+        medium: genMedium,
         note: aiNote || undefined,
         pastImages: images.map((i) => i.image),
       });
+      if (!activeRef.current) return;
       if (res.ok) {
-        setOutput({ text: res.text, source: "ai" });
+        setOutput({ text: res.text, source: "ai", medium: genMedium });
       } else {
-        // ANTHROPIC_API_KEY 未設定（公開デモ）→ サンプル文を表示。
-        setOutput({ text: getMockDraft(candidate, scene, medium, note), source: "sample" });
+        // ANTHROPIC_API_KEY 未設定 → サンプル文を表示（微調整ボタンはサンプルでは出さない）。
+        setOutput({
+          text: getMockDraft(candidate, scene, genMedium, note),
+          source: "sample",
+          medium: genMedium,
+        });
       }
     } catch {
-      pushToast({ message: "連絡文の生成に失敗しました。もう一度お試しください" });
+      if (activeRef.current) {
+        pushToast({ message: "連絡文の生成に失敗しました。もう一度お試しください" });
+      }
     } finally {
-      setGenerating(false);
+      if (activeRef.current) setGenerating(false);
     }
   };
 
@@ -944,7 +977,9 @@ function DraftMessageTab({
   const handleSaveAsLog = async () => {
     if (!output) return;
     const date = dateNDaysAgo(0); // 今日 (JST)
-    const method = MEDIUM_TO_METHOD[medium];
+    // 生成時の媒体（output.medium）で手段を決める。生成後に媒体セレクトを変えても
+    // 保存される手段が表示中の連絡文と食い違わないようにする。
+    const method = MEDIUM_TO_METHOD[output.medium];
     setSavingLog(true);
     try {
       await addContactLogAction({
@@ -953,13 +988,16 @@ function DraftMessageTab({
         method,
         content: output.text,
       });
+      if (!activeRef.current) return;
       // Pane2/Pane3 の「最終接触」バッジを即時更新（D5 と同じ経路）。
       onContactLogAdded(candidate.id, date);
       pushToast({ message: "接触ログとして保存しました" });
     } catch {
-      pushToast({ message: "接触ログの保存に失敗しました" });
+      if (activeRef.current) {
+        pushToast({ message: "接触ログの保存に失敗しました" });
+      }
     } finally {
-      setSavingLog(false);
+      if (activeRef.current) setSavingLog(false);
     }
   };
 
@@ -984,7 +1022,8 @@ function DraftMessageTab({
             <select
               value={scene}
               onChange={(e) => setScene(e.target.value as DraftScene)}
-              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
+              disabled={generating}
+              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm disabled:opacity-60"
             >
               {SCENE_OPTIONS.map((s) => (
                 <option key={s}>{s}</option>
@@ -998,7 +1037,8 @@ function DraftMessageTab({
             <select
               value={medium}
               onChange={(e) => setMedium(e.target.value as DraftMedium)}
-              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
+              disabled={generating}
+              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm disabled:opacity-60"
             >
               {MEDIUM_OPTIONS.map((m) => (
                 <option key={m}>{m}</option>
@@ -1013,8 +1053,9 @@ function DraftMessageTab({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
+              disabled={generating}
               placeholder="例: 来週の展示会の件で"
-              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
+              className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm disabled:opacity-60"
             />
           </label>
           {/* 過去のやり取り画像（任意・最大3枚/5MB）。Claude Vision に base64 で渡す。 */}
@@ -1027,7 +1068,7 @@ function DraftMessageTab({
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/webp"
                 multiple
-                disabled={images.length >= MAX_IMAGES}
+                disabled={images.length >= MAX_IMAGES || generating}
                 onChange={(e) => {
                   handleAddImages(e.target.files);
                   e.target.value = ""; // 同じファイル再選択を許可
@@ -1096,33 +1137,39 @@ function DraftMessageTab({
             {output.text}
           </pre>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={generating}
-              onClick={() => handleGenerate("もっと丁寧な敬語で")}
-            >
-              もっと丁寧
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={generating}
-              onClick={() => handleGenerate("もっとカジュアルな口調で")}
-            >
-              もっとカジュアル
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={generating}
-              onClick={() => handleGenerate("もっと短く要点だけで")}
-            >
-              もっと短く
-            </Button>
+            {/* 微調整（トーン指示）は AI 生成のみ意味を持つ。サンプル文（テンプレ）では
+                同じ文面しか出ず無反応に見えるため、AI 出力のときだけ表示する。 */}
+            {output.source === "ai" && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={generating}
+                  onClick={() => handleGenerate("もっと丁寧な敬語で")}
+                >
+                  もっと丁寧
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={generating}
+                  onClick={() => handleGenerate("もっとカジュアルな口調で")}
+                >
+                  もっとカジュアル
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={generating}
+                  onClick={() => handleGenerate("もっと短く要点だけで")}
+                >
+                  もっと短く
+                </Button>
+              </>
+            )}
             <Button
               type="button"
               variant="outline"
