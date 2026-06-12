@@ -26,7 +26,7 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 | **発表用 図解（公開）** | **https://network-sales-savemap.surge.sh** | 2026-06-10 Surge 公開済み・検索エンジン非インデックス。原本 [groupsession-savemap.html](groupsession-savemap.html)。§0 ツール紹介 → §1 何を残すか → §2 保存先マップ（主役・デモ/本番の2セット運用もここに記載）→ §3 なぜNotion → §4 まとめ。デザインは他図解と統一・自己完結（CDN・画像不使用） |
 | **トークメモ（台本）** | [groupsession-talk.md](groupsession-talk.md) | 5分の発表台本（時間配分・話す文例・想定質問つき） |
 
-- 再デプロイは下記「デプロイ手順」と同じパターン（ソース＝`groupsession-savemap.html` / ドメイン＝`network-sales-savemap.surge.sh`）。
+- 再デプロイ手順は下記「デプロイ手順 → 第4回グループセッション図解」を参照。
 - この回は「grill-me で整理して話す」のが要件で清書資料は必須ではないが、初対面の人向けにツール紹介を含めた共有資料として用意。
 
 ---
@@ -136,6 +136,24 @@ Copy-Item -Force $src -Destination "$dest\index.html"
 
 # 3. デプロイ（更新も同じコマンド）
 surge $dest network-sales-memory.surge.sh
+```
+
+### 第4回グループセッション図解（groupsession-savemap.html → network-sales-savemap.surge.sh）
+
+発表用の保存先マップ図解。更新したら、この手順で再デプロイする。
+
+```powershell
+# 1. Surge アカウント確認 (必ず先に確認)
+surge whoami   # 期待値: dangi.yuta.business@gmail.com
+
+# 2. デプロイ用フォルダに index.html としてコピー
+$src  = "C:\Users\dangi\src\personal-network-sales\submission\groupsession-savemap.html"
+$dest = "C:\Users\dangi\deploy\personal-network-sales-savemap"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Copy-Item -Force $src -Destination "$dest\index.html"
+
+# 3. デプロイ（更新も同じコマンド）
+surge $dest network-sales-savemap.surge.sh
 ```
 
 ### 第6回図解（初回デプロイ）
