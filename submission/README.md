@@ -23,7 +23,7 @@ AI-Driven School の宿題提出物を置くフォルダです。回ごとに図
 
 | 種別 | URL / ファイル | 備考 |
 |------|----------------|------|
-| **発表用 図解（公開）** | **https://network-sales-savemap.surge.sh** | 2026-06-10 Surge 公開済み・検索エンジン非インデックス。原本 [groupsession-savemap.html](groupsession-savemap.html)。§0 ツール紹介 → §1 何を残すか → §2 保存先マップ（主役）→ §3 なぜNotion → §4 決定/論点。デザインは他図解と統一・自己完結（CDN・画像不使用） |
+| **発表用 図解（公開）** | **https://network-sales-savemap.surge.sh** | 2026-06-10 Surge 公開済み・検索エンジン非インデックス。原本 [groupsession-savemap.html](groupsession-savemap.html)。§0 ツール紹介 → §1 何を残すか → §2 保存先マップ（主役・デモ/本番の2セット運用もここに記載）→ §3 なぜNotion → §4 まとめ。デザインは他図解と統一・自己完結（CDN・画像不使用） |
 | **トークメモ（台本）** | [groupsession-talk.md](groupsession-talk.md) | 5分の発表台本（時間配分・話す文例・想定質問つき） |
 
 - 再デプロイは下記「デプロイ手順」と同じパターン（ソース＝`groupsession-savemap.html` / ドメイン＝`network-sales-savemap.surge.sh`）。

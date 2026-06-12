@@ -111,7 +111,7 @@
       <li><a href="#what" class="text-ads-accent-light hover:underline">1. 何を「記憶」に残したいか</a></li>
       <li><a href="#where" class="text-ads-accent-light hover:underline">2. どこに保存するか（保存先マップ）</a></li>
       <li><a href="#why" class="text-ads-accent-light hover:underline">3. なぜ Notion を選んだか</a></li>
-      <li><a href="#decided" class="text-ads-accent-light hover:underline">4. 決まったこと／論点</a></li>
+      <li><a href="#summary" class="text-ads-accent-light hover:underline">4. まとめ</a></li>
     </ul>
   </div>
 </nav>
@@ -361,10 +361,65 @@
     </table>
   </div>
 
+  <div class="mb-4 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 text-sm leading-relaxed text-slate-700">
+    <i data-lucide="info" class="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-600"></i>
+    <span>接触ログだけ <strong class="text-emerald-800">別DB</strong> にしたのは、1人の候補者にログが <strong class="text-emerald-800">時系列で何件も増える（1対多）</strong> ため。候補者DBの1欄に最新1件だけ持つ形では履歴が残らないからです。</span>
+  </div>
+
+  <!-- 1対多（候補者DB → 接触ログDB）の図 -->
+  <figure class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/30 p-5">
+    <figcaption class="text-xs font-bold text-emerald-700 mb-4 flex items-center gap-1.5">
+      <i data-lucide="git-fork" class="w-4 h-4"></i>
+      1人の候補者に、接触ログは何件も連なる（1対多）
+    </figcaption>
+    <div class="flex items-center gap-3 md:gap-5">
+      <!-- 候補者DB: 1件 -->
+      <div class="flex-shrink-0">
+        <p class="text-[10px] text-emerald-700/70 font-bold mb-1.5 text-center">候補者DB</p>
+        <div class="rounded-lg border-2 border-emerald-300 bg-white px-4 py-3 shadow-sm">
+          <div class="flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
+            <span class="text-sm font-medium text-slate-700">鈴木 太郎</span>
+          </div>
+          <p class="text-[10px] text-ads-muted mt-1">1件 ＝ 1人</p>
+        </div>
+      </div>
+      <!-- コネクタ 1:N -->
+      <div class="flex flex-col items-center text-emerald-500 flex-shrink-0">
+        <span class="text-[10px] font-bold">1</span>
+        <i data-lucide="move-right" class="w-6 h-6"></i>
+        <span class="text-[10px] font-bold">N</span>
+      </div>
+      <!-- 接触ログDB: 複数件 -->
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] text-emerald-700/70 font-bold mb-1.5">接触ログDB（時系列で増える）</p>
+        <div class="space-y-1.5">
+          <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i>
+            <span class="text-xs text-slate-600 truncate">6/01 紹介でつながった</span>
+          </div>
+          <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i>
+            <span class="text-xs text-slate-600 truncate">6/05 オンラインで初回面談</span>
+          </div>
+          <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i>
+            <span class="text-xs text-slate-600 truncate">6/09 提案資料を送付 …</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
   <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-4 text-sm leading-relaxed">
     <strong class="text-ads-accent-light">線引きの原則</strong>:
     <strong class="text-slate-800">「人が手で書き換えるもの」＝ Notion</strong>（記憶として残す）。<br>
     <strong class="text-slate-800">「アプリのルール・定義」＝ リポジトリ</strong>（コードと一緒に管理）。
+  </div>
+
+  <div class="mt-3 flex items-start gap-2 text-xs text-ads-muted leading-relaxed">
+    <i data-lucide="shield" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-slate-500"></i>
+    <span>Notion の DB は <strong class="text-slate-700">2 セットで運用</strong> ── <strong class="text-slate-700">公開＝デモ/ダミーDB</strong>・<strong class="text-slate-700">ローカル＝本番（実データ）</strong>。公開 URL に個人情報を出さないための分け方です。</span>
   </div>
 </section>
 
@@ -416,42 +471,17 @@
 </section>
 
 <!-- ============================================================ -->
-<!--  §4 決まったこと／論点                                         -->
+<!--  §4 まとめ                                                    -->
 <!-- ============================================================ -->
-<section id="decided" class="mb-12 scroll-mt-6">
+<section id="summary" class="mb-12 scroll-mt-6">
   <div class="flex items-center gap-3 mb-8">
     <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-500/10 flex-shrink-0">
-      <i data-lucide="clipboard-check" class="w-5 h-5 text-cyan-600"></i>
+      <i data-lucide="flag" class="w-5 h-5 text-cyan-600"></i>
     </div>
-    <h2 class="text-xl md:text-2xl font-bold text-slate-900">4. 決まったこと／検討した論点</h2>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">4. まとめ</h2>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
-      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
-        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-        決まったこと
-      </div>
-      <ul class="space-y-1.5 text-sm">
-        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>保存先＝Notion（編集データ）／リポジトリ（定義）のハイブリッド</span></li>
-        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>接触ログは新規の Notion DB（候補者と 1 対多）</span></li>
-        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"></i><span>DB は 2 セット運用 ── <strong class="text-slate-800">公開＝デモ/ダミー</strong>・<strong class="text-slate-800">ローカル＝本番</strong>（個人情報を公開URLに出さない）</span></li>
-      </ul>
-    </div>
-    <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
-      <div class="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-700 px-3 py-1 rounded-full text-xs font-bold mb-3">
-        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
-        検討した論点（迷いどころ）
-      </div>
-      <ul class="space-y-1.5 text-sm">
-        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>推奨の Neon ではなく Notion で大丈夫か（AIとの距離）</span></li>
-        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>公開時の個人情報をどう守るか → デモDBをダミー化で対応</span></li>
-        <li class="flex items-start gap-2"><i data-lucide="dot" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i><span>紹介ネットワーク（誰の紹介か）の関連付けは今回スコープ外</span></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="mt-8 bg-gradient-to-b from-ads-accent/5 to-transparent border border-ads-accent/10 rounded-xl p-6 md:p-8">
+  <div class="bg-gradient-to-b from-ads-accent/5 to-transparent border border-ads-accent/10 rounded-xl p-6 md:p-8">
     <i data-lucide="brain" class="w-7 h-7 text-ads-accent mb-3"></i>
     <p class="text-base md:text-lg font-bold text-slate-900 mb-2">今日いちばん伝えたいこと</p>
     <p class="text-ads-muted max-w-lg leading-relaxed text-sm md:text-base">
